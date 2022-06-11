@@ -7,18 +7,66 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		5825BD3A2854EC9F0082069A /* Address_BookApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BD392854EC9F0082069A /* Address_BookApp.swift */; };
-		5825BD3C2854EC9F0082069A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BD3B2854EC9F0082069A /* ContentView.swift */; };
+		5825BD3A2854EC9F0082069A /* AddressBookApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BD392854EC9F0082069A /* AddressBookApp.swift */; };
 		5825BD3E2854ECA10082069A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5825BD3D2854ECA10082069A /* Assets.xcassets */; };
 		5825BD412854ECA10082069A /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5825BD402854ECA10082069A /* Preview Assets.xcassets */; };
+		5825BDC32854ED6F0082069A /* Contacts.json in Resources */ = {isa = PBXBuildFile; fileRef = 5825BDA62854ED6E0082069A /* Contacts.json */; };
+		5825BDC42854ED6F0082069A /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDA72854ED6E0082069A /* LocationManager.swift */; };
+		5825BDC52854ED6F0082069A /* FileManager-extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDA92854ED6E0082069A /* FileManager-extension.swift */; };
+		5825BDC62854ED6F0082069A /* ShapeStyle-extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDAA2854ED6E0082069A /* ShapeStyle-extension.swift */; };
+		5825BDC72854ED6F0082069A /* String-extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDAB2854ED6E0082069A /* String-extension.swift */; };
+		5825BDC82854ED6F0082069A /* JSONFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDAD2854ED6E0082069A /* JSONFile.swift */; };
+		5825BDC92854ED6F0082069A /* ContactStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDAE2854ED6E0082069A /* ContactStore.swift */; };
+		5825BDCA2854ED6F0082069A /* Order.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDAF2854ED6E0082069A /* Order.swift */; };
+		5825BDCB2854ED6F0082069A /* Email.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDB02854ED6E0082069A /* Email.swift */; };
+		5825BDCC2854ED6F0082069A /* Phone.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDB12854ED6E0082069A /* Phone.swift */; };
+		5825BDCD2854ED6F0082069A /* ContactLabeledValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDB22854ED6E0082069A /* ContactLabeledValue.swift */; };
+		5825BDCE2854ED6F0082069A /* Contact.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDB32854ED6E0082069A /* Contact.swift */; };
+		5825BDCF2854ED6F0082069A /* LabelPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDB52854ED6F0082069A /* LabelPicker.swift */; };
+		5825BDD02854ED6F0082069A /* ContactDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDB62854ED6F0082069A /* ContactDetails.swift */; };
+		5825BDD12854ED6F0082069A /* EditContact.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDB72854ED6F0082069A /* EditContact.swift */; };
+		5825BDD22854ED6F0082069A /* ImagePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDB82854ED6F0082069A /* ImagePicker.swift */; };
+		5825BDD32854ED6F0082069A /* FirstLettersGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDB92854ED6F0082069A /* FirstLettersGrid.swift */; };
+		5825BDD42854ED6F0082069A /* CodeScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDBB2854ED6F0082069A /* CodeScanner.swift */; };
+		5825BDD52854ED6F0082069A /* ScannerCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDBC2854ED6F0082069A /* ScannerCoordinator.swift */; };
+		5825BDD62854ED6F0082069A /* ScannerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDBD2854ED6F0082069A /* ScannerViewController.swift */; };
+		5825BDD72854ED6F0082069A /* QRCodeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDBE2854ED6F0082069A /* QRCodeGenerator.swift */; };
+		5825BDD82854ED6F0082069A /* ManageContacts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDBF2854ED6F0082069A /* ManageContacts.swift */; };
+		5825BDD92854ED6F0082069A /* EditableContactImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDC02854ED6F0082069A /* EditableContactImage.swift */; };
+		5825BDDA2854ED6F0082069A /* ContactList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDC12854ED6F0082069A /* ContactList.swift */; };
+		5825BDDB2854ED6F0082069A /* ContactImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDC22854ED6F0082069A /* ContactImage.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		5825BD362854EC9F0082069A /* Address Book.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Address Book.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		5825BD392854EC9F0082069A /* Address_BookApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Address_BookApp.swift; sourceTree = "<group>"; };
-		5825BD3B2854EC9F0082069A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		5825BD392854EC9F0082069A /* AddressBookApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddressBookApp.swift; sourceTree = "<group>"; };
 		5825BD3D2854ECA10082069A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		5825BD402854ECA10082069A /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		5825BDA62854ED6E0082069A /* Contacts.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = Contacts.json; sourceTree = "<group>"; };
+		5825BDA72854ED6E0082069A /* LocationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
+		5825BDA92854ED6E0082069A /* FileManager-extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "FileManager-extension.swift"; sourceTree = "<group>"; };
+		5825BDAA2854ED6E0082069A /* ShapeStyle-extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ShapeStyle-extension.swift"; sourceTree = "<group>"; };
+		5825BDAB2854ED6E0082069A /* String-extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String-extension.swift"; sourceTree = "<group>"; };
+		5825BDAD2854ED6E0082069A /* JSONFile.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSONFile.swift; sourceTree = "<group>"; };
+		5825BDAE2854ED6E0082069A /* ContactStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactStore.swift; sourceTree = "<group>"; };
+		5825BDAF2854ED6E0082069A /* Order.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Order.swift; sourceTree = "<group>"; };
+		5825BDB02854ED6E0082069A /* Email.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Email.swift; sourceTree = "<group>"; };
+		5825BDB12854ED6E0082069A /* Phone.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Phone.swift; sourceTree = "<group>"; };
+		5825BDB22854ED6E0082069A /* ContactLabeledValue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactLabeledValue.swift; sourceTree = "<group>"; };
+		5825BDB32854ED6E0082069A /* Contact.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Contact.swift; sourceTree = "<group>"; };
+		5825BDB52854ED6F0082069A /* LabelPicker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LabelPicker.swift; sourceTree = "<group>"; };
+		5825BDB62854ED6F0082069A /* ContactDetails.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactDetails.swift; sourceTree = "<group>"; };
+		5825BDB72854ED6F0082069A /* EditContact.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EditContact.swift; sourceTree = "<group>"; };
+		5825BDB82854ED6F0082069A /* ImagePicker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImagePicker.swift; sourceTree = "<group>"; };
+		5825BDB92854ED6F0082069A /* FirstLettersGrid.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FirstLettersGrid.swift; sourceTree = "<group>"; };
+		5825BDBB2854ED6F0082069A /* CodeScanner.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CodeScanner.swift; sourceTree = "<group>"; };
+		5825BDBC2854ED6F0082069A /* ScannerCoordinator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScannerCoordinator.swift; sourceTree = "<group>"; };
+		5825BDBD2854ED6F0082069A /* ScannerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScannerViewController.swift; sourceTree = "<group>"; };
+		5825BDBE2854ED6F0082069A /* QRCodeGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QRCodeGenerator.swift; sourceTree = "<group>"; };
+		5825BDBF2854ED6F0082069A /* ManageContacts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ManageContacts.swift; sourceTree = "<group>"; };
+		5825BDC02854ED6F0082069A /* EditableContactImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EditableContactImage.swift; sourceTree = "<group>"; };
+		5825BDC12854ED6F0082069A /* ContactList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactList.swift; sourceTree = "<group>"; };
+		5825BDC22854ED6F0082069A /* ContactImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactImage.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -51,9 +99,13 @@
 		5825BD382854EC9F0082069A /* Address Book */ = {
 			isa = PBXGroup;
 			children = (
-				5825BD392854EC9F0082069A /* Address_BookApp.swift */,
-				5825BD3B2854EC9F0082069A /* ContentView.swift */,
+				5825BD392854EC9F0082069A /* AddressBookApp.swift */,
+				5825BDA72854ED6E0082069A /* LocationManager.swift */,
+				5825BDAC2854ED6E0082069A /* Model */,
+				5825BDB42854ED6F0082069A /* View */,
+				5825BDA82854ED6E0082069A /* Extension */,
 				5825BD3D2854ECA10082069A /* Assets.xcassets */,
+				5825BDA62854ED6E0082069A /* Contacts.json */,
 				5825BD3F2854ECA10082069A /* Preview Content */,
 			);
 			path = "Address Book";
@@ -65,6 +117,58 @@
 				5825BD402854ECA10082069A /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		5825BDA82854ED6E0082069A /* Extension */ = {
+			isa = PBXGroup;
+			children = (
+				5825BDA92854ED6E0082069A /* FileManager-extension.swift */,
+				5825BDAB2854ED6E0082069A /* String-extension.swift */,
+				5825BDAA2854ED6E0082069A /* ShapeStyle-extension.swift */,
+			);
+			path = Extension;
+			sourceTree = "<group>";
+		};
+		5825BDAC2854ED6E0082069A /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				5825BDB32854ED6E0082069A /* Contact.swift */,
+				5825BDAE2854ED6E0082069A /* ContactStore.swift */,
+				5825BDB12854ED6E0082069A /* Phone.swift */,
+				5825BDB02854ED6E0082069A /* Email.swift */,
+				5825BDB22854ED6E0082069A /* ContactLabeledValue.swift */,
+				5825BDAF2854ED6E0082069A /* Order.swift */,
+				5825BDAD2854ED6E0082069A /* JSONFile.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		5825BDB42854ED6F0082069A /* View */ = {
+			isa = PBXGroup;
+			children = (
+				5825BDC12854ED6F0082069A /* ContactList.swift */,
+				5825BDB92854ED6F0082069A /* FirstLettersGrid.swift */,
+				5825BDB62854ED6F0082069A /* ContactDetails.swift */,
+				5825BDB72854ED6F0082069A /* EditContact.swift */,
+				5825BDBE2854ED6F0082069A /* QRCodeGenerator.swift */,
+				5825BDB82854ED6F0082069A /* ImagePicker.swift */,
+				5825BDB52854ED6F0082069A /* LabelPicker.swift */,
+				5825BDC22854ED6F0082069A /* ContactImage.swift */,
+				5825BDC02854ED6F0082069A /* EditableContactImage.swift */,
+				5825BDBF2854ED6F0082069A /* ManageContacts.swift */,
+				5825BDBA2854ED6F0082069A /* Code Scanner */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		5825BDBA2854ED6F0082069A /* Code Scanner */ = {
+			isa = PBXGroup;
+			children = (
+				5825BDBB2854ED6F0082069A /* CodeScanner.swift */,
+				5825BDBC2854ED6F0082069A /* ScannerCoordinator.swift */,
+				5825BDBD2854ED6F0082069A /* ScannerViewController.swift */,
+			);
+			path = "Code Scanner";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -125,6 +229,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5825BDC32854ED6F0082069A /* Contacts.json in Resources */,
 				5825BD412854ECA10082069A /* Preview Assets.xcassets in Resources */,
 				5825BD3E2854ECA10082069A /* Assets.xcassets in Resources */,
 			);
@@ -137,8 +242,31 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5825BD3C2854EC9F0082069A /* ContentView.swift in Sources */,
-				5825BD3A2854EC9F0082069A /* Address_BookApp.swift in Sources */,
+				5825BDCE2854ED6F0082069A /* Contact.swift in Sources */,
+				5825BDD02854ED6F0082069A /* ContactDetails.swift in Sources */,
+				5825BDC72854ED6F0082069A /* String-extension.swift in Sources */,
+				5825BDD22854ED6F0082069A /* ImagePicker.swift in Sources */,
+				5825BDD72854ED6F0082069A /* QRCodeGenerator.swift in Sources */,
+				5825BDD92854ED6F0082069A /* EditableContactImage.swift in Sources */,
+				5825BDD42854ED6F0082069A /* CodeScanner.swift in Sources */,
+				5825BDCD2854ED6F0082069A /* ContactLabeledValue.swift in Sources */,
+				5825BDD62854ED6F0082069A /* ScannerViewController.swift in Sources */,
+				5825BDD32854ED6F0082069A /* FirstLettersGrid.swift in Sources */,
+				5825BD3A2854EC9F0082069A /* AddressBookApp.swift in Sources */,
+				5825BDCA2854ED6F0082069A /* Order.swift in Sources */,
+				5825BDC82854ED6F0082069A /* JSONFile.swift in Sources */,
+				5825BDDA2854ED6F0082069A /* ContactList.swift in Sources */,
+				5825BDD82854ED6F0082069A /* ManageContacts.swift in Sources */,
+				5825BDC42854ED6F0082069A /* LocationManager.swift in Sources */,
+				5825BDCF2854ED6F0082069A /* LabelPicker.swift in Sources */,
+				5825BDDB2854ED6F0082069A /* ContactImage.swift in Sources */,
+				5825BDD52854ED6F0082069A /* ScannerCoordinator.swift in Sources */,
+				5825BDCB2854ED6F0082069A /* Email.swift in Sources */,
+				5825BDC62854ED6F0082069A /* ShapeStyle-extension.swift in Sources */,
+				5825BDC92854ED6F0082069A /* ContactStore.swift in Sources */,
+				5825BDC52854ED6F0082069A /* FileManager-extension.swift in Sources */,
+				5825BDD12854ED6F0082069A /* EditContact.swift in Sources */,
+				5825BDCC2854ED6F0082069A /* Phone.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -270,6 +398,9 @@
 				DEVELOPMENT_TEAM = M9H242HW29;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -299,6 +430,9 @@
 				DEVELOPMENT_TEAM = M9H242HW29;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
