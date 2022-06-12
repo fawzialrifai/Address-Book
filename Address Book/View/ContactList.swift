@@ -113,6 +113,14 @@ struct Contacts: View {
                 }
                 
             }
+            .alert("Cannot Access Contacts", isPresented: $contactStore.isNotAuthorized) {
+                Button("Exit") {
+                    fatalError()
+                }
+            } message: {
+                Text("Please allow Address Book access contacts from Settings.")
+
+            }
         }
     }
     func handleScan(result: Result<Data?, ScanError>) {
@@ -274,7 +282,7 @@ struct ContactRow: View {
                     Menu {
                         ForEach(contact.phoneNumbers) { phone in
                             Button("\(phone.label ?? "")\n\(phone.value)") {
-                                guard let url = URL(string: "tel:\(phone.value)") else { return }
+                                guard let url = URL(string: "tel:\(phone.value.replacingOccurrences(of: " ", with: "").replacingOccurrences(of: "(", with: "").replacingOccurrences(of: ")", with: "").replacingOccurrences(of: "-", with: ""))") else { return }
                                 UIApplication.shared.open(url)
                             }
                         }
@@ -284,7 +292,7 @@ struct ContactRow: View {
                     Menu {
                         ForEach(contact.phoneNumbers) { phone in
                             Button("\(phone.label ?? "")\n\(phone.value)") {
-                                guard let url = URL(string: "sms:\(phone.value)") else { return }
+                                guard let url = URL(string: "sms:\(phone.value.replacingOccurrences(of: " ", with: "").replacingOccurrences(of: "(", with: "").replacingOccurrences(of: ")", with: "").replacingOccurrences(of: "-", with: ""))") else { return }
                                 UIApplication.shared.open(url)
                             }
                         }

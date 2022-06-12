@@ -7,9 +7,11 @@
 
 import MapKit
 import SwiftUI
+import Contacts
 
 struct Contact: Identifiable, Codable, Equatable {
     var id = UUID()
+    var identifier = ""
     var firstName = ""
     var lastName: String?
     var company: String?
@@ -99,6 +101,23 @@ extension Contact {
         } else {
             return lastName + " " + firstName
         }
+    }
+    
+    mutating func update(from cnContact: CNContact, isEmergencyContact: Bool, isFavorite: Bool) {
+        identifier = cnContact.identifier
+        firstName = cnContact.givenName
+        lastName = cnContact.familyName.isTotallyEmpty ? nil : cnContact.familyName
+        company = cnContact.organizationName.isTotallyEmpty ? nil : cnContact.organizationName
+        for emailAddress in cnContact.emailAddresses {
+            emailAddresses.append(Email(label: CNLabeledValue<NSString>.localizedString(forLabel: emailAddress.label ?? ""), value: emailAddress.value as String))
+        }
+        for phoneNumber in cnContact.phoneNumbers {
+            phoneNumbers.append(Phone(label: CNLabeledValue<NSString>.localizedString(forLabel: phoneNumber.label!), value: phoneNumber.value.stringValue))
+        }
+        birthday = cnContact.birthday?.date
+        self.isEmergencyContact = isEmergencyContact
+        self.isFavorite = isFavorite
+        imageData = cnContact.imageData
     }
     
 }

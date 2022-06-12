@@ -7,6 +7,7 @@
 
 import SwiftUI
 import MapKit
+import Contacts
 
 struct EditContact: View {
     @Environment(\.dismiss) private var dismiss
@@ -233,6 +234,30 @@ struct EditContact: View {
                             contactStore.contacts[index].birthday = birthday
                             contactStore.contacts[index].notes = notes.isTotallyEmpty ? nil : notes
                             contactStore.contacts[index].imageData = imageData
+                            let store = CNContactStore()
+                            let keys = [CNContactIdentifierKey, CNContactGivenNameKey, CNContactFamilyNameKey, CNContactOrganizationNameKey, CNContactPhoneNumbersKey, CNContactEmailAddressesKey, CNContactPostalAddressesKey, CNContactBirthdayKey, CNContactImageDataKey] as [CNKeyDescriptor]
+                            if let cnContact = try? store.unifiedContact(withIdentifier: contact.identifier, keysToFetch: keys).mutableCopy() as? CNMutableContact {
+                                cnContact.givenName = firstName
+                                cnContact.familyName = lastName
+                                cnContact.organizationName = company
+                                for phoneNumber in phoneNumbers.dropLast().filter({
+                                    !$0.value.isTotallyEmpty
+                                }) {
+                                    cnContact.phoneNumbers.append(CNLabeledValue(label: phoneNumber.label, value: CNPhoneNumber(stringValue: phoneNumber.value)))
+                                }
+                                for emailAddress in emailAddresses.dropLast().filter({
+                                    !$0.value.isTotallyEmpty
+                                }) {
+                                    cnContact.emailAddresses.append(CNLabeledValue(label: emailAddress.label, value: emailAddress.value as NSString))
+                                }
+                                if let birthday = birthday {
+                                    cnContact.birthday = Calendar.current.dateComponents([.year, .month, .day], from: birthday)
+                                }
+                                cnContact.imageData = imageData
+                                let saveRequest = CNSaveRequest()
+                                saveRequest.update(cnContact)
+                                try? store.execute(saveRequest)
+                            }
                         }
                     }
                     .disabled(firstName.isTotallyEmpty || !isContactEdited)
@@ -325,6 +350,29 @@ struct EditContact: View {
         contact.birthday = birthday
         contact.notes = notes.isTotallyEmpty ? nil : notes
         contact.imageData = imageData
+        let cnContact = CNMutableContact()
+        contact.identifier = cnContact.identifier
+        cnContact.givenName = firstName
+        cnContact.familyName = lastName
+        cnContact.organizationName = company
+        for phoneNumber in phoneNumbers.dropLast().filter({
+            !$0.value.isTotallyEmpty
+        }) {
+            cnContact.phoneNumbers.append(CNLabeledValue(label: phoneNumber.label, value: CNPhoneNumber(stringValue: phoneNumber.value)))
+        }
+        for emailAddress in emailAddresses.dropLast().filter({
+            !$0.value.isTotallyEmpty
+        }) {
+            cnContact.emailAddresses.append(CNLabeledValue(label: emailAddress.label, value: emailAddress.value as NSString))
+        }
+        if let birthday = birthday {
+            cnContact.birthday = Calendar.current.dateComponents([.year, .month, .day], from: birthday)
+        }
+        cnContact.imageData = imageData
+        let store = CNContactStore()
+        let saveRequest = CNSaveRequest()
+        saveRequest.add(cnContact, toContainerWithIdentifier: nil)
+        try? store.execute(saveRequest)
         return contact
     }
 }

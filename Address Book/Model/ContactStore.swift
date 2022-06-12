@@ -10,7 +10,7 @@ import Contacts
 
 @MainActor class ContactStore: ObservableObject {
     
-    @Published var contacts: [Contact] {
+    @Published var contacts: [Contact] = [] {
         didSet {
             do {
                 let encodedData = try JSONEncoder().encode(contacts)
@@ -19,23 +19,72 @@ import Contacts
         }
     }
     
+    @Published var favoritesIdentifiers: [String] = [] {
+        didSet {
+            do {
+                let encodedData = try JSONEncoder().encode(favoritesIdentifiers)
+                try encodedData.write(to: favoritesPath, options: .atomic)
+            } catch {}
+        }
+    }
+    
+    @Published var emergencyContactsIdentifiers: [String] = [] {
+        didSet {
+            do {
+                let encodedData = try JSONEncoder().encode(emergencyContactsIdentifiers)
+                try encodedData.write(to: emergencyContactsPath, options: .atomic)
+            } catch {}
+        }
+    }
+    
     init() {
         do {
-            //print(contactsPath)
-            let encodedContacts = try Data(contentsOf: contactsPath)
-            contacts = try JSONDecoder().decode([Contact].self, from: encodedContacts)
-            sortContacts()
-        } catch {
-            do {
-                let encodedContacts = try Data(contentsOf: Bundle.main.url(forResource: "Contacts", withExtension: "json")!)
-                contacts = try JSONDecoder().decode([Contact].self, from: encodedContacts)
-            } catch {
-                contacts = []
+            let encodedFavorites = try Data(contentsOf: favoritesPath)
+            favoritesIdentifiers = try JSONDecoder().decode([String].self, from: encodedFavorites)
+        } catch {}
+        do {
+            let encodedEmergencyContacts = try Data(contentsOf: emergencyContactsPath)
+            emergencyContactsIdentifiers = try JSONDecoder().decode([String].self, from: encodedEmergencyContacts)
+        } catch {}
+        let contactStore = CNContactStore()
+        contactStore.requestAccess(for: .contacts) { success, error in
+            if success {
+                let keys = [CNContactIdentifierKey, CNContactGivenNameKey, CNContactFamilyNameKey, CNContactOrganizationNameKey, CNContactPhoneNumbersKey, CNContactEmailAddressesKey, CNContactPostalAddressesKey, CNContactBirthdayKey, CNContactImageDataKey] as [CNKeyDescriptor]
+                let request = CNContactFetchRequest(keysToFetch: keys)
+                try? contactStore.enumerateContacts(with: request) {
+                    (cnContact, _) in
+                    var contact = Contact()
+                    if self.favoritesIdentifiers.contains(cnContact.identifier) {
+                        if self.emergencyContactsIdentifiers.contains(cnContact.identifier) {
+                            contact.update(from: cnContact, isEmergencyContact: true, isFavorite: true)
+                        } else {
+                            contact.update(from: cnContact, isEmergencyContact: false, isFavorite: true)
+                        }
+                    } else {
+                        if self.emergencyContactsIdentifiers.contains(cnContact.identifier) {
+                            contact.update(from: cnContact, isEmergencyContact: true, isFavorite: false)
+                        } else {
+                            contact.update(from: cnContact, isEmergencyContact: false, isFavorite: false)
+                        }
+                    }
+                    DispatchQueue.main.async {
+                        self.contacts.append(contact)
+                    }
+                }
+                DispatchQueue.main.async {
+                    self.sortContacts()
+                }
+            } else {
+                DispatchQueue.main.async {
+                    self.isNotAuthorized = true
+                }
             }
         }
     }
     
     private var contactsPath = FileManager.documentDirectory.appendingPathComponent("Contacts")
+    private var favoritesPath = FileManager.documentDirectory.appendingPathComponent("Favorites")
+    private var emergencyContactsPath = FileManager.documentDirectory.appendingPathComponent("emergencyContacts")
     @Published var filterText = ""
     @Published var isFirstLettersGridPresented = false
     @Published var isDeleteContactDialogPresented = false
@@ -43,6 +92,7 @@ import Contacts
     @Published var isMerging = false
     @Published var isImporting = false
     @Published var isExporting = false
+    @Published var isNotAuthorized = false
     @AppStorage("Sort Order") var sortOrder = Order.firstNameLastName
     @AppStorage("Order Display") var displayOrder = Order.firstNameLastName
     
@@ -104,11 +154,11 @@ extension ContactStore {
     func sortContacts() {
         if sortOrder == .firstNameLastName {
             contacts.sort {
-                $0.firstName < $1.firstName
+                $0.fullName(displayOrder: .firstNameLastName).lowercased() < $1.fullName(displayOrder: .firstNameLastName).lowercased()
             }
         } else {
             contacts.sort {
-                $0.lastName ?? $0.firstName < $1.lastName ?? $1.firstName
+                $0.fullName(displayOrder: .lastNameFirstName).lowercased() < $1.fullName(displayOrder: .lastNameFirstName).lowercased()
             }
         }
     }
@@ -132,30 +182,40 @@ extension ContactStore {
     func addToEmergencyContacts(_ contact: Contact) {
         if let index = contacts.firstIndex(of: contact) {
             contacts[index].isEmergencyContact = true
+            emergencyContactsIdentifiers.append(contact.identifier)
         }
     }
     
     func removeFromEmergencyContacts(_ contact: Contact) {
         if let index = contacts.firstIndex(of: contact) {
             contacts[index].isEmergencyContact = false
+            emergencyContactsIdentifiers.removeAll(where: { $0 == contact.identifier })
         }
     }
     
     func addToFavorites(_ contact: Contact) {
         if let index = contacts.firstIndex(of: contact) {
             contacts[index].isFavorite = true
+            favoritesIdentifiers.append(contact.identifier)
         }
     }
     
     func removeFromFavorites(_ contact: Contact) {
         if let index = contacts.firstIndex(of: contact) {
             contacts[index].isFavorite = false
+            favoritesIdentifiers.removeAll(where: { $0 == contact.identifier })
         }
     }
     
     func delete(_ contact: Contact) {
         if let index = contacts.firstIndex(of: contact) {
             contacts.remove(at: index)
+        }
+        let store = CNContactStore()
+        if let cnContact = try? store.unifiedContact(withIdentifier: contact.identifier, keysToFetch: []) {
+            let saveRequest = CNSaveRequest()
+            saveRequest.delete(cnContact.mutableCopy() as! CNMutableContact)
+            try? store.execute(saveRequest)
         }
     }
     

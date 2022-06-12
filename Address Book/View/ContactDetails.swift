@@ -33,7 +33,7 @@ struct ContactDetails: View {
                                 if !contact.isMyCard {
                                     Spacer()
                                     Button {
-                                        guard let url = URL(string: "tel:\(phone.value)") else { return }
+                                        guard let url = URL(string: "tel:\(phone.value.replacingOccurrences(of: " ", with: "").replacingOccurrences(of: "(", with: "").replacingOccurrences(of: ")", with: "").replacingOccurrences(of: "-", with: ""))") else { return }
                                         UIApplication.shared.open(url)
                                     } label: {
                                         Image(systemName: "phone.fill")
@@ -46,7 +46,7 @@ struct ContactDetails: View {
                                     }
                                     .buttonStyle(BorderlessButtonStyle())
                                     Button {
-                                        guard let url = URL(string: "sms:\(phone.value)") else { return }
+                                        guard let url = URL(string: "sms:\(phone.value.replacingOccurrences(of: " ", with: "").replacingOccurrences(of: "(", with: "").replacingOccurrences(of: ")", with: "").replacingOccurrences(of: "-", with: ""))") else { return }
                                         UIApplication.shared.open(url)
                                     } label: {
                                         Image(systemName: "message.fill")
@@ -170,6 +170,8 @@ struct ContactDetails: View {
                             } else {
                                 contactStore.addToFavorites(contact)
                             }
+                        }
+                        Button("Hide Contact") {
                         }
                         Button("Delete Contact", role: .destructive) {
                             UINotificationFeedbackGenerator().notificationOccurred(.warning)
