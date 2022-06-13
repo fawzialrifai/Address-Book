@@ -65,7 +65,6 @@
 		5825BDC02854ED6F0082069A /* EditableContactImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EditableContactImage.swift; sourceTree = "<group>"; };
 		5825BDC12854ED6F0082069A /* ContactList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactList.swift; sourceTree = "<group>"; };
 		5825BDC22854ED6F0082069A /* ContactImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactImage.swift; sourceTree = "<group>"; };
-		5878BE08285536E400D19A47 /* Address Book.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Address Book.entitlements"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,7 +97,6 @@
 		5825BD382854EC9F0082069A /* Address Book */ = {
 			isa = PBXGroup;
 			children = (
-				5878BE08285536E400D19A47 /* Address Book.entitlements */,
 				5825BD392854EC9F0082069A /* AddressBookApp.swift */,
 				5825BDA72854ED6E0082069A /* LocationManager.swift */,
 				5825BDAC2854ED6E0082069A /* Model */,

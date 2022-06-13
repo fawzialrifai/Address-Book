@@ -23,7 +23,7 @@ struct ContactImage: View {
                 .font(.title)
                 .foregroundColor(.primary)
             if contact.company?.isTotallyEmpty == false {
-                Text("@ \(contact.company ?? "")")
+                Text(contact.company ?? "")
                     .font(.title3)
                     .foregroundColor(.secondary)
             }
