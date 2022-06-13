@@ -9,7 +9,7 @@ import SwiftUI
 
 struct LabelPicker: View {
     @Environment(\.dismiss) private var dismiss
-    @Binding var labeledValue: ContactLabeledValue
+    @Binding var labeledValue: LabeledValue
     @State private var newLabel = ""
     @State private var selectedLabel: String?
     @State private var labels: [String]
@@ -89,10 +89,10 @@ struct LabelPicker: View {
         }
         
     }
-    init(labeledValue: Binding<ContactLabeledValue>) {
+    init(labeledValue: Binding<LabeledValue>) {
         self._labeledValue = labeledValue
         _selectedLabel = State(initialValue: labeledValue.label.wrappedValue)
-        _labels = State(initialValue: labeledValue.availableLabels.wrappedValue)
+        _labels = State(initialValue: labeledValue.defaultLabels.wrappedValue)
         _customLabels = State(initialValue: labeledValue.customLabels.wrappedValue)
     }
     func deleteLabels(at offsets: IndexSet) {

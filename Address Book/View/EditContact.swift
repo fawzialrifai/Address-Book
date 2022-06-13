@@ -16,8 +16,8 @@ struct EditContact: View {
     @State private var firstName: String
     @State private var lastName: String
     @State private var company: String
-    @State private var phoneNumbers: [Phone]
-    @State private var emailAddresses: [Email]
+    @State private var phoneNumbers: [LabeledValue]
+    @State private var emailAddresses: [LabeledValue]
     @Binding var coordinateRegion: MKCoordinateRegion?
     @StateObject var locationManager: LocationManager
     @State private var birthday: Date?
@@ -206,10 +206,10 @@ struct EditContact: View {
             }
         }
         .sheet(isPresented: $isLabelPickerPresented) {
-            LabelPicker(labeledValue: $phoneNumbers[selectedIndex].asParameter)
+            LabelPicker(labeledValue: $phoneNumbers[selectedIndex])
         }
         .sheet(isPresented: $isEmailLabelPickerPresented) {
-            LabelPicker(labeledValue: $emailAddresses[selectedIndex].asParameter)
+            LabelPicker(labeledValue: $emailAddresses[selectedIndex])
         }
         .environment(\.editMode, .constant(.active))
         .toolbar {
@@ -292,8 +292,8 @@ struct EditContact: View {
         _firstName = State(initialValue: contact.firstName)
         _lastName = State(initialValue: contact.lastName ?? "")
         _company = State(initialValue: contact.company ?? "")
-        _phoneNumbers = State(initialValue: contact.phoneNumbers + [Phone()])
-        _emailAddresses = State(initialValue: contact.emailAddresses + [Email()])
+        _phoneNumbers = State(initialValue: contact.phoneNumbers + [LabeledValue(type: .phone)])
+        _emailAddresses = State(initialValue: contact.emailAddresses + [LabeledValue(type: .email)])
         _notes = State(initialValue: contact.notes ?? "")
         _birthday = State(initialValue: contact.birthday)
         _locationManager = StateObject(wrappedValue: LocationManager(coordinateRegion: contact.coordinateRegion))
@@ -304,13 +304,13 @@ struct EditContact: View {
     func addPhoneNumber() {
         UINotificationFeedbackGenerator().notificationOccurred(.success)
         withAnimation {
-            phoneNumbers.append(Phone())
+            phoneNumbers.append(LabeledValue(type: .phone))
         }
     }
     func addEmailAddress() {
         UINotificationFeedbackGenerator().notificationOccurred(.success)
         withAnimation {
-            emailAddresses.append(Email())
+            emailAddresses.append(LabeledValue(type: .email))
         }
     }
     func removePhoneNumbers(at offsets: IndexSet) {

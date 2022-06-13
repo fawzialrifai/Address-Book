@@ -15,8 +15,8 @@ struct Contact: Identifiable, Codable, Equatable {
     var firstName = ""
     var lastName: String?
     var company: String?
-    var phoneNumbers = [Phone]()
-    var emailAddresses = [Email]()
+    var phoneNumbers = [LabeledValue]()
+    var emailAddresses = [LabeledValue]()
     var latitude: CLLocationDegrees?
     var longitude: CLLocationDegrees?
     var birthday: Date?
@@ -109,10 +109,10 @@ extension Contact {
         lastName = cnContact.familyName.isTotallyEmpty ? nil : cnContact.familyName
         company = cnContact.organizationName.isTotallyEmpty ? nil : cnContact.organizationName
         for emailAddress in cnContact.emailAddresses {
-            emailAddresses.append(Email(label: CNLabeledValue<NSString>.localizedString(forLabel: emailAddress.label ?? ""), value: emailAddress.value as String))
+            emailAddresses.append(LabeledValue(label: CNLabeledValue<NSString>.localizedString(forLabel: emailAddress.label ?? ""), value: emailAddress.value as String, type: .email))
         }
         for phoneNumber in cnContact.phoneNumbers {
-            phoneNumbers.append(Phone(label: CNLabeledValue<NSString>.localizedString(forLabel: phoneNumber.label!), value: phoneNumber.value.stringValue))
+            phoneNumbers.append(LabeledValue(label: CNLabeledValue<NSString>.localizedString(forLabel: phoneNumber.label!), value: phoneNumber.value.stringValue, type: .phone))
         }
         birthday = cnContact.birthday?.date
         self.isEmergencyContact = isEmergencyContact
