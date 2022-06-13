@@ -10,7 +10,6 @@
 		5825BD3A2854EC9F0082069A /* AddressBookApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BD392854EC9F0082069A /* AddressBookApp.swift */; };
 		5825BD3E2854ECA10082069A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5825BD3D2854ECA10082069A /* Assets.xcassets */; };
 		5825BD412854ECA10082069A /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5825BD402854ECA10082069A /* Preview Assets.xcassets */; };
-		5825BDC32854ED6F0082069A /* Contacts.json in Resources */ = {isa = PBXBuildFile; fileRef = 5825BDA62854ED6E0082069A /* Contacts.json */; };
 		5825BDC42854ED6F0082069A /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDA72854ED6E0082069A /* LocationManager.swift */; };
 		5825BDC52854ED6F0082069A /* FileManager-extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDA92854ED6E0082069A /* FileManager-extension.swift */; };
 		5825BDC62854ED6F0082069A /* ShapeStyle-extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDAA2854ED6E0082069A /* ShapeStyle-extension.swift */; };
@@ -42,7 +41,6 @@
 		5825BD392854EC9F0082069A /* AddressBookApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddressBookApp.swift; sourceTree = "<group>"; };
 		5825BD3D2854ECA10082069A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		5825BD402854ECA10082069A /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		5825BDA62854ED6E0082069A /* Contacts.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = Contacts.json; sourceTree = "<group>"; };
 		5825BDA72854ED6E0082069A /* LocationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		5825BDA92854ED6E0082069A /* FileManager-extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "FileManager-extension.swift"; sourceTree = "<group>"; };
 		5825BDAA2854ED6E0082069A /* ShapeStyle-extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ShapeStyle-extension.swift"; sourceTree = "<group>"; };
@@ -107,7 +105,6 @@
 				5825BDB42854ED6F0082069A /* View */,
 				5825BDA82854ED6E0082069A /* Extension */,
 				5825BD3D2854ECA10082069A /* Assets.xcassets */,
-				5825BDA62854ED6E0082069A /* Contacts.json */,
 				5825BD3F2854ECA10082069A /* Preview Content */,
 			);
 			path = "Address Book";
@@ -231,7 +228,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5825BDC32854ED6F0082069A /* Contacts.json in Resources */,
 				5825BD412854ECA10082069A /* Preview Assets.xcassets in Resources */,
 				5825BD3E2854ECA10082069A /* Assets.xcassets in Resources */,
 			);
