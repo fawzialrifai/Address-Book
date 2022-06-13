@@ -30,6 +30,7 @@ import Contacts
         }
     }
     
+    private var myCardPath = FileManager.documentDirectory.appendingPathComponent("My Card")
     private var favoritesPath = FileManager.documentDirectory.appendingPathComponent("Favorites")
     private var emergencyContactsPath = FileManager.documentDirectory.appendingPathComponent("Emergency Contacts")
     @Published var filterText = ""
@@ -44,6 +45,7 @@ import Contacts
     @AppStorage("Order Display") var displayOrder = Order.firstNameLastName
     
     init() {
+        fetchMyCard()
         loadEmergencyContactsIdentifiers()
         loadFavoritesIdentifiers()
         fetchContacts()
@@ -151,6 +153,24 @@ extension ContactStore {
                 }
             }
         }
+    }
+    
+    func saveMyCard(_ contact: Contact) {
+        if let encodedMyCard = try? JSONEncoder().encode(contact) {
+            try? encodedMyCard.write(to: myCardPath, options: .atomic)
+        }
+    }
+    
+    func fetchMyCard() {
+        do {
+            let encodedMyCard = try Data(contentsOf: myCardPath)
+            let myCard = try JSONDecoder().decode(Contact.self, from: encodedMyCard)
+            contacts.append(myCard)
+        } catch {}
+    }
+    
+    func deleteMyCard() {
+        try? FileManager.default.removeItem(at: myCardPath)
     }
     
     func sortContacts() {

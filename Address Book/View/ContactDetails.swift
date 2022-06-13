@@ -188,7 +188,7 @@ struct ContactDetails: View {
                                 }
                             }
                         } message: {
-                            Text("Are you sure you want to delete this contact?")
+                            Text("Are you sure you want to delete \(contact.fullName(displayOrder: contactStore.displayOrder)) from your contacts?")
                         }
                     } else {
                         Button("Delete My Card", role: .destructive) {
@@ -199,6 +199,7 @@ struct ContactDetails: View {
                             Button("Delete", role: .destructive) {
                                 dismiss()
                                 contactStore.delete(contact)
+                                contactStore.deleteMyCard()
                             }
                         } message: {
                             Text("Are you sure you want to delete your card?")
