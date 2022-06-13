@@ -61,7 +61,9 @@ extension ContactStore {
                 ($0.firstName + " " + ($0.lastName ?? "")).lowercased().contains(filterText.lowercased()) ||
                 (($0.lastName ?? "") + " " + ($0.firstName)).lowercased().contains(filterText.lowercased()) ||
                 $0.company?.lowercased().contains(filterText.lowercased()) == true ||
-                $0.notes?.lowercased().contains(filterText.lowercased()) == true
+                $0.notes?.lowercased().contains(filterText.lowercased()) == true ||
+                $0.phoneNumbers.contains(where: { $0.value.lowercased().contains(filterText.lowercased()) }) ||
+                $0.emailAddresses.contains(where: { $0.value.lowercased().contains(filterText.lowercased()) })
             )
         }
     }
