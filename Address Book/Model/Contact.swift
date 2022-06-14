@@ -25,6 +25,7 @@ struct Contact: Identifiable, Codable, Equatable {
     var isMyCard = false
     var isEmergencyContact = false
     var isFavorite = false
+    var isHidden = false
     static let example = Contact(firstName: "Fawzi", lastName: "Rifai", company: "Apple")
 }
 

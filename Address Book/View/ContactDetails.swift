@@ -12,6 +12,7 @@ struct ContactDetails: View {
     @EnvironmentObject var contactStore: ContactStore
     @Environment(\.dismiss) private var dismiss
     @State private var isDeleteContactAlertPresented = false
+    @State private var isHideContactAlertPresented = false
     @State var region: MKCoordinateRegion?
     var contact: Contact
     @State var isEditingContact = false
@@ -171,11 +172,27 @@ struct ContactDetails: View {
                                 contactStore.addToFavorites(contact)
                             }
                         }
-                        Button("Hide Contact") {
+                        Button(contact.isHidden ? "Unhide Contact" : "Hide Contact") {
+                            if contact.isHidden {
+                                UINotificationFeedbackGenerator().notificationOccurred(.success)
+                                contactStore.unhideContact(contact)
+                                dismiss()
+                            } else {
+                                UINotificationFeedbackGenerator().notificationOccurred(.warning)
+                                isHideContactAlertPresented.toggle()
+                            }
                         }
                         Button("Delete Contact", role: .destructive) {
                             UINotificationFeedbackGenerator().notificationOccurred(.warning)
                             isDeleteContactAlertPresented.toggle()
+                        }
+                        .confirmationDialog("Hide Contact?", isPresented: $isHideContactAlertPresented) {
+                            Button("Hide") {
+                                UINotificationFeedbackGenerator().notificationOccurred(.success)
+                                contactStore.hideContact(contact)
+                            }
+                        } message: {
+                            Text("This contact will be hidden but can be found in the Hidden folder.")
                         }
                         .confirmationDialog("Delete Contact?", isPresented: $isDeleteContactAlertPresented) {
                             Button("Delete", role: .destructive) {

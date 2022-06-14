@@ -32,6 +32,7 @@
 		5825BDDA2854ED6F0082069A /* ContactList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDC12854ED6F0082069A /* ContactList.swift */; };
 		5825BDDB2854ED6F0082069A /* ContactImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDC22854ED6F0082069A /* ContactImage.swift */; };
 		58725AB82857C4C6004BF574 /* LabeledValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58725AB72857C4C6004BF574 /* LabeledValue.swift */; };
+		58725ABA28587EDC004BF574 /* HiddenContactList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58725AB928587EDC004BF574 /* HiddenContactList.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -61,6 +62,7 @@
 		5825BDC12854ED6F0082069A /* ContactList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactList.swift; sourceTree = "<group>"; };
 		5825BDC22854ED6F0082069A /* ContactImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactImage.swift; sourceTree = "<group>"; };
 		58725AB72857C4C6004BF574 /* LabeledValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabeledValue.swift; sourceTree = "<group>"; };
+		58725AB928587EDC004BF574 /* HiddenContactList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HiddenContactList.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -147,6 +149,7 @@
 				5825BDC22854ED6F0082069A /* ContactImage.swift */,
 				5825BDC02854ED6F0082069A /* EditableContactImage.swift */,
 				5825BDBF2854ED6F0082069A /* ManageContacts.swift */,
+				58725AB928587EDC004BF574 /* HiddenContactList.swift */,
 				5825BDBA2854ED6F0082069A /* Code Scanner */,
 			);
 			path = View;
@@ -246,6 +249,7 @@
 				5825BDCA2854ED6F0082069A /* Order.swift in Sources */,
 				5825BDC82854ED6F0082069A /* JSONFile.swift in Sources */,
 				5825BDDA2854ED6F0082069A /* ContactList.swift in Sources */,
+				58725ABA28587EDC004BF574 /* HiddenContactList.swift in Sources */,
 				5825BDD82854ED6F0082069A /* ManageContacts.swift in Sources */,
 				5825BDC42854ED6F0082069A /* LocationManager.swift in Sources */,
 				5825BDCF2854ED6F0082069A /* LabelPicker.swift in Sources */,

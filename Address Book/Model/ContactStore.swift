@@ -57,7 +57,7 @@ extension ContactStore {
     
     var filteredContacts: [Contact] {
         contacts.filter {
-            filterText.isEmpty || (
+            !$0.isHidden && filterText.isEmpty || (
                 ($0.firstName + " " + ($0.lastName ?? "")).lowercased().contains(filterText.lowercased()) ||
                 (($0.lastName ?? "") + " " + ($0.firstName)).lowercased().contains(filterText.lowercased()) ||
                 $0.company?.lowercased().contains(filterText.lowercased()) == true ||
@@ -67,6 +67,10 @@ extension ContactStore {
                 $0.emailAddresses.contains(where: { $0.value.lowercased().contains(filterText.lowercased()) })
             )
         }
+    }
+    
+    var hiddenContacts: [Contact] {
+        contacts.filter({ $0.isHidden })
     }
     
     var emergencyContacts: [Contact] {
@@ -81,6 +85,25 @@ extension ContactStore {
         var keys = [String]()
         var contactsDictionary = [String: [Contact]]()
         for contact in filteredContacts {
+            if !contact.isMyCard {
+                if let firstLetter = contact.firstLetter(sortOrder: sortOrder) {
+                    if keys.contains(firstLetter) {
+                        contactsDictionary[firstLetter]?.append(contact)
+                    } else {
+                        contactsDictionary[firstLetter] = [contact]
+                        keys.append(firstLetter)
+                    }
+                }
+                
+            }
+        }
+        return contactsDictionary
+    }
+    
+    var hiddenContactsDictionary: [String: [Contact]] {
+        var keys = [String]()
+        var contactsDictionary = [String: [Contact]]()
+        for contact in hiddenContacts {
             if !contact.isMyCard {
                 if let firstLetter = contact.firstLetter(sortOrder: sortOrder) {
                     if keys.contains(firstLetter) {
@@ -232,6 +255,18 @@ extension ContactStore {
         if let index = contacts.firstIndex(of: contact) {
             contacts[index].isFavorite = false
             favoritesIdentifiers.removeAll(where: { $0 == contact.identifier })
+        }
+    }
+    
+    func hideContact(_ contact: Contact) {
+        if let index = contacts.firstIndex(of: contact) {
+            contacts[index].isHidden = true
+        }
+    }
+    
+    func unhideContact(_ contact: Contact) {
+        if let index = contacts.firstIndex(of: contact) {
+            contacts[index].isHidden = false
         }
     }
     

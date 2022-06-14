@@ -69,12 +69,12 @@ struct ManageContacts: View {
                         }
                     }
                     NavigationLink {
-                        Text("Hidden")
+                        HiddenContactList()
                     } label: {
                         HStack {
                             Text("Hidden")
                             Spacer()
-                            Text("0")
+                            Text(contactStore.hiddenContacts.count, format: .number)
                                 .foregroundColor(.secondary)
                         }
                     }
@@ -84,7 +84,7 @@ struct ManageContacts: View {
                         HStack {
                             Text("Recently Deleted")
                             Spacer()
-                            Text("2")
+                            Text("0")
                                 .foregroundColor(.secondary)
                         }
                     }
