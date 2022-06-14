@@ -13,4 +13,10 @@ extension String {
     var optional: String? {
         self.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : self
     }
+    var plainPhoneNumber: String {
+        self.replacingOccurrences(of: " ", with: "")
+            .replacingOccurrences(of: "-", with: "")
+            .replacingOccurrences(of: "(", with: "")
+            .replacingOccurrences(of: ")", with: "")
+    }
 }

@@ -78,7 +78,7 @@ struct LabelPicker: View {
                         labeledValue.label = selectedLabel
                         dismiss()
                     }
-                    .disabled(selectedLabel == nil || labeledValue.label == selectedLabel)
+                    .disabled(selectedLabel == nil || labeledValue.label == selectedLabel && customLabels == labeledValue.customLabels)
                 }
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {

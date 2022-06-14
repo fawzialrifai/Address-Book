@@ -282,7 +282,7 @@ struct ContactRow: View {
                     Menu {
                         ForEach(contact.phoneNumbers) { phone in
                             Button("\(phone.label ?? "")\n\(phone.value)") {
-                                guard let url = URL(string: "tel:\(phone.value.replacingOccurrences(of: " ", with: "").replacingOccurrences(of: "(", with: "").replacingOccurrences(of: ")", with: "").replacingOccurrences(of: "-", with: ""))") else { return }
+                                guard let url = URL(string: "tel:\(phone.value.plainPhoneNumber)") else { return }
                                 UIApplication.shared.open(url)
                             }
                         }
@@ -292,7 +292,7 @@ struct ContactRow: View {
                     Menu {
                         ForEach(contact.phoneNumbers) { phone in
                             Button("\(phone.label ?? "")\n\(phone.value)") {
-                                guard let url = URL(string: "sms:\(phone.value.replacingOccurrences(of: " ", with: "").replacingOccurrences(of: "(", with: "").replacingOccurrences(of: ")", with: "").replacingOccurrences(of: "-", with: ""))") else { return }
+                                guard let url = URL(string: "sms:\(phone.value.plainPhoneNumber)") else { return }
                                 UIApplication.shared.open(url)
                             }
                         }

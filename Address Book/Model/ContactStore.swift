@@ -63,6 +63,7 @@ extension ContactStore {
                 $0.company?.lowercased().contains(filterText.lowercased()) == true ||
                 $0.notes?.lowercased().contains(filterText.lowercased()) == true ||
                 $0.phoneNumbers.contains(where: { $0.value.lowercased().contains(filterText.lowercased()) }) ||
+                $0.phoneNumbers.contains(where: { $0.value.plainPhoneNumber.lowercased().contains(filterText.plainPhoneNumber.lowercased()) }) ||
                 $0.emailAddresses.contains(where: { $0.value.lowercased().contains(filterText.lowercased()) })
             )
         }
