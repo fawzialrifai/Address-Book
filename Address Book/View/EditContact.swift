@@ -26,11 +26,15 @@ struct EditContact: View {
     @State private var isLabelPickerPresented = false
     @State private var isEmailLabelPickerPresented = false
     @State private var selectedIndex: Int = 0
-    var image: Image {
+    var image: Image? {
         guard let imageData = imageData else {
             return Image(systemName: "person.crop.circle.fill")
         }
-        return Image(uiImage: UIImage(data: imageData)!)
+        if let uiImage = UIImage(data: imageData) {
+            return Image(uiImage: uiImage)
+        } else {
+            return nil
+        }
     }
     @Binding var isEditingContact: Bool
     var isContactEdited: Bool {
@@ -155,7 +159,7 @@ struct EditContact: View {
                 if locationManager.coordinateRegion != nil {
                     ZStack {
                         Map(coordinateRegion: strongCoordinateRegion)
-                        image
+                        image?
                             .resizable()
                             .scaledToFill()
                             .foregroundStyle(.white, .gray)

@@ -56,11 +56,15 @@ extension Contact {
         }
     }
     
-    var image: Image {
+    var image: Image? {
         guard let imageData = imageData else {
             return Image(systemName: "person.crop.circle.fill")
         }
-        return Image(uiImage: UIImage(data: imageData)!)
+        if let uiImage = UIImage(data: imageData) {
+            return Image(uiImage: uiImage)
+        } else {
+            return nil
+        }
     }
     
     var qrShareableData: Data? {
@@ -80,14 +84,14 @@ extension Contact {
 
 extension Contact {
     
-    func firstLetter(sortOrder: Order) -> String {
+    func firstLetter(sortOrder: Order) -> String? {
         if sortOrder == .firstNameLastName {
-            return String(firstName.first!)
+            return String(firstName.first)
         } else {
             if let lastName = lastName {
-                return String(lastName.first!)
+                return String(lastName.first)
             } else {
-                return String(firstName.first!)
+                return String(firstName.first)
             }
         }
     }
@@ -112,7 +116,7 @@ extension Contact {
             emailAddresses.append(LabeledValue(label: CNLabeledValue<NSString>.localizedString(forLabel: emailAddress.label ?? ""), value: emailAddress.value as String, type: .email))
         }
         for phoneNumber in cnContact.phoneNumbers {
-            phoneNumbers.append(LabeledValue(label: CNLabeledValue<NSString>.localizedString(forLabel: phoneNumber.label!), value: phoneNumber.value.stringValue, type: .phone))
+            phoneNumbers.append(LabeledValue(label: CNLabeledValue<CNPhoneNumber>.localizedString(forLabel: phoneNumber.label ?? ""), value: phoneNumber.value.stringValue, type: .phone))
         }
         birthday = cnContact.birthday?.date
         self.isEmergencyContact = isEmergencyContact

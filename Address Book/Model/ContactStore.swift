@@ -82,12 +82,15 @@ extension ContactStore {
         var contactsDictionary = [String: [Contact]]()
         for contact in filteredContacts {
             if !contact.isMyCard {
-                if keys.contains(contact.firstLetter(sortOrder: sortOrder)) {
-                    contactsDictionary[contact.firstLetter(sortOrder: sortOrder)]?.append(contact)
-                } else {
-                    contactsDictionary[contact.firstLetter(sortOrder: sortOrder)] = [contact]
-                    keys.append(contact.firstLetter(sortOrder: sortOrder))
+                if let firstLetter = contact.firstLetter(sortOrder: sortOrder) {
+                    if keys.contains(firstLetter) {
+                        contactsDictionary[firstLetter]?.append(contact)
+                    } else {
+                        contactsDictionary[firstLetter] = [contact]
+                        keys.append(firstLetter)
+                    }
                 }
+                
             }
         }
         return contactsDictionary
@@ -237,9 +240,9 @@ extension ContactStore {
             contacts.remove(at: index)
         }
         let store = CNContactStore()
-        if let cnContact = try? store.unifiedContact(withIdentifier: contact.identifier, keysToFetch: []) {
+        if let cnContact = try? store.unifiedContact(withIdentifier: contact.identifier, keysToFetch: []).mutableCopy() as? CNMutableContact {
             let saveRequest = CNSaveRequest()
-            saveRequest.delete(cnContact.mutableCopy() as! CNMutableContact)
+            saveRequest.delete(cnContact)
             try? store.execute(saveRequest)
         }
     }

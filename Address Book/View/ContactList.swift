@@ -152,7 +152,7 @@ struct MyCardSection: View {
             if let myCard = contactStore.contacts.first(where: { $0.isMyCard }) {
                 NavigationLink(destination: ContactDetails(contact: myCard)) {
                     HStack {
-                        myCard.image
+                        myCard.image?
                             .resizable()
                             .scaledToFill()
                             .foregroundStyle(.white, .gray)
@@ -255,7 +255,7 @@ struct ContactRow: View {
     var body: some View {
         NavigationLink(destination: ContactDetails(contact: contact)) {
             HStack {
-                contact.image
+                contact.image?
                     .resizable()
                     .scaledToFill()
                     .foregroundStyle(.white, .gray)

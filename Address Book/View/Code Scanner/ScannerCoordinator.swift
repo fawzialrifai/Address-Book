@@ -23,13 +23,11 @@ extension CodeScannerView {
                 guard let readableObject = metadataObject as? AVMetadataMachineReadableCodeObject else { return }
                 guard let stringValue = readableObject.stringValue else { return }
                 guard didFinishScanning == false else { return }
-                let data = stringValue.data(using: .utf8)
-                
                 if !codesFound.contains(stringValue) {
                     codesFound.insert(stringValue)
-                    found(data!)
                     do {
-                        guard let data = data else { return }
+                        guard let data = stringValue.data(using: .utf8) else { return }
+                        found(data)
                         let _ = try JSONDecoder().decode(Contact.self, from: data)
                         UINotificationFeedbackGenerator().notificationOccurred(.success)
                         didFinishScanning = true
@@ -37,7 +35,6 @@ extension CodeScannerView {
                         UINotificationFeedbackGenerator().notificationOccurred(.error)
                     }
                 }
-
             }
         }
 

@@ -10,16 +10,20 @@ import SwiftUI
 struct EditableContactImage: View {
     @State private var isImagePickerPresented = false
     @Binding var imageData: Data?
-    var image: Image {
+    var image: Image? {
         guard let imageData = imageData else {
             return Image(systemName: "person.crop.circle.fill")
         }
-        return Image(uiImage: UIImage(data: imageData)!)
+        if let uiImage = UIImage(data: imageData) {
+            return Image(uiImage: uiImage)
+        } else {
+            return nil
+        }
     }
     var body: some View {
         VStack {
             ZStack(alignment: .topTrailing) {
-                image
+                image?
                     .resizable()
                     .scaledToFill()
                     .foregroundStyle(.white, .gray)

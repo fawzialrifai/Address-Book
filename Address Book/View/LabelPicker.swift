@@ -97,16 +97,18 @@ struct LabelPicker: View {
     }
     func deleteLabels(at offsets: IndexSet) {
         withAnimation {
-            if selectedLabel == customLabels[offsets.first!] {
-                selectedLabel = nil
+            if let firstIndex = offsets.first {
+                if selectedLabel == customLabels[firstIndex] {
+                    selectedLabel = nil
+                }
             }
             customLabels.remove(atOffsets: offsets)
         }
     }
 }
 
-//struct LabelPicker_Previews: PreviewProvider {
-//    static var previews: some View {
-//        LabelPicker(phone: .constant(Phone()))
-//    }
-//}
+struct LabelPicker_Previews: PreviewProvider {
+    static var previews: some View {
+        LabelPicker(labeledValue: .constant(LabeledValue(type: .phone)))
+    }
+}

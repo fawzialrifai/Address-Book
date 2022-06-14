@@ -109,7 +109,7 @@ struct ContactDetails: View {
                                         guard let url = contact.mapURL else { return }
                                         UIApplication.shared.open(url)
                                     } label: {
-                                        contact.image
+                                        contact.image?
                                             .resizable()
                                             .scaledToFill()
                                             .foregroundStyle(.white, .gray)

@@ -19,4 +19,11 @@ extension String {
             .replacingOccurrences(of: "(", with: "")
             .replacingOccurrences(of: ")", with: "")
     }
+    init?(_ c: Character?) {
+        if let c = c {
+            self = String(c)
+        } else {
+            return nil
+        }
+    }
 }

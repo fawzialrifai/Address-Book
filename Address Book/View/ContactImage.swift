@@ -12,7 +12,7 @@ struct ContactImage: View {
     var contact: Contact
     var body: some View {
         VStack {
-            contact.image
+            contact.image?
                 .resizable()
                 .scaledToFill()
                 .foregroundStyle(.white, .gray)
