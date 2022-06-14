@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Contacts
+import LocalAuthentication
 
 @MainActor class ContactStore: ObservableObject {
     
@@ -41,6 +42,7 @@ import Contacts
     @Published var isImporting = false
     @Published var isExporting = false
     @Published var isNotAuthorized = false
+    @Published var isHiddenFolderLocked = true
     @AppStorage("Sort Order") var sortOrder = Order.firstNameLastName
     @AppStorage("Order Display") var displayOrder = Order.firstNameLastName
     
@@ -282,4 +284,18 @@ extension ContactStore {
         }
     }
     
+    func authenticate(reason: String) {
+        let context = LAContext()
+        if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: nil) {
+            context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { success, _ in
+                Task { @MainActor in
+                    if success {
+                        self.isHiddenFolderLocked = false
+                    }
+                }
+            }
+        } else {
+            self.isHiddenFolderLocked = false
+        }
+    }
 }

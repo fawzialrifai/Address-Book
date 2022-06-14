@@ -18,6 +18,5 @@ struct AddressBookApp: App {
     }
     init() {
         UITableView.appearance().backgroundColor = UIColor { $0.userInterfaceStyle == .light ? UIColor(red: 0.937, green: 0.937, blue: 0.937, alpha: 1) : UIColor.systemBackground }
-        //UITableView.appearance().backgroundColor = UIColor.clear
     }
 }
