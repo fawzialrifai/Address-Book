@@ -9,6 +9,7 @@ import SwiftUI
 import LocalAuthentication
 
 struct HiddenContactList: View {
+    @Environment (\.scenePhase) private var scenePhase
     @EnvironmentObject var contactStore: ContactStore
     @State private var isFolderLocked = true
     var body: some View {
@@ -53,6 +54,11 @@ struct HiddenContactList: View {
         .onAppear {
             if isFolderLocked {
                 authenticate()
+            }
+        }
+        .onChange(of: scenePhase) { newValue in
+            if newValue != .active {
+                isFolderLocked = true
             }
         }
     }

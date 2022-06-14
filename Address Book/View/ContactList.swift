@@ -24,6 +24,7 @@ struct ContactList: View {
 }
 
 struct Contacts: View {
+    @Environment (\.scenePhase) private var scenePhase
     @EnvironmentObject var contactStore: ContactStore
     @State private var isManageContactsViewPresented = false
     @State private var isNewContactViewPresented = false
@@ -94,6 +95,7 @@ struct Contacts: View {
             }
             .sheet(isPresented: $isManageContactsViewPresented) {
                 ManageContacts()
+                    .environment(\.scenePhase, scenePhase)
             }
             .sheet(isPresented: $isCodeScannerPresented) {
                 NavigationView {
