@@ -9,7 +9,6 @@ import SwiftUI
 import MapKit
 
 struct ContactList: View {
-    @Environment(\.scenePhase) var scenePhase
     @EnvironmentObject var contactStore: ContactStore
     var body: some View {
         ScrollViewReader { scrollViewProxy in
@@ -19,11 +18,6 @@ struct ContactList: View {
                     FirstLettersGrid(scrollViewProxy: scrollViewProxy)
                     .zIndex(1)
                 }
-            }
-        }
-        .onChange(of: scenePhase) { newValue in
-            if newValue != .active {
-                contactStore.isHiddenFolderLocked = true
             }
         }
     }

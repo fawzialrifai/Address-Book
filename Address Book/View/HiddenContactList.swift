@@ -6,14 +6,16 @@
 //
 
 import SwiftUI
+import LocalAuthentication
 
 struct HiddenContactList: View {
     @EnvironmentObject var contactStore: ContactStore
+    @State private var isFolderLocked = true
     var body: some View {
         ZStack {
             Color.contactsBackgroundColor
                 .ignoresSafeArea()
-            if contactStore.isHiddenFolderLocked {
+            if isFolderLocked {
                 VStack(alignment: .center, spacing: 8) {
                     VStack(spacing: 8) {
                         Image(systemName: "lock.fill")
@@ -25,7 +27,7 @@ struct HiddenContactList: View {
                             .multilineTextAlignment(.center)
                     }
                     Button("View Hidden Contacts") {
-                        contactStore.authenticate(reason: "Authentication is required to view hidden contacts.")
+                        authenticate()
                     }
                 }
             } else {
@@ -49,7 +51,23 @@ struct HiddenContactList: View {
         .navigationTitle("Hidden Contacts")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
-            contactStore.authenticate(reason: "Authentication is required to view hidden contacts.")
+            if isFolderLocked {
+                authenticate()
+            }
+        }
+    }
+    func authenticate() {
+        let context = LAContext()
+        if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: nil) {
+            context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: "Authentication is required to view hidden contacts.") { success, _ in
+                Task { @MainActor in
+                    if success {
+                        isFolderLocked = false
+                    }
+                }
+            }
+        } else {
+            isFolderLocked = false
         }
     }
 }
