@@ -37,20 +37,18 @@ struct HiddenContactList: View {
                         .foregroundColor(.secondary)
                         .font(.title2)
                 } else {
-                    List {
-                        ForEach(contactStore.hiddenContactsDictionary.keys.sorted(by: <), id: \.self) { letter in
-                            Section(header: SectionHeader(view: AnyView(Text(letter)))) {
-                                ForEach(contactStore.hiddenContactsDictionary[letter] ?? []) { contact in
-                                    ContactRow(contact: contact)
-                                }
+                    List(contactStore.hiddenContactsDictionary.keys.sorted(by: <), id: \.self) { letter in
+                        Section(header: SectionHeader(view: AnyView(Text(letter)))) {
+                            ForEach(contactStore.hiddenContactsDictionary[letter] ?? []) { contact in
+                                ContactRow(contact: contact)
                             }
                         }
+                        
                     }
                 }
             }
         }
         .navigationTitle("Hidden Contacts")
-        .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             if isFolderLocked {
                 authenticate()

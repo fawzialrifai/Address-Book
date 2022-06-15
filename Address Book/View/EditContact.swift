@@ -247,11 +247,13 @@ struct EditContact: View {
                                     cnContact.givenName = firstName
                                     cnContact.familyName = lastName
                                     cnContact.organizationName = company
+                                    cnContact.phoneNumbers.removeAll()
                                     for phoneNumber in phoneNumbers.dropLast().filter({
                                         !$0.value.isTotallyEmpty
                                     }) {
                                         cnContact.phoneNumbers.append(CNLabeledValue(label: phoneNumber.label, value: CNPhoneNumber(stringValue: phoneNumber.value)))
                                     }
+                                    cnContact.emailAddresses.removeAll()
                                     for emailAddress in emailAddresses.dropLast().filter({
                                         !$0.value.isTotallyEmpty
                                     }) {

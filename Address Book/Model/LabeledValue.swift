@@ -31,8 +31,8 @@ struct LabeledValue: Identifiable, Equatable, Codable {
         if let label = label {
             if !allLabels.contains(label) {
                 self.customLabels.append(label)
-                self.label = label
             }
+            self.label = label
         } else {
             self.label = self.defaultLabels[0]
         }

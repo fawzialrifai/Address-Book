@@ -59,12 +59,12 @@ struct ManageContacts: View {
                 }
                 Section {
                     NavigationLink {
-                        Text("Duplicates")
+                        DuplicatesList()
                     } label: {
                         HStack {
                             Text("Duplicates")
                             Spacer()
-                            Text("0")
+                            Text(contactStore.duplicates.count, format: .number)
                                 .foregroundColor(.secondary)
                         }
                     }
@@ -90,46 +90,6 @@ struct ManageContacts: View {
                     }
                 }
                 Section(footer: Text(contactStore.status)) {
-//                    HStack {
-//                        Button("Merge Duplicates") {
-//                            var contacts = contactStore.contacts
-//                            duplicatesCount = 0
-//                            contactStore.isMerging = true
-//                            for firstIndex in (0 ..< contacts.count - 1).reversed() {
-//                                for secondIndex in (firstIndex + 1 ..< contacts.count).reversed() {
-//                                    if contacts[firstIndex].fullName(displayOrder: contactStore.displayOrder) == contacts[secondIndex].fullName(displayOrder: contactStore.displayOrder) {
-//                                        if contacts[firstIndex].company == nil {
-//                                            contacts[firstIndex].company = contacts[secondIndex].company
-//                                        }
-//                                        contacts[firstIndex].phoneNumbers.append(contentsOf: contacts[secondIndex].phoneNumbers)
-//                                        contacts[firstIndex].emailAddresses.append(contentsOf: contacts[secondIndex].emailAddresses)
-//                                        if contacts[firstIndex].coordinate == nil {
-//                                            contacts[firstIndex].latitude = contacts[secondIndex].latitude
-//                                            contacts[firstIndex].longitude = contacts[secondIndex].longitude
-//                                        }
-//                                        if contacts[firstIndex].birthday == nil {
-//                                            contacts[firstIndex].birthday = contacts[secondIndex].birthday
-//                                        }
-//                                        if contacts[firstIndex].notes == nil {
-//                                            contacts[firstIndex].notes = contacts[secondIndex].notes
-//                                        }
-//                                        if contacts[firstIndex].imageData == nil {
-//                                            contacts[firstIndex].imageData = contacts[secondIndex].imageData
-//                                        }
-//                                        duplicatesCount += 2
-//                                        contacts.remove(at: secondIndex)
-//                                    }
-//                                }
-//                            }
-//                            contactStore.contacts = contacts
-//                            contactStore.isMerging = false
-//                            isMergeCompleted = true
-//                        }
-//                        if contactStore.isMerging {
-//                            Spacer()
-//                            ProgressView()
-//                        }
-//                    }
                     Button("Import Contacts") {
                         isFileImporterPresented = true
                     }

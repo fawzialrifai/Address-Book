@@ -57,6 +57,29 @@ import LocalAuthentication
 
 extension ContactStore {
     
+    var duplicates: [[Contact]] {
+        var arrayOfduplicates = [[Contact]]()
+        var scannedContacts = [String]()
+        let contacts = self.contacts
+        for firstIndex in (0 ..< contacts.count - 1) {
+            if !scannedContacts.contains(contacts[firstIndex].fullName(displayOrder: displayOrder)) {
+                scannedContacts.append(contacts[firstIndex].fullName(displayOrder: displayOrder))
+                var duplicates = [contacts[firstIndex]]
+                for secondIndex in (firstIndex + 1 ..< contacts.count) {
+                    if contacts[firstIndex].fullName(displayOrder: displayOrder) == contacts[secondIndex].fullName(displayOrder: displayOrder) {
+                        duplicates.append(contacts[secondIndex])
+                    }
+                }
+                if duplicates.count > 1 {
+                    arrayOfduplicates.append(duplicates)
+                } else {
+                    duplicates.removeAll()
+                }
+            }
+        }
+        return arrayOfduplicates
+    }
+    
     var filteredContacts: [Contact] {
         contacts.filter {
             !$0.isHidden && filterText.isEmpty || (
@@ -81,6 +104,27 @@ extension ContactStore {
     
     var favorites: [Contact] {
         filteredContacts.filter({ $0.isFavorite })
+    }
+    
+    var duplicatesDictionary: [String: [[Contact]]] {
+        var keys = [String]()
+        var contactsDictionary = [String: [[Contact]]]()
+        for duplicate in duplicates {
+            if let firstDuplicate = duplicate.first {
+                if !firstDuplicate.isMyCard {
+                    if let firstLetter = firstDuplicate.firstLetter(sortOrder: sortOrder) {
+                        if keys.contains(firstLetter) {
+                            contactsDictionary[firstLetter]?.append(duplicate)
+                        } else {
+                            contactsDictionary[firstLetter] = [duplicate]
+                            keys.append(firstLetter)
+                        }
+                    }
+                }
+            }
+            
+        }
+        return contactsDictionary
     }
     
     var contactsDictionary: [String: [Contact]] {
