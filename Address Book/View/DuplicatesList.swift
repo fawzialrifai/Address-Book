@@ -25,7 +25,7 @@ struct DuplicatesList: View {
                     Section(header: SectionHeader(view: AnyView(Text(letter)))) {
                         ForEach(contactStore.duplicatesDictionary[letter] ?? [], id: \.[0].id) { duplicates in
                             NavigationLink {
-                                MergeFactory(duplicates: duplicates)
+                                MergeContact(duplicates: duplicates)
                             } label: {
                                 HStack {
                                     HStack {

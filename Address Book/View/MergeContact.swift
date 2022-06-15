@@ -1,5 +1,5 @@
 //
-//  MergeFactory.swift
+//  MergeContact.swift
 //  Address Book
 //
 //  Created by Fawzi Rifai on 15/06/2022.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct MergeFactory: View {
+struct MergeContact: View {
     @Environment(\.dismiss) private var dismiss
     @State private var isMergeAlertPresented = false
     var companies = [String]()
@@ -234,6 +234,6 @@ struct MergeFactory: View {
 
 struct MergeFactory_Previews: PreviewProvider {
     static var previews: some View {
-        MergeFactory(duplicates: [])
+        MergeContact(duplicates: [])
     }
 }

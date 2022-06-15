@@ -137,7 +137,9 @@ struct ManageContacts: View {
             .confirmationDialog("Delete all Contacts?", isPresented: $isDeleteContactsAlertPresented) {
                 Button("Delete", role: .destructive) {
                     UINotificationFeedbackGenerator().notificationOccurred(.success)
-                    contactStore.contacts.removeAll()
+                    for contact in contactStore.contacts {
+                        contactStore.delete(contact)
+                    }
                 }
             } message: {
                 Text("Are you sure you want to delete all your contacts?")

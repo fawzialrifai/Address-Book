@@ -61,6 +61,9 @@ extension ContactStore {
         var arrayOfduplicates = [[Contact]]()
         var scannedContacts = [String]()
         let contacts = self.contacts
+        if self.contacts.isEmpty {
+            return []
+        }
         for firstIndex in (0 ..< contacts.count - 1) {
             if !scannedContacts.contains(contacts[firstIndex].fullName(displayOrder: displayOrder)) {
                 scannedContacts.append(contacts[firstIndex].fullName(displayOrder: displayOrder))
@@ -195,39 +198,68 @@ extension ContactStore {
     
     func fetchContacts() {
         let contactStore = CNContactStore()
-        contactStore.requestAccess(for: .contacts) { success, error in
-            if success {
-                let keys = [CNContactIdentifierKey, CNContactGivenNameKey, CNContactFamilyNameKey, CNContactOrganizationNameKey, CNContactPhoneNumbersKey, CNContactEmailAddressesKey, CNContactPostalAddressesKey, CNContactBirthdayKey, CNContactImageDataKey] as [CNKeyDescriptor]
-                let request = CNContactFetchRequest(keysToFetch: keys)
-                try? contactStore.enumerateContacts(with: request) {
-                    (cnContact, _) in
-                    var contact = Contact()
-                    if self.favoritesIdentifiers.contains(cnContact.identifier) {
-                        if self.emergencyContactsIdentifiers.contains(cnContact.identifier) {
-                            contact.update(from: cnContact, isEmergencyContact: true, isFavorite: true)
-                        } else {
-                            contact.update(from: cnContact, isEmergencyContact: false, isFavorite: true)
-                        }
+        if CNContactStore.authorizationStatus(for: .contacts) == .authorized {
+            let keys = [CNContactIdentifierKey, CNContactGivenNameKey, CNContactFamilyNameKey, CNContactOrganizationNameKey, CNContactPhoneNumbersKey, CNContactEmailAddressesKey, CNContactPostalAddressesKey, CNContactBirthdayKey, CNContactImageDataKey] as [CNKeyDescriptor]
+            let request = CNContactFetchRequest(keysToFetch: keys)
+            try? contactStore.enumerateContacts(with: request) {
+                (cnContact, _) in
+                var contact = Contact()
+                if self.favoritesIdentifiers.contains(cnContact.identifier) {
+                    if self.emergencyContactsIdentifiers.contains(cnContact.identifier) {
+                        contact.update(from: cnContact, isEmergencyContact: true, isFavorite: true)
                     } else {
-                        if self.emergencyContactsIdentifiers.contains(cnContact.identifier) {
-                            contact.update(from: cnContact, isEmergencyContact: true, isFavorite: false)
+                        contact.update(from: cnContact, isEmergencyContact: false, isFavorite: true)
+                    }
+                } else {
+                    if self.emergencyContactsIdentifiers.contains(cnContact.identifier) {
+                        contact.update(from: cnContact, isEmergencyContact: true, isFavorite: false)
+                    } else {
+                        contact.update(from: cnContact, isEmergencyContact: false, isFavorite: false)
+                    }
+                }
+                DispatchQueue.main.async {
+                    self.contacts.append(contact)
+                }
+            }
+            sortContacts()
+        } else if CNContactStore.authorizationStatus(for: .contacts) == .notDetermined {
+            contactStore.requestAccess(for: .contacts) { success, error in
+                if success {
+                    let keys = [CNContactIdentifierKey, CNContactGivenNameKey, CNContactFamilyNameKey, CNContactOrganizationNameKey, CNContactPhoneNumbersKey, CNContactEmailAddressesKey, CNContactPostalAddressesKey, CNContactBirthdayKey, CNContactImageDataKey] as [CNKeyDescriptor]
+                    let request = CNContactFetchRequest(keysToFetch: keys)
+                    try? contactStore.enumerateContacts(with: request) {
+                        (cnContact, _) in
+                        var contact = Contact()
+                        if self.favoritesIdentifiers.contains(cnContact.identifier) {
+                            if self.emergencyContactsIdentifiers.contains(cnContact.identifier) {
+                                contact.update(from: cnContact, isEmergencyContact: true, isFavorite: true)
+                            } else {
+                                contact.update(from: cnContact, isEmergencyContact: false, isFavorite: true)
+                            }
                         } else {
-                            contact.update(from: cnContact, isEmergencyContact: false, isFavorite: false)
+                            if self.emergencyContactsIdentifiers.contains(cnContact.identifier) {
+                                contact.update(from: cnContact, isEmergencyContact: true, isFavorite: false)
+                            } else {
+                                contact.update(from: cnContact, isEmergencyContact: false, isFavorite: false)
+                            }
+                        }
+                        DispatchQueue.main.async {
+                            self.contacts.append(contact)
                         }
                     }
                     DispatchQueue.main.async {
-                        self.contacts.append(contact)
+                        self.sortContacts()
+                    }
+                } else {
+                    DispatchQueue.main.async {
+                        self.isNotAuthorized = true
                     }
                 }
-                DispatchQueue.main.async {
-                    self.sortContacts()
-                }
-            } else {
-                DispatchQueue.main.async {
-                    self.isNotAuthorized = true
-                }
             }
+        } else if CNContactStore.authorizationStatus(for: .contacts) == .denied {
+            self.isNotAuthorized = true
         }
+        
     }
     
     func saveMyCard(_ contact: Contact) {
