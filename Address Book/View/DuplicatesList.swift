@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Contacts
 
 struct DuplicatesList: View {
     @EnvironmentObject var contactStore: ContactStore
@@ -74,6 +75,7 @@ struct DuplicatesList: View {
                 }
                 .confirmationDialog("Merge Duplicates?", isPresented: $isMergeAlertPresented) {
                     Button("Merge All") {
+                        let store = CNContactStore()
                         for duplicates in contactStore.duplicates {
                             var newContact = Contact()
                             for contact in duplicates {
@@ -100,6 +102,28 @@ struct DuplicatesList: View {
                                 }
                                 contactStore.delete(contact)
                             }
+                            let cnContact = CNMutableContact()
+                            newContact.identifier = cnContact.identifier
+                            cnContact.givenName = newContact.firstName
+                            cnContact.familyName = newContact.lastName ?? ""
+                            cnContact.organizationName = newContact.company ?? ""
+                            for phoneNumber in newContact.phoneNumbers.dropLast().filter({
+                                !$0.value.isTotallyEmpty
+                            }) {
+                                cnContact.phoneNumbers.append(CNLabeledValue(label: phoneNumber.label, value: CNPhoneNumber(stringValue: phoneNumber.value)))
+                            }
+                            for emailAddress in newContact.emailAddresses.dropLast().filter({
+                                !$0.value.isTotallyEmpty
+                            }) {
+                                cnContact.emailAddresses.append(CNLabeledValue(label: emailAddress.label, value: emailAddress.value as NSString))
+                            }
+                            if let birthday = newContact.birthday {
+                                cnContact.birthday = Calendar.current.dateComponents([.year, .month, .day], from: birthday)
+                            }
+                            cnContact.imageData = newContact.imageData
+                            let saveRequest = CNSaveRequest()
+                            saveRequest.add(cnContact, toContainerWithIdentifier: nil)
+                            try? store.execute(saveRequest)
                             contactStore.contacts.append(newContact)
                             contactStore.sortContacts()
                         }

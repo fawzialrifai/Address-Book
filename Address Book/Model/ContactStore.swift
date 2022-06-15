@@ -196,6 +196,60 @@ extension ContactStore {
         } catch {}
     }
     
+    func updateContact(_ contact: Contact) {
+        let store = CNContactStore()
+        let keys = [CNContactIdentifierKey, CNContactGivenNameKey, CNContactFamilyNameKey, CNContactOrganizationNameKey, CNContactPhoneNumbersKey, CNContactEmailAddressesKey, CNContactPostalAddressesKey, CNContactBirthdayKey, CNContactImageDataKey] as [CNKeyDescriptor]
+        if let cnContact = try? store.unifiedContact(withIdentifier: contact.identifier, keysToFetch: keys).mutableCopy() as? CNMutableContact {
+            cnContact.givenName = contact.firstName
+            cnContact.familyName = contact.lastName ?? ""
+            cnContact.organizationName = contact.company ?? ""
+            cnContact.phoneNumbers.removeAll()
+            for phoneNumber in contact.phoneNumbers.dropLast().filter({
+                !$0.value.isTotallyEmpty
+            }) {
+                cnContact.phoneNumbers.append(CNLabeledValue(label: phoneNumber.label, value: CNPhoneNumber(stringValue: phoneNumber.value)))
+            }
+            cnContact.emailAddresses.removeAll()
+            for emailAddress in contact.emailAddresses.dropLast().filter({
+                !$0.value.isTotallyEmpty
+            }) {
+                cnContact.emailAddresses.append(CNLabeledValue(label: emailAddress.label, value: emailAddress.value as NSString))
+            }
+            if let birthday = contact.birthday {
+                cnContact.birthday = Calendar.current.dateComponents([.year, .month, .day], from: birthday)
+            }
+            cnContact.imageData = contact.imageData
+            let saveRequest = CNSaveRequest()
+            saveRequest.update(cnContact)
+            try? store.execute(saveRequest)
+        }
+    }
+    
+    func addContact(_ contact: Contact) {
+        let cnContact = CNMutableContact()
+        cnContact.givenName = contact.firstName
+        cnContact.familyName = contact.lastName ?? ""
+        cnContact.organizationName = contact.company ?? ""
+        for phoneNumber in contact.phoneNumbers.dropLast().filter({
+            !$0.value.isTotallyEmpty
+        }) {
+            cnContact.phoneNumbers.append(CNLabeledValue(label: phoneNumber.label, value: CNPhoneNumber(stringValue: phoneNumber.value)))
+        }
+        for emailAddress in contact.emailAddresses.dropLast().filter({
+            !$0.value.isTotallyEmpty
+        }) {
+            cnContact.emailAddresses.append(CNLabeledValue(label: emailAddress.label, value: emailAddress.value as NSString))
+        }
+        if let birthday = contact.birthday {
+            cnContact.birthday = Calendar.current.dateComponents([.year, .month, .day], from: birthday)
+        }
+        cnContact.imageData = contact.imageData
+        let store = CNContactStore()
+        let saveRequest = CNSaveRequest()
+        saveRequest.add(cnContact, toContainerWithIdentifier: nil)
+        try? store.execute(saveRequest)
+    }
+    
     func fetchContacts() {
         let contactStore = CNContactStore()
         if CNContactStore.authorizationStatus(for: .contacts) == .authorized {

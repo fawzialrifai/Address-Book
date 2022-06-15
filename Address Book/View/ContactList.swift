@@ -7,6 +7,7 @@
 
 import SwiftUI
 import MapKit
+import Contacts
 
 struct ContactList: View {
     @EnvironmentObject var contactStore: ContactStore
@@ -133,6 +134,29 @@ struct Contacts: View {
                 var newContact = try JSONDecoder().decode(Contact.self, from: data)
                 newContact.id = UUID()
                 isCodeScannerPresented = false
+                let cnContact = CNMutableContact()
+                newContact.identifier = cnContact.identifier
+                cnContact.givenName = newContact.firstName
+                cnContact.familyName = newContact.lastName ?? ""
+                cnContact.organizationName = newContact.company ?? ""
+                for phoneNumber in newContact.phoneNumbers.dropLast().filter({
+                    !$0.value.isTotallyEmpty
+                }) {
+                    cnContact.phoneNumbers.append(CNLabeledValue(label: phoneNumber.label, value: CNPhoneNumber(stringValue: phoneNumber.value)))
+                }
+                for emailAddress in newContact.emailAddresses.dropLast().filter({
+                    !$0.value.isTotallyEmpty
+                }) {
+                    cnContact.emailAddresses.append(CNLabeledValue(label: emailAddress.label, value: emailAddress.value as NSString))
+                }
+                if let birthday = newContact.birthday {
+                    cnContact.birthday = Calendar.current.dateComponents([.year, .month, .day], from: birthday)
+                }
+                cnContact.imageData = newContact.imageData
+                let store = CNContactStore()
+                let saveRequest = CNSaveRequest()
+                saveRequest.add(cnContact, toContainerWithIdentifier: nil)
+                try? store.execute(saveRequest)
                 contactStore.contacts.insert(newContact, at: contactStore.indexFor(newContact))
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     withAnimation {

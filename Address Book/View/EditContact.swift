@@ -241,32 +241,7 @@ struct EditContact: View {
                             if contact.isMyCard {
                                 contactStore.saveMyCard(contactStore.contacts[index])
                             } else {
-                                let store = CNContactStore()
-                                let keys = [CNContactIdentifierKey, CNContactGivenNameKey, CNContactFamilyNameKey, CNContactOrganizationNameKey, CNContactPhoneNumbersKey, CNContactEmailAddressesKey, CNContactPostalAddressesKey, CNContactBirthdayKey, CNContactImageDataKey] as [CNKeyDescriptor]
-                                if let cnContact = try? store.unifiedContact(withIdentifier: contact.identifier, keysToFetch: keys).mutableCopy() as? CNMutableContact {
-                                    cnContact.givenName = firstName
-                                    cnContact.familyName = lastName
-                                    cnContact.organizationName = company
-                                    cnContact.phoneNumbers.removeAll()
-                                    for phoneNumber in phoneNumbers.dropLast().filter({
-                                        !$0.value.isTotallyEmpty
-                                    }) {
-                                        cnContact.phoneNumbers.append(CNLabeledValue(label: phoneNumber.label, value: CNPhoneNumber(stringValue: phoneNumber.value)))
-                                    }
-                                    cnContact.emailAddresses.removeAll()
-                                    for emailAddress in emailAddresses.dropLast().filter({
-                                        !$0.value.isTotallyEmpty
-                                    }) {
-                                        cnContact.emailAddresses.append(CNLabeledValue(label: emailAddress.label, value: emailAddress.value as NSString))
-                                    }
-                                    if let birthday = birthday {
-                                        cnContact.birthday = Calendar.current.dateComponents([.year, .month, .day], from: birthday)
-                                    }
-                                    cnContact.imageData = imageData
-                                    let saveRequest = CNSaveRequest()
-                                    saveRequest.update(cnContact)
-                                    try? store.execute(saveRequest)
-                                }
+                                contactStore.updateContact(contactStore.contacts[index])
                             }
                         }
                     }

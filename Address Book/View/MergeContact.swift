@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Contacts
 
 struct MergeContact: View {
     @Environment(\.dismiss) private var dismiss
@@ -176,6 +177,29 @@ struct MergeContact: View {
                 for contact in duplicates {
                     contactStore.delete(contact)
                 }
+                let cnContact = CNMutableContact()
+                mergedContact.identifier = cnContact.identifier
+                cnContact.givenName = mergedContact.firstName
+                cnContact.familyName = mergedContact.lastName ?? ""
+                cnContact.organizationName = mergedContact.company ?? ""
+                for phoneNumber in mergedContact.phoneNumbers.dropLast().filter({
+                    !$0.value.isTotallyEmpty
+                }) {
+                    cnContact.phoneNumbers.append(CNLabeledValue(label: phoneNumber.label, value: CNPhoneNumber(stringValue: phoneNumber.value)))
+                }
+                for emailAddress in mergedContact.emailAddresses.dropLast().filter({
+                    !$0.value.isTotallyEmpty
+                }) {
+                    cnContact.emailAddresses.append(CNLabeledValue(label: emailAddress.label, value: emailAddress.value as NSString))
+                }
+                if let birthday = mergedContact.birthday {
+                    cnContact.birthday = Calendar.current.dateComponents([.year, .month, .day], from: birthday)
+                }
+                cnContact.imageData = mergedContact.imageData
+                let store = CNContactStore()
+                let saveRequest = CNSaveRequest()
+                saveRequest.add(cnContact, toContainerWithIdentifier: nil)
+                try? store.execute(saveRequest)
                 contactStore.contacts.append(mergedContact)
                 contactStore.sortContacts()
                 dismiss()
