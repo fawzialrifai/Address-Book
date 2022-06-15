@@ -108,7 +108,7 @@ extension Contact {
         }
     }
     
-    mutating func update(from cnContact: CNContact, isEmergencyContact: Bool, isFavorite: Bool) {
+    mutating func update(from cnContact: CNContact, isEmergencyContact: Bool, isFavorite: Bool, isHidden: Bool) {
         identifier = cnContact.identifier
         firstName = cnContact.givenName
         lastName = cnContact.familyName.isTotallyEmpty ? nil : cnContact.familyName
@@ -122,6 +122,7 @@ extension Contact {
         birthday = cnContact.birthday?.date
         self.isEmergencyContact = isEmergencyContact
         self.isFavorite = isFavorite
+        self.isHidden = isHidden
         imageData = cnContact.imageData
     }
     

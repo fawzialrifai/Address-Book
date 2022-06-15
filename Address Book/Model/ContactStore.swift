@@ -31,8 +31,18 @@ import LocalAuthentication
         }
     }
     
+    @Published var hiddenContactsIdentifiers: [String] = [] {
+        didSet {
+            do {
+                let encodedData = try JSONEncoder().encode(hiddenContactsIdentifiers)
+                try encodedData.write(to: hiddenContactsPath, options: .atomic)
+            } catch {}
+        }
+    }
+    
     private var myCardPath = FileManager.documentDirectory.appendingPathComponent("My Card")
     private var favoritesPath = FileManager.documentDirectory.appendingPathComponent("Favorites")
+    private var hiddenContactsPath = FileManager.documentDirectory.appendingPathComponent("Hidden")
     private var emergencyContactsPath = FileManager.documentDirectory.appendingPathComponent("Emergency Contacts")
     @Published var filterText = ""
     @Published var isFirstLettersGridPresented = false
@@ -50,6 +60,7 @@ import LocalAuthentication
         fetchMyCard()
         loadEmergencyContactsIdentifiers()
         loadFavoritesIdentifiers()
+        loadHiddenContactsIdentifiers()
         fetchContacts()
     }
     
@@ -189,6 +200,13 @@ extension ContactStore {
         } catch {}
     }
     
+    func loadHiddenContactsIdentifiers() {
+        do {
+            let encodedHiddenContactsIdentifiers = try Data(contentsOf: hiddenContactsPath)
+            hiddenContactsIdentifiers = try JSONDecoder().decode([String].self, from: encodedHiddenContactsIdentifiers)
+        } catch {}
+    }
+    
     func loadFavoritesIdentifiers() {
         do {
             let encodedEmergencyContacts = try Data(contentsOf: emergencyContactsPath)
@@ -258,19 +276,7 @@ extension ContactStore {
             try? contactStore.enumerateContacts(with: request) {
                 (cnContact, _) in
                 var contact = Contact()
-                if self.favoritesIdentifiers.contains(cnContact.identifier) {
-                    if self.emergencyContactsIdentifiers.contains(cnContact.identifier) {
-                        contact.update(from: cnContact, isEmergencyContact: true, isFavorite: true)
-                    } else {
-                        contact.update(from: cnContact, isEmergencyContact: false, isFavorite: true)
-                    }
-                } else {
-                    if self.emergencyContactsIdentifiers.contains(cnContact.identifier) {
-                        contact.update(from: cnContact, isEmergencyContact: true, isFavorite: false)
-                    } else {
-                        contact.update(from: cnContact, isEmergencyContact: false, isFavorite: false)
-                    }
-                }
+                contact.update(from: cnContact, isEmergencyContact: self.emergencyContactsIdentifiers.contains(cnContact.identifier), isFavorite: self.favoritesIdentifiers.contains(cnContact.identifier), isHidden: self.hiddenContactsIdentifiers.contains(cnContact.identifier))
                 DispatchQueue.main.async {
                     self.contacts.append(contact)
                 }
@@ -284,19 +290,7 @@ extension ContactStore {
                     try? contactStore.enumerateContacts(with: request) {
                         (cnContact, _) in
                         var contact = Contact()
-                        if self.favoritesIdentifiers.contains(cnContact.identifier) {
-                            if self.emergencyContactsIdentifiers.contains(cnContact.identifier) {
-                                contact.update(from: cnContact, isEmergencyContact: true, isFavorite: true)
-                            } else {
-                                contact.update(from: cnContact, isEmergencyContact: false, isFavorite: true)
-                            }
-                        } else {
-                            if self.emergencyContactsIdentifiers.contains(cnContact.identifier) {
-                                contact.update(from: cnContact, isEmergencyContact: true, isFavorite: false)
-                            } else {
-                                contact.update(from: cnContact, isEmergencyContact: false, isFavorite: false)
-                            }
-                        }
+                        contact.update(from: cnContact, isEmergencyContact: self.emergencyContactsIdentifiers.contains(cnContact.identifier), isFavorite: self.favoritesIdentifiers.contains(cnContact.identifier), isHidden: self.hiddenContactsIdentifiers.contains(cnContact.identifier))
                         DispatchQueue.main.async {
                             self.contacts.append(contact)
                         }
@@ -393,12 +387,14 @@ extension ContactStore {
     func hideContact(_ contact: Contact) {
         if let index = contacts.firstIndex(of: contact) {
             contacts[index].isHidden = true
+            hiddenContactsIdentifiers.append(contact.identifier)
         }
     }
     
     func unhideContact(_ contact: Contact) {
         if let index = contacts.firstIndex(of: contact) {
             contacts[index].isHidden = false
+            hiddenContactsIdentifiers.removeAll(where: { $0 == contact.identifier })
         }
     }
     
