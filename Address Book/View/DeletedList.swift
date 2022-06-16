@@ -12,6 +12,7 @@ struct DeletedList: View {
     @Environment (\.scenePhase) private var scenePhase
     @EnvironmentObject var contactStore: ContactStore
     @State private var isFolderLocked = true
+    @State private var isDeleteAlertPresented = false
     var body: some View {
         ZStack {
             Color.contactsBackgroundColor
@@ -43,6 +44,38 @@ struct DeletedList: View {
                                 ContactRow(contact: contact)
                             }
                         }
+                    }
+                    .safeAreaInset(edge: .bottom) {
+                        VStack(spacing: 16) {
+                            Button {
+                                isDeleteAlertPresented = true
+                            } label: {
+                                Label("Delete All Permanently", systemImage: "trash.fill")
+                                    .padding()
+                                    .frame(maxWidth: .infinity)
+                                    .foregroundColor(.white)
+                                    .background(.red)
+                                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                            }
+                            .padding([.horizontal, .top], 20)
+                            Button("Restore All") {
+                                for contact in contactStore.deletedContacts {
+                                    contactStore.restore(contact)
+                                }
+                            }
+                            .padding(.bottom, 20)
+                        }
+                        .background(Material.thinMaterial)
+                        .shadow(radius: 0.5)
+                    }
+                    .confirmationDialog("Merge Duplicates?", isPresented: $isDeleteAlertPresented) {
+                        Button("Delete All Permanently") {
+                            for contact in contactStore.deletedContacts {
+                                contactStore.permanentlyDelete(contact)
+                            }
+                        }
+                    } message: {
+                        Text("These contacts will be deleted permanently, This action cannot be undone.")
                     }
                 }
             }

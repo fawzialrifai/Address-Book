@@ -176,7 +176,7 @@ struct MergeContact: View {
                 for contact in duplicates {
                     contactStore.moveToDeletedList(contact)
                 }
-                contactStore.addContact(mergedContact)
+                contactStore.add(mergedContact)
                 dismiss()
             }
         } message: {

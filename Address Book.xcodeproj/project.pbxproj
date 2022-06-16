@@ -36,6 +36,7 @@
 		58725AD628590BA2004BF574 /* DuplicatesList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58725AD528590BA1004BF574 /* DuplicatesList.swift */; };
 		58725AD828594B11004BF574 /* MergeContact.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58725AD728594B11004BF574 /* MergeContact.swift */; };
 		587EB063285A98100047A5C9 /* DeletedList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 587EB062285A98100047A5C9 /* DeletedList.swift */; };
+		58DA70CA285B602900BEA685 /* CNContact-extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58DA70C9285B602900BEA685 /* CNContact-extension.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -69,6 +70,7 @@
 		58725AD528590BA1004BF574 /* DuplicatesList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicatesList.swift; sourceTree = "<group>"; };
 		58725AD728594B11004BF574 /* MergeContact.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MergeContact.swift; sourceTree = "<group>"; };
 		587EB062285A98100047A5C9 /* DeletedList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeletedList.swift; sourceTree = "<group>"; };
+		58DA70C9285B602900BEA685 /* CNContact-extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CNContact-extension.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -125,6 +127,7 @@
 			children = (
 				5825BDA92854ED6E0082069A /* FileManager-extension.swift */,
 				5825BDAB2854ED6E0082069A /* String-extension.swift */,
+				58DA70C9285B602900BEA685 /* CNContact-extension.swift */,
 				5825BDAA2854ED6E0082069A /* ShapeStyle-extension.swift */,
 			);
 			path = Extension;
@@ -251,6 +254,7 @@
 				5825BDD22854ED6F0082069A /* ImagePicker.swift in Sources */,
 				5825BDD72854ED6F0082069A /* QRCodeGenerator.swift in Sources */,
 				5825BDD92854ED6F0082069A /* EditableContactImage.swift in Sources */,
+				58DA70CA285B602900BEA685 /* CNContact-extension.swift in Sources */,
 				5825BDD42854ED6F0082069A /* CodeScanner.swift in Sources */,
 				5825BDD62854ED6F0082069A /* ScannerViewController.swift in Sources */,
 				5825BDD32854ED6F0082069A /* FirstLettersGrid.swift in Sources */,

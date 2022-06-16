@@ -80,9 +80,7 @@ struct Contacts: View {
             }
             .sheet(isPresented: $isNewContactViewPresented) {
                 NavigationView {
-                    EditContact(contact: Contact(), coordinateRegion: .constant(MKCoordinateRegion()), isEditingContact: .constant(false)) { newContact in
-                        UINotificationFeedbackGenerator().notificationOccurred(.success)
-                        contactStore.addContact(newContact)
+                    EditContact(contact: Contact()) { newContact in
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                             withAnimation {
                                 scrollViewProxy.scrollTo(newContact.id, anchor: .center)
@@ -133,7 +131,7 @@ struct Contacts: View {
                 var newContact = try JSONDecoder().decode(Contact.self, from: data)
                 newContact.id = UUID()
                 isCodeScannerPresented = false
-                contactStore.addContact(newContact)
+                contactStore.add(newContact)
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     withAnimation {
                         scrollViewProxy.scrollTo(newContact.id, anchor: .center)
@@ -197,9 +195,9 @@ struct MyCardSection: View {
         }
         .sheet(isPresented: $isSettingUpMyCard) {
             NavigationView {
-                EditContact(contact: Contact(isMyCard: true), coordinateRegion: .constant(MKCoordinateRegion()), isEditingContact: .constant(false)) { newContact in
+                EditContact(contact: Contact(isMyCard: true), isEditingContact: .constant(false)) { newContact in
                     UINotificationFeedbackGenerator().notificationOccurred(.success)
-                    contactStore.addContact(newContact)
+                    contactStore.add(newContact)
                 }
                 .navigationTitle("My Card")
                 .navigationBarTitleDisplayMode(.inline)

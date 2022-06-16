@@ -12,140 +12,137 @@ struct EditContact: View {
     @Environment(\.dismiss) private var dismiss
     var completeionHandler: (Contact) -> Void
     @EnvironmentObject var contactStore: ContactStore
-    @State private var firstName: String
-    @State private var lastName: String
-    @State private var company: String
-    @State private var phoneNumbers: [LabeledValue]
-    @State private var emailAddresses: [LabeledValue]
-    @Binding var coordinateRegion: MKCoordinateRegion?
     @StateObject var locationManager: LocationManager
-    @State private var birthday: Date?
-    @State private var notes: String
-    @State private var imageData: Data?
-    @State private var isLabelPickerPresented = false
-    @State private var isEmailLabelPickerPresented = false
-    @State private var selectedIndex: Int = 0
-    var image: Image? {
-        guard let imageData = imageData else {
-            return Image(systemName: "person.crop.circle.fill")
-        }
-        if let uiImage = UIImage(data: imageData) {
-            return Image(uiImage: uiImage)
-        } else {
-            return nil
-        }
-    }
-    @Binding var isEditingContact: Bool
-    var isContactEdited: Bool {
-        contact.firstName != firstName ||
-        contact.lastName != lastName.optional ||
-        contact.company != company.optional ||
-        contact.phoneNumbers != phoneNumbers.dropLast().filter({ !$0.value.isTotallyEmpty }) ||
-        contact.emailAddresses != emailAddresses.dropLast().filter({ !$0.value.isTotallyEmpty }) ||
-        contact.latitude != locationManager.coordinateRegion?.center.latitude ||
-        contact.longitude != locationManager.coordinateRegion?.center.longitude ||
-        contact.birthday != birthday ||
-        contact.notes != notes.optional ||
-        contact.imageData != imageData
-    }
     var contact: Contact
+    @State private var newData: Contact
+    @State private var isPhoneLabelPickerPresented = false
+    @State private var isEmailLabelPickerPresented = false
+    @State private var selectedLabel: Int = 0
+    @Binding var isEditingContact: Bool
     var body: some View {
         Form {
-            Section(header: EditableContactImage(imageData: $imageData)) {}
+            Section(header: EditableContactImage(imageData: $newData.imageData)) {}
             Section {
+                let lastName: Binding<String> = Binding {
+                    newData.lastName ?? ""
+                } set: {
+                    newData.lastName = $0
+                }
+                let company: Binding<String> = Binding {
+                    newData.company ?? ""
+                } set: {
+                    newData.company = $0
+                }
                 if contactStore.displayOrder == .firstNameLastName {
-                    TextField("First name", text: $firstName)
-                        .disableAutocorrection(true)
-                    TextField("Last name", text: $lastName)
-                        .disableAutocorrection(true)
+                    TextField("First name", text: $newData.firstName)
+                        .textContentType(.givenName)
+                    TextField("Last name", text: lastName)
+                        .textContentType(.familyName)
                 } else {
-                    TextField("Last name", text: $lastName)
-                        .disableAutocorrection(true)
-                    TextField("First name", text: $firstName)
-                        .disableAutocorrection(true)
+                    TextField("Last name", text: lastName)
+                        .textContentType(.familyName)
+                    TextField("First name", text: $newData.firstName)
+                        .textContentType(.givenName)
                 }
-                TextField("Company", text: $company)
-                    .disableAutocorrection(true)
+                TextField("Company", text: company)
             }
+            .disableAutocorrection(true)
             Section {
-                ForEach(0 ..< phoneNumbers.count - 1, id: \.self) { index in
+                ForEach(Array(newData.phoneNumbers.dropLast().enumerated()), id: \.element.id) { item in
                     VStack(alignment: .leading, spacing: 0) {
-                        Button(phoneNumbers[index].label ?? "") {
-                            selectedIndex = index
-                            isLabelPickerPresented = true
+                        Button(item.element.label ?? "") {
+                            selectedLabel = item.offset
+                            isPhoneLabelPickerPresented = true
                         }
-                        .buttonStyle(BorderlessButtonStyle())
-                        TextField("Phone", text: $phoneNumbers[index].value)
+                        TextField("Phone number", text: $newData.phoneNumbers[item.offset].value)
                     }
                     .padding(.vertical, 8)
                 }
-                .onDelete(perform: removePhoneNumbers)
-                .onMove(perform: movePhoneNumbers)
+                .onMove {
+                    newData.movePhoneNumbers(at: $0, to: $1)
+                }
+                .onDelete {
+                    newData.removePhoneNumbers(at: $0)
+                }
                 HStack(spacing: 18) {
-                    Button(action: addPhoneNumber) {
+                    Button {
+                        UINotificationFeedbackGenerator().notificationOccurred(.success)
+                        withAnimation {
+                            newData.addNewPhoneNumber()
+                        }
+                    } label: {
                         Image(systemName: "plus.circle.fill")
                             .font(.title2)
                             .symbolRenderingMode(.multicolor)
                     }
-                    .buttonStyle(PlainButtonStyle())
                     VStack(alignment: .leading, spacing: 0) {
-                        Button(phoneNumbers[phoneNumbers.count - 1].label ?? "") {
-                            selectedIndex = phoneNumbers.count - 1
-                            isLabelPickerPresented = true
+                        Button(newData.phoneNumbers[newData.phoneNumbers.count - 1].label ?? "") {
+                            selectedLabel = newData.phoneNumbers.count - 1
+                            isPhoneLabelPickerPresented = true
                         }
-                        .buttonStyle(BorderlessButtonStyle())
-                        TextField("Phone", text: $phoneNumbers[phoneNumbers.count - 1].value)
-                            .keyboardType(.phonePad)
-                            .disableAutocorrection(true)
-                            .autocapitalization(.none)
+                        TextField("Phone number", text: $newData.phoneNumbers[newData.phoneNumbers.count - 1].value)
                     }
                 }
                 .padding(.vertical, 8)
             }
+            .buttonStyle(BorderlessButtonStyle())
+            .disableAutocorrection(true)
+            .keyboardType(UIKit.UIKeyboardType.phonePad)
+            .textContentType(.telephoneNumber)
             Section {
-                ForEach(0 ..< emailAddresses.count - 1, id: \.self) { index in
+                ForEach(Array(newData.emailAddresses.dropLast().enumerated()), id: \.element.id) { item in
                     VStack(alignment: .leading, spacing: 0) {
-                        Button(emailAddresses[index].label ?? "") {
-                            selectedIndex = index
+                        Button(item.element.label ?? "") {
+                            selectedLabel = item.offset
                             isEmailLabelPickerPresented = true
                         }
-                        .buttonStyle(BorderlessButtonStyle())
-                        TextField("Email", text: $emailAddresses[index].value)
+                        TextField("Email address", text: $newData.emailAddresses[item.offset].value)
                     }
                     .padding(.vertical, 8)
                 }
-                .onDelete(perform: removeEmailAddresses)
-                .onMove(perform: moveEmailAddresses)
+                .onMove {
+                    newData.moveEmailAddresses(at: $0, to: $1)
+                }
+                .onDelete {
+                    newData.removeEmailAddresses(at: $0)
+                }
                 HStack(spacing: 18) {
-                    Button(action: addEmailAddress) {
+                    Button {
+                        UINotificationFeedbackGenerator().notificationOccurred(.success)
+                        withAnimation {
+                            newData.addNewEmailAddress()
+                        }
+                    } label: {
                         Image(systemName: "plus.circle.fill")
                             .font(.title2)
                             .symbolRenderingMode(.multicolor)
                     }
-                    .buttonStyle(PlainButtonStyle())
                     VStack(alignment: .leading, spacing: 0) {
-                        Button(emailAddresses[emailAddresses.count - 1].label ?? "") {
-                            selectedIndex = emailAddresses.count - 1
+                        Button(newData.emailAddresses[newData.emailAddresses.count - 1].label ?? "") {
+                            selectedLabel = newData.emailAddresses.count - 1
                             isEmailLabelPickerPresented = true
                         }
-                        .buttonStyle(BorderlessButtonStyle())
-                        TextField("Email", text: $emailAddresses[emailAddresses.count - 1].value)
-                            .keyboardType(.emailAddress)
-                            .disableAutocorrection(true)
-                            .autocapitalization(.none)
+                        TextField("Email address", text: $newData.emailAddresses[newData.emailAddresses.count - 1].value)
                     }
                 }
                 .padding(.vertical, 8)
             }
+            .buttonStyle(BorderlessButtonStyle())
+            .textContentType(.emailAddress)
+            .keyboardType(.emailAddress)
+            .disableAutocorrection(true)
+            .autocapitalization(.none)
             Section {
                 let isMapPresented: Binding<Bool> = Binding {
                     locationManager.coordinateRegion != nil
                 } set: {
                     if $0 == true {
-                        locationManager.coordinateRegion = contact.coordinateRegion ?? MKCoordinateRegion()
+                        locationManager.coordinateRegion = newData.coordinateRegion ?? MKCoordinateRegion()
                         locationManager.requestLocation()
                     }
                     else {
+                        newData.latitude = nil
+                        newData.longitude = nil
                         locationManager.coordinateRegion = nil
                     }
                 }
@@ -153,12 +150,14 @@ struct EditContact: View {
                     locationManager.coordinateRegion ?? MKCoordinateRegion()
                 } set: {
                     locationManager.coordinateRegion = $0
+                    newData.latitude = $0.center.latitude
+                    newData.longitude = $0.center.longitude
                 }
                 Toggle("Location", isOn: isMapPresented)
                 if locationManager.coordinateRegion != nil {
                     ZStack {
                         Map(coordinateRegion: strongCoordinateRegion)
-                        image?
+                        newData.image?
                             .resizable()
                             .scaledToFill()
                             .foregroundStyle(.white, .gray)
@@ -173,173 +172,99 @@ struct EditContact: View {
             }
             Section {
                 let isDatePickerPresented: Binding<Bool> = Binding {
-                    birthday != nil
+                    newData.birthday != nil
                 } set: {
                     if $0 == true {
-                        birthday = contact.birthday ?? Date.now
+                        newData.birthday = contact.birthday ?? Date.now
                     }
                     else {
-                        birthday = nil
+                        newData.birthday = nil
                     }
                 }
                 let strongBirthday: Binding<Date> = Binding {
-                    birthday ?? Date.now
+                    newData.birthday ?? Date.now
                 } set: {
-                    birthday = $0
+                    newData.birthday = $0
                 }
-                Toggle("Birthday", isOn: isDatePickerPresented )
-                if birthday != nil {
+                Toggle("Birthday", isOn: isDatePickerPresented)
+                if newData.birthday != nil {
                     DatePicker("Date", selection: strongBirthday, displayedComponents: [.date])
                         .datePickerStyle(.graphical)
                 }
             }
             Section {
+                let notes: Binding<String> = Binding {
+                    newData.notes ?? ""
+                } set: {
+                    if $0.isTotallyEmpty {
+                        newData.notes = nil
+                    } else {
+                        newData.notes = $0
+                    }
+                }
                 ZStack(alignment: .topLeading) {
-                    if notes.isEmpty {
+                    if newData.notes == nil {
                         Text("Notes")
                             .opacity(0.25)
                             .padding(.top, 7)
                         
                     }
-                    TextEditor(text: $notes)
+                    TextEditor(text: notes)
                         .padding(.top, -1)
                         .padding(.leading, -5)
                         .frame(minHeight: 100)
                 }
             }
         }
-        .sheet(isPresented: $isLabelPickerPresented) {
-            LabelPicker(labeledValue: $phoneNumbers[selectedIndex])
-        }
-        .sheet(isPresented: $isEmailLabelPickerPresented) {
-            LabelPicker(labeledValue: $emailAddresses[selectedIndex])
-        }
         .environment(\.editMode, .constant(.active))
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
-                if isEditingContact {
-                    Button("Done") {
-                        UINotificationFeedbackGenerator().notificationOccurred(.success)
+                Button("Done") {
+                    UINotificationFeedbackGenerator().notificationOccurred(.success)
+                    if isEditingContact {
                         isEditingContact.toggle()
-                        if let index = contactStore.contacts.firstIndex(of: contact) {
-                            contactStore.contacts[index].firstName = firstName
-                            contactStore.contacts[index].lastName = lastName.isTotallyEmpty ? nil : lastName
-                            contactStore.contacts[index].company = company.isTotallyEmpty ? nil : company
-                            contactStore.contacts[index].phoneNumbers = phoneNumbers.dropLast().filter({
-                                !$0.value.isTotallyEmpty
-                            })
-                            contactStore.contacts[index].emailAddresses = emailAddresses.dropLast().filter({
-                                !$0.value.isTotallyEmpty
-                            })
-                            contactStore.contacts[index].latitude = locationManager.coordinateRegion?.center.latitude
-                            contactStore.contacts[index].longitude = locationManager.coordinateRegion?.center.longitude
-                            coordinateRegion = locationManager.coordinateRegion ?? MKCoordinateRegion()
-                            contactStore.contacts[index].birthday = birthday
-                            contactStore.contacts[index].notes = notes.isTotallyEmpty ? nil : notes
-                            contactStore.contacts[index].imageData = imageData
-                            if contact.isMyCard {
-                                contactStore.saveMyCard(contactStore.contacts[index])
-                            } else {
-                                contactStore.updateContact(contactStore.contacts[index])
-                            }
-                        }
-                    }
-                    .disabled(firstName.isTotallyEmpty || !isContactEdited)
-                } else {
-                    Button("Done") {
+                        contactStore.update(contact, with: newData)
+                    } else {
                         dismiss()
-                        completeionHandler(newContact())
+                        contactStore.add(newData)
+                        completeionHandler(newData)
                     }
-                    .disabled(firstName.isTotallyEmpty)
                 }
+                .disabled(newData.firstName.isTotallyEmpty || contact == newData)
             }
-            ToolbarItem(placement: .navigationBarLeading) {
-                if isEditingContact {
-                    Button("Cancel") {
+            ToolbarItem(placement: .cancellationAction) {
+                Button("Cancel") {
+                    if isEditingContact {
                         UISelectionFeedbackGenerator().selectionChanged()
                         isEditingContact.toggle()
+                    } else {
+                        dismiss()
                     }
-                } else {
-                    Button("Cancel", action: dismiss.callAsFunction)
                 }
-                
             }
         }
+        .sheet(isPresented: $isPhoneLabelPickerPresented) {
+            LabelPicker(labeledValue: $newData.phoneNumbers[selectedLabel])
+        }
+        .sheet(isPresented: $isEmailLabelPickerPresented) {
+            LabelPicker(labeledValue: $newData.emailAddresses[selectedLabel])
+        }
     }
-    init(contact: Contact, coordinateRegion: Binding<MKCoordinateRegion?>, isEditingContact: Binding<Bool>, completeionHandler: @escaping (Contact) -> Void) {
+    
+    init(contact: Contact, isEditingContact: Binding<Bool> = .constant(false), completeionHandler: @escaping (Contact) -> Void = {_ in}) {
         self.contact = contact
-        _imageData = State(initialValue: contact.imageData)
-        _firstName = State(initialValue: contact.firstName)
-        _lastName = State(initialValue: contact.lastName ?? "")
-        _company = State(initialValue: contact.company ?? "")
-        _phoneNumbers = State(initialValue: contact.phoneNumbers + [LabeledValue(type: .phone)])
-        _emailAddresses = State(initialValue: contact.emailAddresses + [LabeledValue(type: .email)])
-        _notes = State(initialValue: contact.notes ?? "")
-        _birthday = State(initialValue: contact.birthday)
-        _locationManager = StateObject(wrappedValue: LocationManager(coordinateRegion: contact.coordinateRegion))
-        _coordinateRegion = coordinateRegion
-        _isEditingContact = isEditingContact
+        self._isEditingContact = isEditingContact
         self.completeionHandler = completeionHandler
+        self.contact.phoneNumbers.append(LabeledValue(type: .phone))
+        self.contact.emailAddresses.append(LabeledValue(type: .email))
+        self._newData = State(initialValue: self.contact)
+        self._locationManager = StateObject(wrappedValue: LocationManager(coordinateRegion: contact.coordinateRegion))
     }
-    func addPhoneNumber() {
-        UINotificationFeedbackGenerator().notificationOccurred(.success)
-        withAnimation {
-            phoneNumbers.append(LabeledValue(type: .phone))
-        }
-    }
-    func addEmailAddress() {
-        UINotificationFeedbackGenerator().notificationOccurred(.success)
-        withAnimation {
-            emailAddresses.append(LabeledValue(type: .email))
-        }
-    }
-    func removePhoneNumbers(at offsets: IndexSet) {
-        phoneNumbers.remove(atOffsets: offsets)
-    }
-    func movePhoneNumbers(at offsets: IndexSet, to index: Int) {
-        phoneNumbers.move(fromOffsets: offsets, toOffset: index)
-    }
-    func removeEmailAddresses(at offsets: IndexSet) {
-        emailAddresses.remove(atOffsets: offsets)
-    }
-    func moveEmailAddresses(at offsets: IndexSet, to index: Int) {
-        emailAddresses.move(fromOffsets: offsets, toOffset: index)
-    }
-    func removePhoneNumber(at index: Int) {
-        UINotificationFeedbackGenerator().notificationOccurred(.success)
-        _ = withAnimation {
-            phoneNumbers.remove(at: index)
-        }
-    }
-    func removeEmailAddress(at index: Int) {
-        UINotificationFeedbackGenerator().notificationOccurred(.success)
-        _ = withAnimation {
-            emailAddresses.remove(at: index)
-        }
-    }
-    func newContact() -> Contact {
-        var contact = Contact()
-        contact.isMyCard = self.contact.isMyCard
-        contact.firstName = firstName
-        contact.lastName = lastName.isTotallyEmpty ? nil : lastName
-        contact.company = company.isTotallyEmpty ? nil : company
-        contact.phoneNumbers = phoneNumbers.dropLast().filter({
-            !$0.value.isTotallyEmpty
-        })
-        contact.emailAddresses = emailAddresses.dropLast().filter({
-            !$0.value.isTotallyEmpty
-        })
-        contact.latitude = locationManager.coordinateRegion?.center.latitude
-        contact.longitude = locationManager.coordinateRegion?.center.longitude
-        contact.birthday = birthday
-        contact.notes = notes.isTotallyEmpty ? nil : notes
-        contact.imageData = imageData
-        return contact
-    }
+    
 }
 
 struct EditContact_Previews: PreviewProvider {
     static var previews: some View {
-        EditContact(contact: .example, coordinateRegion: .constant(MKCoordinateRegion()), isEditingContact: .constant(true), completeionHandler: {_ in})
+        EditContact(contact: .example, isEditingContact: .constant(true), completeionHandler: {_ in})
     }
 }

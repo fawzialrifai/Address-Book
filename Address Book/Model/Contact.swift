@@ -109,22 +109,23 @@ extension Contact {
         }
     }
     
-    mutating func update(from cnContact: CNContact, isEmergencyContact: Bool, isFavorite: Bool, isHidden: Bool) {
-        identifier = cnContact.identifier
-        firstName = cnContact.givenName
-        lastName = cnContact.familyName.isTotallyEmpty ? nil : cnContact.familyName
-        company = cnContact.organizationName.isTotallyEmpty ? nil : cnContact.organizationName
-        for emailAddress in cnContact.emailAddresses {
-            emailAddresses.append(LabeledValue(label: CNLabeledValue<NSString>.localizedString(forLabel: emailAddress.label ?? ""), value: emailAddress.value as String, type: .email))
-        }
-        for phoneNumber in cnContact.phoneNumbers {
-            phoneNumbers.append(LabeledValue(label: CNLabeledValue<CNPhoneNumber>.localizedString(forLabel: phoneNumber.label ?? ""), value: phoneNumber.value.stringValue, type: .phone))
-        }
-        birthday = cnContact.birthday?.date
-        self.isEmergencyContact = isEmergencyContact
-        self.isFavorite = isFavorite
-        self.isHidden = isHidden
-        imageData = cnContact.imageData
+    mutating func addNewPhoneNumber() {
+        phoneNumbers.append(LabeledValue(type: .phone))
+    }
+    mutating func movePhoneNumbers(at offsets: IndexSet, to index: Int) {
+        phoneNumbers.move(fromOffsets: offsets, toOffset: index)
+    }
+    mutating func removePhoneNumbers(at offsets: IndexSet) {
+        phoneNumbers.remove(atOffsets: offsets)
+    }
+    mutating func addNewEmailAddress() {
+        emailAddresses.append(LabeledValue(type: .email))
+    }
+    mutating func moveEmailAddresses(at offsets: IndexSet, to index: Int) {
+        emailAddresses.move(fromOffsets: offsets, toOffset: index)
+    }
+    mutating func removeEmailAddresses(at offsets: IndexSet) {
+        emailAddresses.remove(atOffsets: offsets)
     }
     
 }

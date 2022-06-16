@@ -67,7 +67,7 @@ struct DuplicatesList: View {
                                 .background(.blue)
                                 .clipShape(RoundedRectangle(cornerRadius: 10))
                         }
-                        .padding(24)
+                        .padding(20)
                     }
                     .background(Material.thinMaterial)
                     .shadow(radius: 0.5)
@@ -100,7 +100,7 @@ struct DuplicatesList: View {
                                 }
                                 contactStore.moveToDeletedList(contact)
                             }
-                            contactStore.addContact(newContact)
+                            contactStore.add(newContact)
                         }
                     }
                 } message: {

@@ -249,36 +249,57 @@ extension ContactStore {
         } catch {}
     }
     
-    func updateContact(_ contact: Contact) {
-        let store = CNContactStore()
-        let keys = [CNContactIdentifierKey, CNContactGivenNameKey, CNContactFamilyNameKey, CNContactOrganizationNameKey, CNContactPhoneNumbersKey, CNContactEmailAddressesKey, CNContactPostalAddressesKey, CNContactBirthdayKey, CNContactImageDataKey] as [CNKeyDescriptor]
-        if let cnContact = try? store.unifiedContact(withIdentifier: contact.identifier, keysToFetch: keys).mutableCopy() as? CNMutableContact {
-            cnContact.givenName = contact.firstName
-            cnContact.familyName = contact.lastName ?? ""
-            cnContact.organizationName = contact.company ?? ""
-            cnContact.phoneNumbers.removeAll()
-            for phoneNumber in contact.phoneNumbers.dropLast().filter({
-                !$0.value.isTotallyEmpty
-            }) {
-                cnContact.phoneNumbers.append(CNLabeledValue(label: phoneNumber.label, value: CNPhoneNumber(stringValue: phoneNumber.value)))
+    func update(_ contact: Contact, with newData: Contact) {
+        var contact = contact
+        contact.phoneNumbers = contact.phoneNumbers.dropLast().filter({ !$0.value.isTotallyEmpty })
+        contact.emailAddresses = contact.emailAddresses.dropLast().filter({ !$0.value.isTotallyEmpty })
+        var newData = newData
+        newData.phoneNumbers = newData.phoneNumbers.dropLast().filter({ !$0.value.isTotallyEmpty })
+        newData.emailAddresses = newData.emailAddresses.dropLast().filter({ !$0.value.isTotallyEmpty })
+        if let index = contacts.firstIndex(of: contact) {
+            contacts[index].firstName = newData.firstName
+            contacts[index].lastName = newData.lastName
+            contacts[index].company = newData.company
+            contacts[index].phoneNumbers = newData.phoneNumbers
+            contacts[index].emailAddresses = newData.emailAddresses
+            contacts[index].latitude = newData.latitude
+            contacts[index].longitude = newData.longitude
+            contacts[index].birthday = newData.birthday
+            contacts[index].notes = newData.notes
+            contacts[index].imageData = newData.imageData
+        }
+        if contact.isMyCard {
+            saveMyCard(newData)
+        } else {
+            let store = CNContactStore()
+            let keys = [CNContactIdentifierKey, CNContactGivenNameKey, CNContactFamilyNameKey, CNContactOrganizationNameKey, CNContactPhoneNumbersKey, CNContactEmailAddressesKey, CNContactPostalAddressesKey, CNContactBirthdayKey, CNContactImageDataKey] as [CNKeyDescriptor]
+            if let cnContact = try? store.unifiedContact(withIdentifier: contact.identifier, keysToFetch: keys).mutableCopy() as? CNMutableContact {
+                cnContact.givenName = newData.firstName
+                cnContact.familyName = newData.lastName ?? ""
+                cnContact.organizationName = newData.company ?? ""
+                cnContact.phoneNumbers.removeAll()
+                for phoneNumber in newData.phoneNumbers {
+                    cnContact.phoneNumbers.append(CNLabeledValue(label: phoneNumber.label, value: CNPhoneNumber(stringValue: phoneNumber.value)))
+                }
+                cnContact.emailAddresses.removeAll()
+                for emailAddress in newData.emailAddresses {
+                    cnContact.emailAddresses.append(CNLabeledValue(label: emailAddress.label, value: emailAddress.value as NSString))
+                }
+                if let birthday = newData.birthday {
+                    cnContact.birthday = Calendar.current.dateComponents([.year, .month, .day], from: birthday)
+                }
+                cnContact.imageData = newData.imageData
+                let saveRequest = CNSaveRequest()
+                saveRequest.update(cnContact)
+                try? store.execute(saveRequest)
             }
-            cnContact.emailAddresses.removeAll()
-            for emailAddress in contact.emailAddresses.dropLast().filter({
-                !$0.value.isTotallyEmpty
-            }) {
-                cnContact.emailAddresses.append(CNLabeledValue(label: emailAddress.label, value: emailAddress.value as NSString))
-            }
-            if let birthday = contact.birthday {
-                cnContact.birthday = Calendar.current.dateComponents([.year, .month, .day], from: birthday)
-            }
-            cnContact.imageData = contact.imageData
-            let saveRequest = CNSaveRequest()
-            saveRequest.update(cnContact)
-            try? store.execute(saveRequest)
         }
     }
     
-    func addContact(_ contact: Contact) {
+    func add(_ contact: Contact) {
+        var contact = contact
+        contact.phoneNumbers = contact.phoneNumbers.dropLast().filter({ !$0.value.isTotallyEmpty })
+        contact.emailAddresses = contact.emailAddresses.dropLast().filter({ !$0.value.isTotallyEmpty })
         if contact.isMyCard {
             contacts.insert(contact, at: indexFor(contact))
             saveMyCard(contact)
@@ -293,7 +314,7 @@ extension ContactStore {
             for phoneNumber in contact.phoneNumbers {
                 cnContact.phoneNumbers.append(CNLabeledValue(label: phoneNumber.label, value: CNPhoneNumber(stringValue: phoneNumber.value)))
             }
-            for emailAddress in contact.emailAddresses.dropLast() {
+            for emailAddress in contact.emailAddresses {
                 cnContact.emailAddresses.append(CNLabeledValue(label: emailAddress.label, value: emailAddress.value as NSString))
             }
             if let birthday = contact.birthday {
@@ -314,8 +335,10 @@ extension ContactStore {
         let request = CNContactFetchRequest(keysToFetch: keys)
         try? contactStore.enumerateContacts(with: request) {
             (cnContact, _) in
-            var contact = Contact()
-            contact.update(from: cnContact, isEmergencyContact: self.emergencyContactsIdentifiers.contains(cnContact.identifier), isFavorite: self.favoritesIdentifiers.contains(cnContact.identifier), isHidden: self.hiddenContactsIdentifiers.contains(cnContact.identifier))
+            var contact = cnContact.modernized
+            contact.isEmergencyContact = self.emergencyContactsIdentifiers.contains(cnContact.identifier)
+            contact.isFavorite = self.favoritesIdentifiers.contains(cnContact.identifier)
+            contact.isHidden = self.hiddenContactsIdentifiers.contains(cnContact.identifier)
             DispatchQueue.main.async {
                 self.contacts.append(contact)
             }
@@ -326,33 +349,12 @@ extension ContactStore {
     func fetchContacts() {
         let contactStore = CNContactStore()
         if CNContactStore.authorizationStatus(for: .contacts) == .authorized {
-            let keys = [CNContactIdentifierKey, CNContactGivenNameKey, CNContactFamilyNameKey, CNContactOrganizationNameKey, CNContactPhoneNumbersKey, CNContactEmailAddressesKey, CNContactPostalAddressesKey, CNContactBirthdayKey, CNContactImageDataKey] as [CNKeyDescriptor]
-            let request = CNContactFetchRequest(keysToFetch: keys)
-            try? contactStore.enumerateContacts(with: request) {
-                (cnContact, _) in
-                var contact = Contact()
-                contact.update(from: cnContact, isEmergencyContact: self.emergencyContactsIdentifiers.contains(cnContact.identifier), isFavorite: self.favoritesIdentifiers.contains(cnContact.identifier), isHidden: self.hiddenContactsIdentifiers.contains(cnContact.identifier))
-                DispatchQueue.main.async {
-                    self.contacts.append(contact)
-                }
-            }
+            reload()
             sortContacts()
         } else if CNContactStore.authorizationStatus(for: .contacts) == .notDetermined {
             contactStore.requestAccess(for: .contacts) { success, error in
                 if success {
-                    let keys = [CNContactIdentifierKey, CNContactGivenNameKey, CNContactFamilyNameKey, CNContactOrganizationNameKey, CNContactPhoneNumbersKey, CNContactEmailAddressesKey, CNContactPostalAddressesKey, CNContactBirthdayKey, CNContactImageDataKey] as [CNKeyDescriptor]
-                    let request = CNContactFetchRequest(keysToFetch: keys)
-                    try? contactStore.enumerateContacts(with: request) {
-                        (cnContact, _) in
-                        var contact = Contact()
-                        contact.update(from: cnContact, isEmergencyContact: self.emergencyContactsIdentifiers.contains(cnContact.identifier), isFavorite: self.favoritesIdentifiers.contains(cnContact.identifier), isHidden: self.hiddenContactsIdentifiers.contains(cnContact.identifier))
-                        DispatchQueue.main.async {
-                            self.contacts.append(contact)
-                        }
-                    }
-                    DispatchQueue.main.async {
-                        self.sortContacts()
-                    }
+                    self.reload()
                 } else {
                     DispatchQueue.main.async {
                         self.isNotAuthorized = true
@@ -467,7 +469,7 @@ extension ContactStore {
         }
     }
     
-    func delete(_ contact: Contact) {
+    func permanentlyDelete(_ contact: Contact) {
         if let index = deletedContacts.firstIndex(of: contact) {
             deletedContacts.remove(at: index)
         }
@@ -476,23 +478,8 @@ extension ContactStore {
     func restore(_ contact: Contact) {
         if let index = deletedContacts.firstIndex(of: contact) {
             deletedContacts[index].isDeleted = false
-            addContact(deletedContacts[index])
+            add(deletedContacts[index])
             deletedContacts.remove(at: index)
-        }
-    }
-    
-    func authenticate(reason: String) {
-        let context = LAContext()
-        if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: nil) {
-            context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { success, _ in
-                Task { @MainActor in
-                    if success {
-                        self.isHiddenFolderLocked = false
-                    }
-                }
-            }
-        } else {
-            self.isHiddenFolderLocked = false
         }
     }
 }

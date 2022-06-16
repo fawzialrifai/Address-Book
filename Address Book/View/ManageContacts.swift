@@ -119,7 +119,7 @@ struct ManageContacts: View {
                     let encodedContacts = try Data(contentsOf: result.get())
                     let contacts = try JSONDecoder().decode([Contact].self, from: encodedContacts)
                     for contact in contacts {
-                        contactStore.addContact(contact)
+                        contactStore.add(contact)
                     }
                     contactStore.isImporting = false
                     UINotificationFeedbackGenerator().notificationOccurred(.success)

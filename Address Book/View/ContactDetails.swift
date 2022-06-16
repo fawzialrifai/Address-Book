@@ -176,7 +176,7 @@ struct ContactDetails: View {
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                                     UINotificationFeedbackGenerator().notificationOccurred(.success)
                                     withAnimation {
-                                        contactStore.delete(contact)
+                                        contactStore.permanentlyDelete(contact)
                                     }
                                 }
                             }
@@ -263,7 +263,7 @@ struct ContactDetails: View {
                 }
             }
             if isEditingContact {
-                EditContact(contact: contact, coordinateRegion: $region, isEditingContact: $isEditingContact, completeionHandler: {_ in})
+                EditContact(contact: contact, isEditingContact: $isEditingContact, completeionHandler: {_ in})
                     .zIndex(1)
                     .navigationBarBackButtonHidden(true)
             }
