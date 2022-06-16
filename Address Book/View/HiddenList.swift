@@ -1,5 +1,5 @@
 //
-//  HiddenContactList.swift
+//  HiddenList.swift
 //  Address Book
 //
 //  Created by Fawzi Rifai on 14/06/2022.
@@ -8,7 +8,7 @@
 import SwiftUI
 import LocalAuthentication
 
-struct HiddenContactList: View {
+struct HiddenList: View {
     @Environment (\.scenePhase) private var scenePhase
     @EnvironmentObject var contactStore: ContactStore
     @State private var isFolderLocked = true
@@ -78,7 +78,7 @@ struct HiddenContactList: View {
 
 struct HiddenContactList_Previews: PreviewProvider {
     static var previews: some View {
-        HiddenContactList()
+        HiddenList()
             .environmentObject(ContactStore())
     }
 }

@@ -32,9 +32,10 @@
 		5825BDDA2854ED6F0082069A /* ContactList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDC12854ED6F0082069A /* ContactList.swift */; };
 		5825BDDB2854ED6F0082069A /* ContactImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDC22854ED6F0082069A /* ContactImage.swift */; };
 		58725AB82857C4C6004BF574 /* LabeledValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58725AB72857C4C6004BF574 /* LabeledValue.swift */; };
-		58725ABA28587EDC004BF574 /* HiddenContactList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58725AB928587EDC004BF574 /* HiddenContactList.swift */; };
+		58725ABA28587EDC004BF574 /* HiddenList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58725AB928587EDC004BF574 /* HiddenList.swift */; };
 		58725AD628590BA2004BF574 /* DuplicatesList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58725AD528590BA1004BF574 /* DuplicatesList.swift */; };
 		58725AD828594B11004BF574 /* MergeContact.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58725AD728594B11004BF574 /* MergeContact.swift */; };
+		587EB063285A98100047A5C9 /* DeletedList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 587EB062285A98100047A5C9 /* DeletedList.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -64,9 +65,10 @@
 		5825BDC12854ED6F0082069A /* ContactList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactList.swift; sourceTree = "<group>"; };
 		5825BDC22854ED6F0082069A /* ContactImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactImage.swift; sourceTree = "<group>"; };
 		58725AB72857C4C6004BF574 /* LabeledValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabeledValue.swift; sourceTree = "<group>"; };
-		58725AB928587EDC004BF574 /* HiddenContactList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HiddenContactList.swift; sourceTree = "<group>"; };
+		58725AB928587EDC004BF574 /* HiddenList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HiddenList.swift; sourceTree = "<group>"; };
 		58725AD528590BA1004BF574 /* DuplicatesList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicatesList.swift; sourceTree = "<group>"; };
 		58725AD728594B11004BF574 /* MergeContact.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MergeContact.swift; sourceTree = "<group>"; };
+		587EB062285A98100047A5C9 /* DeletedList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeletedList.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -146,16 +148,17 @@
 				5825BDC12854ED6F0082069A /* ContactList.swift */,
 				5825BDB92854ED6F0082069A /* FirstLettersGrid.swift */,
 				5825BDB62854ED6F0082069A /* ContactDetails.swift */,
-				5825BDB72854ED6F0082069A /* EditContact.swift */,
 				5825BDBE2854ED6F0082069A /* QRCodeGenerator.swift */,
-				5825BDB82854ED6F0082069A /* ImagePicker.swift */,
+				5825BDB72854ED6F0082069A /* EditContact.swift */,
 				5825BDB52854ED6F0082069A /* LabelPicker.swift */,
-				5825BDC22854ED6F0082069A /* ContactImage.swift */,
-				5825BDC02854ED6F0082069A /* EditableContactImage.swift */,
 				5825BDBF2854ED6F0082069A /* ManageContacts.swift */,
 				58725AD528590BA1004BF574 /* DuplicatesList.swift */,
 				58725AD728594B11004BF574 /* MergeContact.swift */,
-				58725AB928587EDC004BF574 /* HiddenContactList.swift */,
+				58725AB928587EDC004BF574 /* HiddenList.swift */,
+				587EB062285A98100047A5C9 /* DeletedList.swift */,
+				5825BDB82854ED6F0082069A /* ImagePicker.swift */,
+				5825BDC22854ED6F0082069A /* ContactImage.swift */,
+				5825BDC02854ED6F0082069A /* EditableContactImage.swift */,
 				5825BDBA2854ED6F0082069A /* Code Scanner */,
 			);
 			path = View;
@@ -242,6 +245,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5825BDCE2854ED6F0082069A /* Contact.swift in Sources */,
+				587EB063285A98100047A5C9 /* DeletedList.swift in Sources */,
 				5825BDD02854ED6F0082069A /* ContactDetails.swift in Sources */,
 				5825BDC72854ED6F0082069A /* String-extension.swift in Sources */,
 				5825BDD22854ED6F0082069A /* ImagePicker.swift in Sources */,
@@ -255,7 +259,7 @@
 				5825BDCA2854ED6F0082069A /* Order.swift in Sources */,
 				5825BDC82854ED6F0082069A /* JSONFile.swift in Sources */,
 				5825BDDA2854ED6F0082069A /* ContactList.swift in Sources */,
-				58725ABA28587EDC004BF574 /* HiddenContactList.swift in Sources */,
+				58725ABA28587EDC004BF574 /* HiddenList.swift in Sources */,
 				5825BDD82854ED6F0082069A /* ManageContacts.swift in Sources */,
 				5825BDC42854ED6F0082069A /* LocationManager.swift in Sources */,
 				5825BDCF2854ED6F0082069A /* LabelPicker.swift in Sources */,

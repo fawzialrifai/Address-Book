@@ -175,7 +175,7 @@ struct MergeContact: View {
         .confirmationDialog("Merge Duplicates?", isPresented: $isMergeAlertPresented) {
             Button("Merge") {
                 for contact in duplicates {
-                    contactStore.delete(contact)
+                    contactStore.moveToDeletedList(contact)
                 }
                 let cnContact = CNMutableContact()
                 mergedContact.identifier = cnContact.identifier

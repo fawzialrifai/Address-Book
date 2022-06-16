@@ -69,7 +69,7 @@ struct ManageContacts: View {
                         }
                     }
                     NavigationLink {
-                        HiddenContactList()
+                        HiddenList()
                     } label: {
                         HStack {
                             Text("Hidden")
@@ -79,12 +79,12 @@ struct ManageContacts: View {
                         }
                     }
                     NavigationLink {
-                        Text("Recently Deleted")
+                        DeletedList()
                     } label: {
                         HStack {
                             Text("Recently Deleted")
                             Spacer()
-                            Text("0")
+                            Text(contactStore.deletedContacts.count, format: .number)
                                 .foregroundColor(.secondary)
                         }
                     }
@@ -125,20 +125,11 @@ struct ManageContacts: View {
                     UINotificationFeedbackGenerator().notificationOccurred(.error)
                 }
             })
-            .alert("Merge Completed!", isPresented: $isMergeCompleted) {
-                Button("OK") {}
-            } message: {
-                if duplicatesCount == 0 {
-                    Text("No duplicates found.")
-                } else {
-                    Text("\(duplicatesCount) duplicates were found and merged successfully.")
-                }
-            }
             .confirmationDialog("Delete all Contacts?", isPresented: $isDeleteContactsAlertPresented) {
                 Button("Delete", role: .destructive) {
                     UINotificationFeedbackGenerator().notificationOccurred(.success)
                     for contact in contactStore.contacts {
-                        contactStore.delete(contact)
+                        contactStore.moveToDeletedList(contact)
                     }
                 }
             } message: {

@@ -100,7 +100,7 @@ struct DuplicatesList: View {
                                 if let imageData = contact.imageData {
                                     newContact.imageData = imageData
                                 }
-                                contactStore.delete(contact)
+                                contactStore.moveToDeletedList(contact)
                             }
                             let cnContact = CNMutableContact()
                             newContact.identifier = cnContact.identifier

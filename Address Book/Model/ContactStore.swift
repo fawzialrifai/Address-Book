@@ -13,6 +13,15 @@ import LocalAuthentication
     
     @Published var contacts: [Contact] = []
     
+    @Published var deletedContacts: [Contact] = [] {
+        didSet {
+            do {
+                let encodedData = try JSONEncoder().encode(deletedContacts)
+                try encodedData.write(to: deletedContactsPath, options: .atomic)
+            } catch {}
+        }
+    }
+    
     @Published var emergencyContactsIdentifiers: [String] = [] {
         didSet {
             do {
@@ -40,9 +49,10 @@ import LocalAuthentication
         }
     }
     
+    private var deletedContactsPath = FileManager.documentDirectory.appendingPathComponent("Deleted Contacts")
     private var myCardPath = FileManager.documentDirectory.appendingPathComponent("My Card")
     private var favoritesPath = FileManager.documentDirectory.appendingPathComponent("Favorites")
-    private var hiddenContactsPath = FileManager.documentDirectory.appendingPathComponent("Hidden")
+    private var hiddenContactsPath = FileManager.documentDirectory.appendingPathComponent("Hidden Contacts")
     private var emergencyContactsPath = FileManager.documentDirectory.appendingPathComponent("Emergency Contacts")
     @Published var filterText = ""
     @Published var isFirstLettersGridPresented = false
@@ -62,6 +72,7 @@ import LocalAuthentication
         loadFavoritesIdentifiers()
         loadHiddenContactsIdentifiers()
         fetchContacts()
+        loadDeletedContacts()
     }
     
 }
@@ -179,6 +190,23 @@ extension ContactStore {
         return contactsDictionary
     }
     
+    var deletedContactsDictionary: [String: [Contact]] {
+        var keys = [String]()
+        var contactsDictionary = [String: [Contact]]()
+        for contact in deletedContacts {
+                if let firstLetter = contact.firstLetter(sortOrder: sortOrder) {
+                    if keys.contains(firstLetter) {
+                        contactsDictionary[firstLetter]?.append(contact)
+                    } else {
+                        contactsDictionary[firstLetter] = [contact]
+                        keys.append(firstLetter)
+                    }
+                }
+                
+        }
+        return contactsDictionary
+    }
+    
     var status: String {
         if isImporting {
             return "Importing..."
@@ -192,6 +220,13 @@ extension ContactStore {
 }
 
 extension ContactStore {
+    
+    func loadDeletedContacts() {
+        do {
+            let encodedContacts = try Data(contentsOf: deletedContactsPath)
+            deletedContacts = try JSONDecoder().decode([Contact].self, from: encodedContacts)
+        } catch {}
+    }
     
     func loadEmergencyContactsIdentifiers() {
         do {
@@ -398,8 +433,10 @@ extension ContactStore {
         }
     }
     
-    func delete(_ contact: Contact) {
+    func moveToDeletedList(_ contact: Contact) {
         if let index = contacts.firstIndex(of: contact) {
+            contacts[index].isDeleted = true
+            deletedContacts.append(contacts[index])
             contacts.remove(at: index)
         }
         let store = CNContactStore()
@@ -407,6 +444,43 @@ extension ContactStore {
             let saveRequest = CNSaveRequest()
             saveRequest.delete(cnContact)
             try? store.execute(saveRequest)
+        }
+    }
+    
+    func delete(_ contact: Contact) {
+        if let index = deletedContacts.firstIndex(of: contact) {
+            deletedContacts.remove(at: index)
+        }
+    }
+    
+    func restore(_ contact: Contact) {
+        if let index = deletedContacts.firstIndex(of: contact) {
+            deletedContacts[index].isDeleted = false
+            contacts.append(deletedContacts[index])
+            if deletedContacts[index].isMyCard {
+                saveMyCard(deletedContacts[index])
+            } else {
+                let cnContact = CNMutableContact()
+                deletedContacts[index].identifier = cnContact.identifier
+                cnContact.givenName = deletedContacts[index].firstName
+                cnContact.familyName = deletedContacts[index].lastName ?? ""
+                cnContact.organizationName = deletedContacts[index].company ?? ""
+                for phoneNumber in deletedContacts[index].phoneNumbers {
+                    cnContact.phoneNumbers.append(CNLabeledValue(label: phoneNumber.label, value: CNPhoneNumber(stringValue: phoneNumber.value)))
+                }
+                for emailAddress in deletedContacts[index].emailAddresses {
+                    cnContact.emailAddresses.append(CNLabeledValue(label: emailAddress.label, value: emailAddress.value as NSString))
+                }
+                if let birthday = deletedContacts[index].birthday {
+                    cnContact.birthday = Calendar.current.dateComponents([.year, .month, .day], from: birthday)
+                }
+                cnContact.imageData = deletedContacts[index].imageData
+                let store = CNContactStore()
+                let saveRequest = CNSaveRequest()
+                saveRequest.add(cnContact, toContainerWithIdentifier: nil)
+                try? store.execute(saveRequest)
+            }
+            deletedContacts.remove(at: index)
         }
     }
     

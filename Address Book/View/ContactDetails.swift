@@ -12,6 +12,7 @@ struct ContactDetails: View {
     @EnvironmentObject var contactStore: ContactStore
     @Environment(\.dismiss) private var dismiss
     @State private var isDeleteContactAlertPresented = false
+    @State private var isPermanentlyDeleteContactAlertPresented = false
     @State private var isHideContactAlertPresented = false
     @State var region: MKCoordinateRegion?
     var contact: Contact
@@ -155,7 +156,34 @@ struct ContactDetails: View {
                     .sheet(isPresented: $isCodeGeneratorPresented) {
                         QRCodeGenerator(contact: contact)
                     }
-                    if !contact.isMyCard {
+                    if contact.isDeleted {
+                        Button("Restore Contact") {
+                            dismiss()
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                UINotificationFeedbackGenerator().notificationOccurred(.success)
+                                withAnimation {
+                                    contactStore.restore(contact)
+                                }
+                            }
+                        }
+                        Button("Delete Contact", role: .destructive) {
+                            UINotificationFeedbackGenerator().notificationOccurred(.warning)
+                            isPermanentlyDeleteContactAlertPresented = true
+                        }
+                        .confirmationDialog("Permanently Delete Contact?", isPresented: $isPermanentlyDeleteContactAlertPresented) {
+                            Button("Delete Permanently", role: .destructive) {
+                                dismiss()
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                    UINotificationFeedbackGenerator().notificationOccurred(.success)
+                                    withAnimation {
+                                        contactStore.delete(contact)
+                                    }
+                                }
+                            }
+                        } message: {
+                            Text("\(contact.fullName(displayOrder: contactStore.displayOrder)) will be deleted permanently, This action cannot be undone.")
+                        }
+                    } else if !contact.isMyCard {
                         Button(contact.isEmergencyContact ? "Remove from Emergency Contacts" : "Add to Emergency Contacts") {
                             UINotificationFeedbackGenerator().notificationOccurred(.success)
                             if contact.isEmergencyContact {
@@ -200,7 +228,7 @@ struct ContactDetails: View {
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                                     UINotificationFeedbackGenerator().notificationOccurred(.success)
                                     withAnimation {
-                                        contactStore.delete(contact)
+                                        contactStore.moveToDeletedList(contact)
                                     }
                                 }
                             }
@@ -215,7 +243,7 @@ struct ContactDetails: View {
                         .confirmationDialog("Delete Your Card?", isPresented: $isDeleteContactAlertPresented) {
                             Button("Delete", role: .destructive) {
                                 dismiss()
-                                contactStore.delete(contact)
+                                contactStore.moveToDeletedList(contact)
                                 contactStore.deleteMyCard()
                             }
                         } message: {

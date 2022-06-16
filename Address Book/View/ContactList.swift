@@ -46,7 +46,7 @@ struct Contacts: View {
                             return
                         }
                         UINotificationFeedbackGenerator().notificationOccurred(.success)
-                        contactStore.delete(contactToDelete)
+                        contactStore.moveToDeletedList(contactToDelete)
                     }
                     contactStore.contactToDelete = nil
                 }
