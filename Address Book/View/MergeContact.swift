@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import Contacts
 
 struct MergeContact: View {
     @Environment(\.dismiss) private var dismiss
@@ -28,24 +27,24 @@ struct MergeContact: View {
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 24) {
                                 ForEach(images, id: \.self) { imageData in
-                                        Button {
-                                            if mergedContact.imageData == imageData {
-                                                mergedContact.imageData = nil
-                                            } else {
-                                                mergedContact.imageData = imageData
-                                            }
-                                        } label: {
-                                            Image(uiImage: UIImage(data: imageData)!)
-                                                .resizable()
-                                                .scaledToFill()
-                                                .foregroundStyle(.white, .gray)
-                                                .frame(width: 75, height: 75)
-                                                .clipShape(Circle())
-                                                .shadow(radius: 0.5)
-                                                .padding(3)
-                                                .overlay(Circle().stroke(lineWidth: mergedContact.imageData == imageData ? 3 : 0)).foregroundColor(.blue)
-                                                .shadow(radius: 0.5)
+                                    Button {
+                                        if mergedContact.imageData == imageData {
+                                            mergedContact.imageData = nil
+                                        } else {
+                                            mergedContact.imageData = imageData
                                         }
+                                    } label: {
+                                        Image(uiImage: UIImage(data: imageData)!)
+                                            .resizable()
+                                            .scaledToFill()
+                                            .foregroundStyle(.white, .gray)
+                                            .frame(width: 75, height: 75)
+                                            .clipShape(Circle())
+                                            .shadow(radius: 0.5)
+                                            .padding(3)
+                                            .overlay(Circle().stroke(lineWidth: mergedContact.imageData == imageData ? 3 : 0)).foregroundColor(.blue)
+                                            .shadow(radius: 0.5)
+                                    }
                                 }
                             }
                             .padding(24)
@@ -59,114 +58,114 @@ struct MergeContact: View {
             if !companies.isEmpty {
                 Section("Company") {
                     ForEach(companies, id: \.self) { company in
-                            HStack {
-                                Text(company)
-                                Spacer()
-                                Button {
-                                    if mergedContact.company == company {
-                                        mergedContact.company = nil
-                                    } else {
-                                        mergedContact.company = company
-                                    }
-                                } label: {
-                                    if mergedContact.company == company {
-                                        Image(systemName: "checkmark.circle.fill")
-                                            .foregroundStyle(.white, .blue)
-                                    } else {
-                                        Image(systemName: "circle")
-                                            .foregroundColor(.primary)
-                                    }
+                        HStack {
+                            Text(company)
+                            Spacer()
+                            Button {
+                                if mergedContact.company == company {
+                                    mergedContact.company = nil
+                                } else {
+                                    mergedContact.company = company
+                                }
+                            } label: {
+                                if mergedContact.company == company {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundStyle(.white, .blue)
+                                } else {
+                                    Image(systemName: "circle")
+                                        .foregroundColor(.primary)
                                 }
                             }
+                        }
                     }
                 }
             }
             if !phoneNumbers.isEmpty {
                 Section("Phone Numbers") {
                     ForEach(phoneNumbers) { phoneNumber in
-                            HStack {
-                                VStack(alignment: .leading) {
-                                    Text(phoneNumber.label ?? "")
-                                    Text(phoneNumber.value)
-                                        .foregroundColor(.secondary)
+                        HStack {
+                            VStack(alignment: .leading) {
+                                Text(phoneNumber.label ?? "")
+                                Text(phoneNumber.value)
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding(.vertical, 8)
+                            Spacer()
+                            Button {
+                                if mergedContact.phoneNumbers.contains(phoneNumber) {
+                                    if let index = mergedContact.phoneNumbers.firstIndex(of: phoneNumber) {
+                                        mergedContact.phoneNumbers.remove(at: index)
+                                    }
+                                } else {
+                                    mergedContact.phoneNumbers.append(phoneNumber)
                                 }
-                                .padding(.vertical, 8)
-                                Spacer()
-                                Button {
-                                    if mergedContact.phoneNumbers.contains(phoneNumber) {
-                                        if let index = mergedContact.phoneNumbers.firstIndex(of: phoneNumber) {
-                                            mergedContact.phoneNumbers.remove(at: index)
-                                        }
-                                    } else {
-                                        mergedContact.phoneNumbers.append(phoneNumber)
-                                    }
-                                } label: {
-                                    if mergedContact.phoneNumbers.contains(phoneNumber) {
-                                        Image(systemName: "checkmark.circle.fill")
-                                            .foregroundStyle(.white, .blue)
-                                    } else {
-                                        Image(systemName: "circle")
-                                            .foregroundColor(.primary)
-                                    }
+                            } label: {
+                                if mergedContact.phoneNumbers.contains(phoneNumber) {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundStyle(.white, .blue)
+                                } else {
+                                    Image(systemName: "circle")
+                                        .foregroundColor(.primary)
                                 }
                             }
+                        }
                     }
                 }
             }
             if !emailAddresses.isEmpty {
                 Section("Email Addresses") {
-                        ForEach(emailAddresses) { emailAddress in
-                            HStack {
-                                VStack(alignment: .leading) {
-                                    Text(emailAddress.label ?? "")
-                                    Text(emailAddress.value)
-                                        .foregroundColor(.secondary)
+                    ForEach(emailAddresses) { emailAddress in
+                        HStack {
+                            VStack(alignment: .leading) {
+                                Text(emailAddress.label ?? "")
+                                Text(emailAddress.value)
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding(.vertical, 8)
+                            Spacer()
+                            Button {
+                                if mergedContact.emailAddresses.contains(emailAddress) {
+                                    if let index = mergedContact.emailAddresses.firstIndex(of: emailAddress) {
+                                        mergedContact.emailAddresses.remove(at: index)
+                                    }
+                                } else {
+                                    mergedContact.emailAddresses.append(emailAddress)
                                 }
-                                .padding(.vertical, 8)
-                                Spacer()
-                                Button {
-                                    if mergedContact.emailAddresses.contains(emailAddress) {
-                                        if let index = mergedContact.emailAddresses.firstIndex(of: emailAddress) {
-                                            mergedContact.emailAddresses.remove(at: index)
-                                        }
-                                    } else {
-                                        mergedContact.emailAddresses.append(emailAddress)
-                                    }
-                                } label: {
-                                    if mergedContact.emailAddresses.contains(emailAddress) {
-                                        Image(systemName: "checkmark.circle.fill")
-                                            .foregroundStyle(.white, .blue)
-                                    } else {
-                                        Image(systemName: "circle")
-                                            .foregroundColor(.primary)
-                                    }
+                            } label: {
+                                if mergedContact.emailAddresses.contains(emailAddress) {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundStyle(.white, .blue)
+                                } else {
+                                    Image(systemName: "circle")
+                                        .foregroundColor(.primary)
                                 }
                             }
                         }
+                    }
                 }
             }
             if !birthdays.isEmpty {
                 Section("Birthday") {
                     ForEach(birthdays, id: \.self) { birthday in
-                            HStack {
-                                Text(birthday.formatted(.dateTime.year().month().day()))
-                                Spacer()
-                                Button {
-                                    if mergedContact.birthday == birthday {
-                                        mergedContact.birthday = nil
-                                    } else {
-                                        mergedContact.birthday = birthday
-                                    }
-                                } label: {
-                                    if mergedContact.birthday == birthday {
-                                        Image(systemName: "checkmark.circle.fill")
-                                            .foregroundStyle(.white, .blue)
-                                    } else {
-                                        Image(systemName: "circle")
-                                            .foregroundColor(.primary)
-                                    }
+                        HStack {
+                            Text(birthday.formatted(.dateTime.year().month().day()))
+                            Spacer()
+                            Button {
+                                if mergedContact.birthday == birthday {
+                                    mergedContact.birthday = nil
+                                } else {
+                                    mergedContact.birthday = birthday
+                                }
+                            } label: {
+                                if mergedContact.birthday == birthday {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundStyle(.white, .blue)
+                                } else {
+                                    Image(systemName: "circle")
+                                        .foregroundColor(.primary)
                                 }
                             }
+                        }
                     }
                 }
             }
@@ -177,31 +176,7 @@ struct MergeContact: View {
                 for contact in duplicates {
                     contactStore.moveToDeletedList(contact)
                 }
-                let cnContact = CNMutableContact()
-                mergedContact.identifier = cnContact.identifier
-                cnContact.givenName = mergedContact.firstName
-                cnContact.familyName = mergedContact.lastName ?? ""
-                cnContact.organizationName = mergedContact.company ?? ""
-                for phoneNumber in mergedContact.phoneNumbers.dropLast().filter({
-                    !$0.value.isTotallyEmpty
-                }) {
-                    cnContact.phoneNumbers.append(CNLabeledValue(label: phoneNumber.label, value: CNPhoneNumber(stringValue: phoneNumber.value)))
-                }
-                for emailAddress in mergedContact.emailAddresses.dropLast().filter({
-                    !$0.value.isTotallyEmpty
-                }) {
-                    cnContact.emailAddresses.append(CNLabeledValue(label: emailAddress.label, value: emailAddress.value as NSString))
-                }
-                if let birthday = mergedContact.birthday {
-                    cnContact.birthday = Calendar.current.dateComponents([.year, .month, .day], from: birthday)
-                }
-                cnContact.imageData = mergedContact.imageData
-                let store = CNContactStore()
-                let saveRequest = CNSaveRequest()
-                saveRequest.add(cnContact, toContainerWithIdentifier: nil)
-                try? store.execute(saveRequest)
-                contactStore.contacts.append(mergedContact)
-                contactStore.sortContacts()
+                contactStore.addContact(mergedContact)
                 dismiss()
             }
         } message: {

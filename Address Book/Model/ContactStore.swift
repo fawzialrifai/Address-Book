@@ -194,15 +194,15 @@ extension ContactStore {
         var keys = [String]()
         var contactsDictionary = [String: [Contact]]()
         for contact in deletedContacts {
-                if let firstLetter = contact.firstLetter(sortOrder: sortOrder) {
-                    if keys.contains(firstLetter) {
-                        contactsDictionary[firstLetter]?.append(contact)
-                    } else {
-                        contactsDictionary[firstLetter] = [contact]
-                        keys.append(firstLetter)
-                    }
+            if let firstLetter = contact.firstLetter(sortOrder: sortOrder) {
+                if keys.contains(firstLetter) {
+                    contactsDictionary[firstLetter]?.append(contact)
+                } else {
+                    contactsDictionary[firstLetter] = [contact]
+                    keys.append(firstLetter)
                 }
-                
+            }
+            
         }
         return contactsDictionary
     }
@@ -279,28 +279,48 @@ extension ContactStore {
     }
     
     func addContact(_ contact: Contact) {
-        let cnContact = CNMutableContact()
-        cnContact.givenName = contact.firstName
-        cnContact.familyName = contact.lastName ?? ""
-        cnContact.organizationName = contact.company ?? ""
-        for phoneNumber in contact.phoneNumbers.dropLast().filter({
-            !$0.value.isTotallyEmpty
-        }) {
-            cnContact.phoneNumbers.append(CNLabeledValue(label: phoneNumber.label, value: CNPhoneNumber(stringValue: phoneNumber.value)))
+        if contact.isMyCard {
+            contacts.insert(contact, at: indexFor(contact))
+            saveMyCard(contact)
+        } else {
+            var newContact = contact
+            let cnContact = CNMutableContact()
+            newContact.identifier = cnContact.identifier
+            contacts.insert(newContact, at: indexFor(newContact))
+            cnContact.givenName = contact.firstName
+            cnContact.familyName = contact.lastName ?? ""
+            cnContact.organizationName = contact.company ?? ""
+            for phoneNumber in contact.phoneNumbers {
+                cnContact.phoneNumbers.append(CNLabeledValue(label: phoneNumber.label, value: CNPhoneNumber(stringValue: phoneNumber.value)))
+            }
+            for emailAddress in contact.emailAddresses.dropLast() {
+                cnContact.emailAddresses.append(CNLabeledValue(label: emailAddress.label, value: emailAddress.value as NSString))
+            }
+            if let birthday = contact.birthday {
+                cnContact.birthday = Calendar.current.dateComponents([.year, .month, .day], from: birthday)
+            }
+            cnContact.imageData = contact.imageData
+            let store = CNContactStore()
+            let saveRequest = CNSaveRequest()
+            saveRequest.add(cnContact, toContainerWithIdentifier: nil)
+            try? store.execute(saveRequest)
         }
-        for emailAddress in contact.emailAddresses.dropLast().filter({
-            !$0.value.isTotallyEmpty
-        }) {
-            cnContact.emailAddresses.append(CNLabeledValue(label: emailAddress.label, value: emailAddress.value as NSString))
+    }
+    
+    func reload() {
+        contacts.removeAll()
+        let contactStore = CNContactStore()
+        let keys = [CNContactIdentifierKey, CNContactGivenNameKey, CNContactFamilyNameKey, CNContactOrganizationNameKey, CNContactPhoneNumbersKey, CNContactEmailAddressesKey, CNContactPostalAddressesKey, CNContactBirthdayKey, CNContactImageDataKey] as [CNKeyDescriptor]
+        let request = CNContactFetchRequest(keysToFetch: keys)
+        try? contactStore.enumerateContacts(with: request) {
+            (cnContact, _) in
+            var contact = Contact()
+            contact.update(from: cnContact, isEmergencyContact: self.emergencyContactsIdentifiers.contains(cnContact.identifier), isFavorite: self.favoritesIdentifiers.contains(cnContact.identifier), isHidden: self.hiddenContactsIdentifiers.contains(cnContact.identifier))
+            DispatchQueue.main.async {
+                self.contacts.append(contact)
+            }
         }
-        if let birthday = contact.birthday {
-            cnContact.birthday = Calendar.current.dateComponents([.year, .month, .day], from: birthday)
-        }
-        cnContact.imageData = contact.imageData
-        let store = CNContactStore()
-        let saveRequest = CNSaveRequest()
-        saveRequest.add(cnContact, toContainerWithIdentifier: nil)
-        try? store.execute(saveRequest)
+        sortContacts()
     }
     
     func fetchContacts() {
@@ -456,30 +476,7 @@ extension ContactStore {
     func restore(_ contact: Contact) {
         if let index = deletedContacts.firstIndex(of: contact) {
             deletedContacts[index].isDeleted = false
-            contacts.append(deletedContacts[index])
-            if deletedContacts[index].isMyCard {
-                saveMyCard(deletedContacts[index])
-            } else {
-                let cnContact = CNMutableContact()
-                deletedContacts[index].identifier = cnContact.identifier
-                cnContact.givenName = deletedContacts[index].firstName
-                cnContact.familyName = deletedContacts[index].lastName ?? ""
-                cnContact.organizationName = deletedContacts[index].company ?? ""
-                for phoneNumber in deletedContacts[index].phoneNumbers {
-                    cnContact.phoneNumbers.append(CNLabeledValue(label: phoneNumber.label, value: CNPhoneNumber(stringValue: phoneNumber.value)))
-                }
-                for emailAddress in deletedContacts[index].emailAddresses {
-                    cnContact.emailAddresses.append(CNLabeledValue(label: emailAddress.label, value: emailAddress.value as NSString))
-                }
-                if let birthday = deletedContacts[index].birthday {
-                    cnContact.birthday = Calendar.current.dateComponents([.year, .month, .day], from: birthday)
-                }
-                cnContact.imageData = deletedContacts[index].imageData
-                let store = CNContactStore()
-                let saveRequest = CNSaveRequest()
-                saveRequest.add(cnContact, toContainerWithIdentifier: nil)
-                try? store.execute(saveRequest)
-            }
+            addContact(deletedContacts[index])
             deletedContacts.remove(at: index)
         }
     }

@@ -117,8 +117,10 @@ struct ManageContacts: View {
                 do {
                     contactStore.isImporting = true
                     let encodedContacts = try Data(contentsOf: result.get())
-                    contactStore.contacts = try JSONDecoder().decode([Contact].self, from: encodedContacts)
-                    contactStore.sortContacts()
+                    let contacts = try JSONDecoder().decode([Contact].self, from: encodedContacts)
+                    for contact in contacts {
+                        contactStore.addContact(contact)
+                    }
                     contactStore.isImporting = false
                     UINotificationFeedbackGenerator().notificationOccurred(.success)
                 } catch {

@@ -7,7 +7,6 @@
 
 import SwiftUI
 import MapKit
-import Contacts
 
 struct ContactList: View {
     @EnvironmentObject var contactStore: ContactStore
@@ -17,7 +16,7 @@ struct ContactList: View {
                 Contacts(scrollViewProxy: scrollViewProxy)
                 if contactStore.isFirstLettersGridPresented {
                     FirstLettersGrid(scrollViewProxy: scrollViewProxy)
-                    .zIndex(1)
+                        .zIndex(1)
                 }
             }
         }
@@ -83,7 +82,7 @@ struct Contacts: View {
                 NavigationView {
                     EditContact(contact: Contact(), coordinateRegion: .constant(MKCoordinateRegion()), isEditingContact: .constant(false)) { newContact in
                         UINotificationFeedbackGenerator().notificationOccurred(.success)
-                        contactStore.contacts.insert(newContact, at: contactStore.indexFor(newContact))
+                        contactStore.addContact(newContact)
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                             withAnimation {
                                 scrollViewProxy.scrollTo(newContact.id, anchor: .center)
@@ -122,7 +121,7 @@ struct Contacts: View {
                 }
             } message: {
                 Text("Please allow Address Book access contacts from Settings.")
-
+                
             }
         }
     }
@@ -134,30 +133,7 @@ struct Contacts: View {
                 var newContact = try JSONDecoder().decode(Contact.self, from: data)
                 newContact.id = UUID()
                 isCodeScannerPresented = false
-                let cnContact = CNMutableContact()
-                newContact.identifier = cnContact.identifier
-                cnContact.givenName = newContact.firstName
-                cnContact.familyName = newContact.lastName ?? ""
-                cnContact.organizationName = newContact.company ?? ""
-                for phoneNumber in newContact.phoneNumbers.dropLast().filter({
-                    !$0.value.isTotallyEmpty
-                }) {
-                    cnContact.phoneNumbers.append(CNLabeledValue(label: phoneNumber.label, value: CNPhoneNumber(stringValue: phoneNumber.value)))
-                }
-                for emailAddress in newContact.emailAddresses.dropLast().filter({
-                    !$0.value.isTotallyEmpty
-                }) {
-                    cnContact.emailAddresses.append(CNLabeledValue(label: emailAddress.label, value: emailAddress.value as NSString))
-                }
-                if let birthday = newContact.birthday {
-                    cnContact.birthday = Calendar.current.dateComponents([.year, .month, .day], from: birthday)
-                }
-                cnContact.imageData = newContact.imageData
-                let store = CNContactStore()
-                let saveRequest = CNSaveRequest()
-                saveRequest.add(cnContact, toContainerWithIdentifier: nil)
-                try? store.execute(saveRequest)
-                contactStore.contacts.insert(newContact, at: contactStore.indexFor(newContact))
+                contactStore.addContact(newContact)
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     withAnimation {
                         scrollViewProxy.scrollTo(newContact.id, anchor: .center)
@@ -223,7 +199,7 @@ struct MyCardSection: View {
             NavigationView {
                 EditContact(contact: Contact(isMyCard: true), coordinateRegion: .constant(MKCoordinateRegion()), isEditingContact: .constant(false)) { newContact in
                     UINotificationFeedbackGenerator().notificationOccurred(.success)
-                    contactStore.contacts.append(newContact)
+                    contactStore.addContact(newContact)
                 }
                 .navigationTitle("My Card")
                 .navigationBarTitleDisplayMode(.inline)

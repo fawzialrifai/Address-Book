@@ -7,7 +7,6 @@
 
 import SwiftUI
 import MapKit
-import Contacts
 
 struct EditContact: View {
     @Environment(\.dismiss) private var dismiss
@@ -335,33 +334,6 @@ struct EditContact: View {
         contact.birthday = birthday
         contact.notes = notes.isTotallyEmpty ? nil : notes
         contact.imageData = imageData
-        if contact.isMyCard {
-            contactStore.saveMyCard(contact)
-        } else {
-            let cnContact = CNMutableContact()
-            contact.identifier = cnContact.identifier
-            cnContact.givenName = firstName
-            cnContact.familyName = lastName
-            cnContact.organizationName = company
-            for phoneNumber in phoneNumbers.dropLast().filter({
-                !$0.value.isTotallyEmpty
-            }) {
-                cnContact.phoneNumbers.append(CNLabeledValue(label: phoneNumber.label, value: CNPhoneNumber(stringValue: phoneNumber.value)))
-            }
-            for emailAddress in emailAddresses.dropLast().filter({
-                !$0.value.isTotallyEmpty
-            }) {
-                cnContact.emailAddresses.append(CNLabeledValue(label: emailAddress.label, value: emailAddress.value as NSString))
-            }
-            if let birthday = birthday {
-                cnContact.birthday = Calendar.current.dateComponents([.year, .month, .day], from: birthday)
-            }
-            cnContact.imageData = imageData
-            let store = CNContactStore()
-            let saveRequest = CNSaveRequest()
-            saveRequest.add(cnContact, toContainerWithIdentifier: nil)
-            try? store.execute(saveRequest)
-        }
         return contact
     }
 }
