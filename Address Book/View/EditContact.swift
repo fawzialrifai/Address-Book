@@ -12,6 +12,7 @@ struct EditContact: View {
     @Environment(\.dismiss) private var dismiss
     var completeionHandler: (Contact) -> Void
     @EnvironmentObject var contactStore: ContactStore
+    @State private var isLocationAlertPresented = false
     @StateObject var locationManager: LocationManager
     var contact: Contact
     @State private var newData: Contact
@@ -48,7 +49,7 @@ struct EditContact: View {
             }
             .disableAutocorrection(true)
             Section {
-                ForEach(Array(newData.phoneNumbers.dropLast().enumerated()), id: \.element.id) { item in
+                ForEach(Array(newData.phoneNumbers.enumerated()), id: \.element.id) { item in
                     VStack(alignment: .leading, spacing: 0) {
                         Button(item.element.label ?? "") {
                             selectedLabel = item.offset
@@ -64,33 +65,26 @@ struct EditContact: View {
                 .onDelete {
                     newData.removePhoneNumbers(at: $0)
                 }
-                HStack(spacing: 18) {
-                    Button {
-                        UINotificationFeedbackGenerator().notificationOccurred(.success)
-                        withAnimation {
-                            newData.addNewPhoneNumber()
-                        }
-                    } label: {
+                Button {
+                    UINotificationFeedbackGenerator().notificationOccurred(.success)
+                    withAnimation {
+                        newData.addNewPhoneNumber()
+                    }
+                } label: {
+                    HStack(spacing: 18) {
                         Image(systemName: "plus.circle.fill")
                             .font(.title2)
                             .symbolRenderingMode(.multicolor)
-                    }
-                    VStack(alignment: .leading, spacing: 0) {
-                        Button(newData.phoneNumbers[newData.phoneNumbers.count - 1].label ?? "") {
-                            selectedLabel = newData.phoneNumbers.count - 1
-                            isPhoneLabelPickerPresented = true
-                        }
-                        TextField("Phone number", text: $newData.phoneNumbers[newData.phoneNumbers.count - 1].value)
+                        Text("New Phone")
                     }
                 }
-                .padding(.vertical, 8)
             }
             .buttonStyle(BorderlessButtonStyle())
             .disableAutocorrection(true)
             .keyboardType(UIKit.UIKeyboardType.phonePad)
             .textContentType(.telephoneNumber)
             Section {
-                ForEach(Array(newData.emailAddresses.dropLast().enumerated()), id: \.element.id) { item in
+                ForEach(Array(newData.emailAddresses.enumerated()), id: \.element.id) { item in
                     VStack(alignment: .leading, spacing: 0) {
                         Button(item.element.label ?? "") {
                             selectedLabel = item.offset
@@ -106,26 +100,19 @@ struct EditContact: View {
                 .onDelete {
                     newData.removeEmailAddresses(at: $0)
                 }
-                HStack(spacing: 18) {
-                    Button {
-                        UINotificationFeedbackGenerator().notificationOccurred(.success)
-                        withAnimation {
-                            newData.addNewEmailAddress()
-                        }
-                    } label: {
+                Button {
+                    UINotificationFeedbackGenerator().notificationOccurred(.success)
+                    withAnimation {
+                        newData.addNewEmailAddress()
+                    }
+                } label: {
+                    HStack(spacing: 18) {
                         Image(systemName: "plus.circle.fill")
                             .font(.title2)
                             .symbolRenderingMode(.multicolor)
-                    }
-                    VStack(alignment: .leading, spacing: 0) {
-                        Button(newData.emailAddresses[newData.emailAddresses.count - 1].label ?? "") {
-                            selectedLabel = newData.emailAddresses.count - 1
-                            isEmailLabelPickerPresented = true
-                        }
-                        TextField("Email address", text: $newData.emailAddresses[newData.emailAddresses.count - 1].value)
+                        Text("New Email")
                     }
                 }
-                .padding(.vertical, 8)
             }
             .buttonStyle(BorderlessButtonStyle())
             .textContentType(.emailAddress)
@@ -134,11 +121,15 @@ struct EditContact: View {
             .autocapitalization(.none)
             Section {
                 let isMapPresented: Binding<Bool> = Binding {
-                    locationManager.coordinateRegion != nil
+                    return newData.coordinateRegion != nil || locationManager.coordinateRegion != nil
                 } set: {
                     if $0 == true {
-                        locationManager.coordinateRegion = newData.coordinateRegion ?? MKCoordinateRegion()
-                        locationManager.requestLocation()
+                        if locationManager.isAuthorized {
+                            locationManager.coordinateRegion = MKCoordinateRegion()
+                            locationManager.requestLocation()
+                        } else {
+                            isLocationAlertPresented = true
+                        }
                     }
                     else {
                         newData.latitude = nil
@@ -147,14 +138,33 @@ struct EditContact: View {
                     }
                 }
                 let strongCoordinateRegion: Binding<MKCoordinateRegion> = Binding {
-                    locationManager.coordinateRegion ?? MKCoordinateRegion()
+                    if isEditingContact {
+                        if newData.coordinateRegion == nil {
+                            return locationManager.coordinateRegion ?? MKCoordinateRegion()
+                        } else {
+                            return newData.coordinateRegion!
+                        }
+                    } else {
+                        return locationManager.coordinateRegion ?? MKCoordinateRegion()
+                    }
                 } set: {
-                    locationManager.coordinateRegion = $0
-                    newData.latitude = $0.center.latitude
-                    newData.longitude = $0.center.longitude
+                    if isEditingContact {
+                        if newData.coordinateRegion == nil {
+                            locationManager.coordinateRegion = $0
+                            newData.latitude = $0.center.latitude
+                            newData.longitude = $0.center.longitude
+                        } else {
+                            newData.latitude = $0.center.latitude
+                            newData.longitude = $0.center.longitude
+                        }
+                    } else {
+                        locationManager.coordinateRegion = $0
+                        newData.latitude = $0.center.latitude
+                        newData.longitude = $0.center.longitude
+                    }
                 }
                 Toggle("Location", isOn: isMapPresented)
-                if locationManager.coordinateRegion != nil {
+                if newData.coordinateRegion != nil || locationManager.coordinateRegion != nil {
                     ZStack {
                         Map(coordinateRegion: strongCoordinateRegion)
                         newData.image?
@@ -243,6 +253,11 @@ struct EditContact: View {
                 }
             }
         }
+        .alert("Cannot Access Location", isPresented: $isLocationAlertPresented) {
+            Button("OK") {}
+        } message: {
+            
+        }
         .sheet(isPresented: $isPhoneLabelPickerPresented) {
             LabelPicker(labeledValue: $newData.phoneNumbers[selectedLabel])
         }
@@ -255,8 +270,6 @@ struct EditContact: View {
         self.contact = contact
         self._isEditingContact = isEditingContact
         self.completeionHandler = completeionHandler
-        self.contact.phoneNumbers.append(LabeledValue(type: .phone))
-        self.contact.emailAddresses.append(LabeledValue(type: .email))
         self._newData = State(initialValue: self.contact)
         self._locationManager = StateObject(wrappedValue: LocationManager(coordinateRegion: contact.coordinateRegion))
     }

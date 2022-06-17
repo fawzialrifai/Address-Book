@@ -195,10 +195,7 @@ struct MyCardSection: View {
         }
         .sheet(isPresented: $isSettingUpMyCard) {
             NavigationView {
-                EditContact(contact: Contact(isMyCard: true), isEditingContact: .constant(false)) { newContact in
-                    UINotificationFeedbackGenerator().notificationOccurred(.success)
-                    contactStore.add(newContact)
-                }
+                EditContact(contact: Contact(isMyCard: true))
                 .navigationTitle("My Card")
                 .navigationBarTitleDisplayMode(.inline)
             }

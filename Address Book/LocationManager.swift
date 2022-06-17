@@ -12,6 +12,14 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     var manager: CLLocationManager?
     @Published var coordinateRegion: MKCoordinateRegion?
     
+    var isAuthorized: Bool {
+        if manager?.authorizationStatus == .authorizedWhenInUse {
+            return true
+        } else {
+            return false
+        }
+    }
+    
     override init() {
         super.init()
         manager = CLLocationManager()

@@ -244,7 +244,6 @@ struct ContactDetails: View {
                             Button("Delete", role: .destructive) {
                                 dismiss()
                                 contactStore.moveToDeletedList(contact)
-                                contactStore.deleteMyCard()
                             }
                         } message: {
                             Text("Are you sure you want to delete your card?")

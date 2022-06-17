@@ -7,20 +7,10 @@
 
 import SwiftUI
 import Contacts
-import LocalAuthentication
 
 @MainActor class ContactStore: ObservableObject {
     
     @Published var contacts: [Contact] = []
-    
-    @Published var deletedContacts: [Contact] = [] {
-        didSet {
-            do {
-                let encodedData = try JSONEncoder().encode(deletedContacts)
-                try encodedData.write(to: deletedContactsPath, options: .atomic)
-            } catch {}
-        }
-    }
     
     @Published var emergencyContactsIdentifiers: [String] = [] {
         didSet {
@@ -49,20 +39,27 @@ import LocalAuthentication
         }
     }
     
-    private var deletedContactsPath = FileManager.documentDirectory.appendingPathComponent("Deleted Contacts")
+    @Published var deletedContacts: [Contact] = [] {
+        didSet {
+            do {
+                let encodedData = try JSONEncoder().encode(deletedContacts)
+                try encodedData.write(to: deletedContactsPath, options: .atomic)
+            } catch {}
+        }
+    }
+    
     private var myCardPath = FileManager.documentDirectory.appendingPathComponent("My Card")
+    private var emergencyContactsPath = FileManager.documentDirectory.appendingPathComponent("Emergency Contacts")
     private var favoritesPath = FileManager.documentDirectory.appendingPathComponent("Favorites")
     private var hiddenContactsPath = FileManager.documentDirectory.appendingPathComponent("Hidden Contacts")
-    private var emergencyContactsPath = FileManager.documentDirectory.appendingPathComponent("Emergency Contacts")
+    private var deletedContactsPath = FileManager.documentDirectory.appendingPathComponent("Deleted Contacts")
     @Published var filterText = ""
     @Published var isFirstLettersGridPresented = false
     @Published var isDeleteContactDialogPresented = false
     @Published var contactToDelete: Contact?
-    @Published var isMerging = false
     @Published var isImporting = false
     @Published var isExporting = false
     @Published var isNotAuthorized = false
-    @Published var isHiddenFolderLocked = true
     @AppStorage("Sort Order") var sortOrder = Order.firstNameLastName
     @AppStorage("Order Display") var displayOrder = Order.firstNameLastName
     
@@ -71,13 +68,42 @@ import LocalAuthentication
         loadEmergencyContactsIdentifiers()
         loadFavoritesIdentifiers()
         loadHiddenContactsIdentifiers()
-        fetchContacts()
+        requestContactsAccess {
+            self.fetchContacts()
+            self.sortContacts()
+        }
         loadDeletedContacts()
     }
     
 }
 
 extension ContactStore {
+    
+    var filteredContacts: [Contact] {
+        contacts.filter {
+            !$0.isHidden && filterText.isEmpty || (
+                ($0.firstName + " " + ($0.lastName ?? "")).lowercased().contains(filterText.lowercased()) ||
+                (($0.lastName ?? "") + " " + ($0.firstName)).lowercased().contains(filterText.lowercased()) ||
+                $0.company?.lowercased().contains(filterText.lowercased()) == true ||
+                $0.notes?.lowercased().contains(filterText.lowercased()) == true ||
+                $0.phoneNumbers.contains(where: { $0.value.lowercased().contains(filterText.lowercased()) }) ||
+                $0.phoneNumbers.contains(where: { $0.value.plainPhoneNumber.lowercased().contains(filterText.plainPhoneNumber.lowercased()) }) ||
+                $0.emailAddresses.contains(where: { $0.value.lowercased().contains(filterText.lowercased()) })
+            )
+        }
+    }
+    
+    var emergencyContacts: [Contact] {
+        filteredContacts.filter({ $0.isEmergencyContact })
+    }
+    
+    var favorites: [Contact] {
+        filteredContacts.filter({ $0.isFavorite })
+    }
+    
+    var hiddenContacts: [Contact] {
+        contacts.filter({ $0.isHidden })
+    }
     
     var duplicates: [[Contact]] {
         var arrayOfduplicates = [[Contact]]()
@@ -105,30 +131,37 @@ extension ContactStore {
         return arrayOfduplicates
     }
     
-    var filteredContacts: [Contact] {
-        contacts.filter {
-            !$0.isHidden && filterText.isEmpty || (
-                ($0.firstName + " " + ($0.lastName ?? "")).lowercased().contains(filterText.lowercased()) ||
-                (($0.lastName ?? "") + " " + ($0.firstName)).lowercased().contains(filterText.lowercased()) ||
-                $0.company?.lowercased().contains(filterText.lowercased()) == true ||
-                $0.notes?.lowercased().contains(filterText.lowercased()) == true ||
-                $0.phoneNumbers.contains(where: { $0.value.lowercased().contains(filterText.lowercased()) }) ||
-                $0.phoneNumbers.contains(where: { $0.value.plainPhoneNumber.lowercased().contains(filterText.plainPhoneNumber.lowercased()) }) ||
-                $0.emailAddresses.contains(where: { $0.value.lowercased().contains(filterText.lowercased()) })
-            )
+    var status: String {
+        if isImporting {
+            return "Importing..."
+        } else if isExporting {
+            return "Exporting..."
+        } else {
+            return "\(contacts.filter({ !$0.isMyCard }).count) contacts"
         }
     }
     
-    var hiddenContacts: [Contact] {
-        contacts.filter({ $0.isHidden })
-    }
+}
+
+extension ContactStore {
     
-    var emergencyContacts: [Contact] {
-        filteredContacts.filter({ $0.isEmergencyContact })
-    }
-    
-    var favorites: [Contact] {
-        filteredContacts.filter({ $0.isFavorite })
+    var contactsDictionary: [String: [Contact]] {
+        var keys = [String]()
+        var contactsDictionary = [String: [Contact]]()
+        for contact in filteredContacts {
+            if !contact.isMyCard {
+                if let firstLetter = contact.firstLetter(sortOrder: sortOrder) {
+                    if keys.contains(firstLetter) {
+                        contactsDictionary[firstLetter]?.append(contact)
+                    } else {
+                        contactsDictionary[firstLetter] = [contact]
+                        keys.append(firstLetter)
+                    }
+                }
+                
+            }
+        }
+        return contactsDictionary
     }
     
     var duplicatesDictionary: [String: [[Contact]]] {
@@ -148,25 +181,6 @@ extension ContactStore {
                 }
             }
             
-        }
-        return contactsDictionary
-    }
-    
-    var contactsDictionary: [String: [Contact]] {
-        var keys = [String]()
-        var contactsDictionary = [String: [Contact]]()
-        for contact in filteredContacts {
-            if !contact.isMyCard {
-                if let firstLetter = contact.firstLetter(sortOrder: sortOrder) {
-                    if keys.contains(firstLetter) {
-                        contactsDictionary[firstLetter]?.append(contact)
-                    } else {
-                        contactsDictionary[firstLetter] = [contact]
-                        keys.append(firstLetter)
-                    }
-                }
-                
-            }
         }
         return contactsDictionary
     }
@@ -207,24 +221,15 @@ extension ContactStore {
         return contactsDictionary
     }
     
-    var status: String {
-        if isImporting {
-            return "Importing..."
-        } else if isExporting {
-            return "Exporting..."
-        } else {
-            return "\(contacts.filter({ !$0.isMyCard }).count) contacts"
-        }
-    }
-    
 }
 
 extension ContactStore {
     
-    func loadDeletedContacts() {
+    func fetchMyCard() {
         do {
-            let encodedContacts = try Data(contentsOf: deletedContactsPath)
-            deletedContacts = try JSONDecoder().decode([Contact].self, from: encodedContacts)
+            let encodedMyCard = try Data(contentsOf: myCardPath)
+            let myCard = try JSONDecoder().decode(Contact.self, from: encodedMyCard)
+            contacts.append(myCard)
         } catch {}
     }
     
@@ -235,13 +240,6 @@ extension ContactStore {
         } catch {}
     }
     
-    func loadHiddenContactsIdentifiers() {
-        do {
-            let encodedHiddenContactsIdentifiers = try Data(contentsOf: hiddenContactsPath)
-            hiddenContactsIdentifiers = try JSONDecoder().decode([String].self, from: encodedHiddenContactsIdentifiers)
-        } catch {}
-    }
-    
     func loadFavoritesIdentifiers() {
         do {
             let encodedEmergencyContacts = try Data(contentsOf: emergencyContactsPath)
@@ -249,87 +247,34 @@ extension ContactStore {
         } catch {}
     }
     
-    func update(_ contact: Contact, with newData: Contact) {
-        var contact = contact
-        contact.phoneNumbers = contact.phoneNumbers.dropLast().filter({ !$0.value.isTotallyEmpty })
-        contact.emailAddresses = contact.emailAddresses.dropLast().filter({ !$0.value.isTotallyEmpty })
-        var newData = newData
-        newData.phoneNumbers = newData.phoneNumbers.dropLast().filter({ !$0.value.isTotallyEmpty })
-        newData.emailAddresses = newData.emailAddresses.dropLast().filter({ !$0.value.isTotallyEmpty })
-        if let index = contacts.firstIndex(of: contact) {
-            contacts[index].firstName = newData.firstName
-            contacts[index].lastName = newData.lastName
-            contacts[index].company = newData.company
-            contacts[index].phoneNumbers = newData.phoneNumbers
-            contacts[index].emailAddresses = newData.emailAddresses
-            contacts[index].latitude = newData.latitude
-            contacts[index].longitude = newData.longitude
-            contacts[index].birthday = newData.birthday
-            contacts[index].notes = newData.notes
-            contacts[index].imageData = newData.imageData
-        }
-        if contact.isMyCard {
-            saveMyCard(newData)
-        } else {
-            let store = CNContactStore()
-            let keys = [CNContactIdentifierKey, CNContactGivenNameKey, CNContactFamilyNameKey, CNContactOrganizationNameKey, CNContactPhoneNumbersKey, CNContactEmailAddressesKey, CNContactPostalAddressesKey, CNContactBirthdayKey, CNContactImageDataKey] as [CNKeyDescriptor]
-            if let cnContact = try? store.unifiedContact(withIdentifier: contact.identifier, keysToFetch: keys).mutableCopy() as? CNMutableContact {
-                cnContact.givenName = newData.firstName
-                cnContact.familyName = newData.lastName ?? ""
-                cnContact.organizationName = newData.company ?? ""
-                cnContact.phoneNumbers.removeAll()
-                for phoneNumber in newData.phoneNumbers {
-                    cnContact.phoneNumbers.append(CNLabeledValue(label: phoneNumber.label, value: CNPhoneNumber(stringValue: phoneNumber.value)))
-                }
-                cnContact.emailAddresses.removeAll()
-                for emailAddress in newData.emailAddresses {
-                    cnContact.emailAddresses.append(CNLabeledValue(label: emailAddress.label, value: emailAddress.value as NSString))
-                }
-                if let birthday = newData.birthday {
-                    cnContact.birthday = Calendar.current.dateComponents([.year, .month, .day], from: birthday)
-                }
-                cnContact.imageData = newData.imageData
-                let saveRequest = CNSaveRequest()
-                saveRequest.update(cnContact)
-                try? store.execute(saveRequest)
-            }
-        }
+    func loadHiddenContactsIdentifiers() {
+        do {
+            let encodedHiddenContactsIdentifiers = try Data(contentsOf: hiddenContactsPath)
+            hiddenContactsIdentifiers = try JSONDecoder().decode([String].self, from: encodedHiddenContactsIdentifiers)
+        } catch {}
     }
     
-    func add(_ contact: Contact) {
-        var contact = contact
-        contact.phoneNumbers = contact.phoneNumbers.dropLast().filter({ !$0.value.isTotallyEmpty })
-        contact.emailAddresses = contact.emailAddresses.dropLast().filter({ !$0.value.isTotallyEmpty })
-        if contact.isMyCard {
-            contacts.insert(contact, at: indexFor(contact))
-            saveMyCard(contact)
-        } else {
-            var newContact = contact
-            let cnContact = CNMutableContact()
-            newContact.identifier = cnContact.identifier
-            contacts.insert(newContact, at: indexFor(newContact))
-            cnContact.givenName = contact.firstName
-            cnContact.familyName = contact.lastName ?? ""
-            cnContact.organizationName = contact.company ?? ""
-            for phoneNumber in contact.phoneNumbers {
-                cnContact.phoneNumbers.append(CNLabeledValue(label: phoneNumber.label, value: CNPhoneNumber(stringValue: phoneNumber.value)))
+    func requestContactsAccess(onSuccess: @escaping () -> Void) {
+        let contactStore = CNContactStore()
+        if CNContactStore.authorizationStatus(for: .contacts) == .authorized {
+            onSuccess()
+        } else if CNContactStore.authorizationStatus(for: .contacts) == .notDetermined {
+            contactStore.requestAccess(for: .contacts) { success, _ in
+                if success {
+                    onSuccess()
+                } else {
+                    DispatchQueue.main.async {
+                        self.isNotAuthorized = true
+                    }
+                }
             }
-            for emailAddress in contact.emailAddresses {
-                cnContact.emailAddresses.append(CNLabeledValue(label: emailAddress.label, value: emailAddress.value as NSString))
-            }
-            if let birthday = contact.birthday {
-                cnContact.birthday = Calendar.current.dateComponents([.year, .month, .day], from: birthday)
-            }
-            cnContact.imageData = contact.imageData
-            let store = CNContactStore()
-            let saveRequest = CNSaveRequest()
-            saveRequest.add(cnContact, toContainerWithIdentifier: nil)
-            try? store.execute(saveRequest)
+        } else if CNContactStore.authorizationStatus(for: .contacts) == .denied {
+            self.isNotAuthorized = true
         }
+        
     }
     
-    func reload() {
-        contacts.removeAll()
+    func fetchContacts() {
         let contactStore = CNContactStore()
         let keys = [CNContactIdentifierKey, CNContactGivenNameKey, CNContactFamilyNameKey, CNContactOrganizationNameKey, CNContactPhoneNumbersKey, CNContactEmailAddressesKey, CNContactPostalAddressesKey, CNContactBirthdayKey, CNContactImageDataKey] as [CNKeyDescriptor]
         let request = CNContactFetchRequest(keysToFetch: keys)
@@ -346,56 +291,16 @@ extension ContactStore {
         sortContacts()
     }
     
-    func fetchContacts() {
-        let contactStore = CNContactStore()
-        if CNContactStore.authorizationStatus(for: .contacts) == .authorized {
-            reload()
-            sortContacts()
-        } else if CNContactStore.authorizationStatus(for: .contacts) == .notDetermined {
-            contactStore.requestAccess(for: .contacts) { success, error in
-                if success {
-                    self.reload()
-                } else {
-                    DispatchQueue.main.async {
-                        self.isNotAuthorized = true
-                    }
-                }
-            }
-        } else if CNContactStore.authorizationStatus(for: .contacts) == .denied {
-            self.isNotAuthorized = true
-        }
-        
-    }
-    
-    func saveMyCard(_ contact: Contact) {
-        if let encodedMyCard = try? JSONEncoder().encode(contact) {
-            try? encodedMyCard.write(to: myCardPath, options: .atomic)
-        }
-    }
-    
-    func fetchMyCard() {
+    func loadDeletedContacts() {
         do {
-            let encodedMyCard = try Data(contentsOf: myCardPath)
-            let myCard = try JSONDecoder().decode(Contact.self, from: encodedMyCard)
-            contacts.append(myCard)
+            let encodedContacts = try Data(contentsOf: deletedContactsPath)
+            deletedContacts = try JSONDecoder().decode([Contact].self, from: encodedContacts)
         } catch {}
     }
     
-    func deleteMyCard() {
-        try? FileManager.default.removeItem(at: myCardPath)
-    }
-    
-    func sortContacts() {
-        if sortOrder == .firstNameLastName {
-            contacts.sort {
-                $0.fullName(displayOrder: .firstNameLastName).lowercased() < $1.fullName(displayOrder: .firstNameLastName).lowercased()
-            }
-        } else {
-            contacts.sort {
-                $0.fullName(displayOrder: .lastNameFirstName).lowercased() < $1.fullName(displayOrder: .lastNameFirstName).lowercased()
-            }
-        }
-    }
+}
+
+extension ContactStore {
     
     func indexFor(_ newContact: Contact) -> Int {
         if sortOrder == .firstNameLastName {
@@ -413,6 +318,104 @@ extension ContactStore {
         }
     }
     
+    func sortContacts() {
+        if sortOrder == .firstNameLastName {
+            contacts.sort {
+                $0.fullName(displayOrder: .firstNameLastName).lowercased() < $1.fullName(displayOrder: .firstNameLastName).lowercased()
+            }
+        } else {
+            contacts.sort {
+                $0.fullName(displayOrder: .lastNameFirstName).lowercased() < $1.fullName(displayOrder: .lastNameFirstName).lowercased()
+            }
+        }
+    }
+    
+    func add(_ contact: Contact) {
+        var contact = contact
+        contact.phoneNumbers = contact.phoneNumbers.filter({ !$0.value.isTotallyEmpty })
+        contact.emailAddresses = contact.emailAddresses.filter({ !$0.value.isTotallyEmpty })
+        if contact.isMyCard {
+            contacts.insert(contact, at: indexFor(contact))
+            if let encodedMyCard = try? JSONEncoder().encode(contact) {
+                try? encodedMyCard.write(to: myCardPath, options: .atomic)
+            }
+        } else {
+            let cnContact = CNMutableContact()
+            
+            contact.identifier = cnContact.identifier
+            contacts.insert(contact, at: indexFor(contact))
+            if contact.isEmergencyContact {
+                addToEmergencyContacts(contact)
+            }
+            if contact.isFavorite {
+                addToFavorites(contact)
+            }
+            if contact.isHidden {
+                hideContact(contact)
+            }
+            cnContact.givenName = contact.firstName
+            cnContact.familyName = contact.lastName ?? ""
+            cnContact.organizationName = contact.company ?? ""
+            for phoneNumber in contact.phoneNumbers.filter({ !$0.value.isTotallyEmpty }) {
+                cnContact.phoneNumbers.append(CNLabeledValue(label: phoneNumber.label, value: CNPhoneNumber(stringValue: phoneNumber.value)))
+            }
+            for emailAddress in contact.emailAddresses.filter({ !$0.value.isTotallyEmpty }) {
+                cnContact.emailAddresses.append(CNLabeledValue(label: emailAddress.label, value: emailAddress.value as NSString))
+            }
+            if let birthday = contact.birthday {
+                cnContact.birthday = Calendar.current.dateComponents([.year, .month, .day], from: birthday)
+            }
+            cnContact.imageData = contact.imageData
+            let store = CNContactStore()
+            let saveRequest = CNSaveRequest()
+            saveRequest.add(cnContact, toContainerWithIdentifier: nil)
+            try? store.execute(saveRequest)
+        }
+    }
+    
+    func update(_ contact: Contact, with newData: Contact) {
+        if let index = contacts.firstIndex(of: contact) {
+            contacts[index].firstName = newData.firstName
+            contacts[index].lastName = newData.lastName
+            contacts[index].company = newData.company
+            contacts[index].phoneNumbers = newData.phoneNumbers.filter({ !$0.value.isTotallyEmpty })
+            contacts[index].emailAddresses = newData.emailAddresses.filter({ !$0.value.isTotallyEmpty })
+            contacts[index].latitude = newData.latitude
+            contacts[index].longitude = newData.longitude
+            contacts[index].birthday = newData.birthday
+            contacts[index].notes = newData.notes
+            contacts[index].imageData = newData.imageData
+        }
+        if contact.isMyCard {
+            if let encodedMyCard = try? JSONEncoder().encode(contact) {
+                try? encodedMyCard.write(to: myCardPath, options: .atomic)
+            }
+        } else {
+            let store = CNContactStore()
+            let keys = [CNContactIdentifierKey, CNContactGivenNameKey, CNContactFamilyNameKey, CNContactOrganizationNameKey, CNContactPhoneNumbersKey, CNContactEmailAddressesKey, CNContactPostalAddressesKey, CNContactBirthdayKey, CNContactImageDataKey] as [CNKeyDescriptor]
+            if let cnContact = try? store.unifiedContact(withIdentifier: contact.identifier, keysToFetch: keys).mutableCopy() as? CNMutableContact {
+                cnContact.givenName = newData.firstName
+                cnContact.familyName = newData.lastName ?? ""
+                cnContact.organizationName = newData.company ?? ""
+                cnContact.phoneNumbers.removeAll()
+                for phoneNumber in newData.phoneNumbers.filter({ !$0.value.isTotallyEmpty }) {
+                    cnContact.phoneNumbers.append(CNLabeledValue(label: phoneNumber.label, value: CNPhoneNumber(stringValue: phoneNumber.value)))
+                }
+                cnContact.emailAddresses.removeAll()
+                for emailAddress in newData.emailAddresses.filter({ !$0.value.isTotallyEmpty }) {
+                    cnContact.emailAddresses.append(CNLabeledValue(label: emailAddress.label, value: emailAddress.value as NSString))
+                }
+                if let birthday = newData.birthday {
+                    cnContact.birthday = Calendar.current.dateComponents([.year, .month, .day], from: birthday)
+                }
+                cnContact.imageData = newData.imageData
+                let saveRequest = CNSaveRequest()
+                saveRequest.update(cnContact)
+                try? store.execute(saveRequest)
+            }
+        }
+    }
+    
     func addToEmergencyContacts(_ contact: Contact) {
         if let index = contacts.firstIndex(of: contact) {
             contacts[index].isEmergencyContact = true
@@ -421,9 +424,9 @@ extension ContactStore {
     }
     
     func removeFromEmergencyContacts(_ contact: Contact) {
+        emergencyContactsIdentifiers.removeAll(where: { $0 == contact.identifier })
         if let index = contacts.firstIndex(of: contact) {
             contacts[index].isEmergencyContact = false
-            emergencyContactsIdentifiers.removeAll(where: { $0 == contact.identifier })
         }
     }
     
@@ -435,9 +438,9 @@ extension ContactStore {
     }
     
     func removeFromFavorites(_ contact: Contact) {
+        favoritesIdentifiers.removeAll(where: { $0 == contact.identifier })
         if let index = contacts.firstIndex(of: contact) {
             contacts[index].isFavorite = false
-            favoritesIdentifiers.removeAll(where: { $0 == contact.identifier })
         }
     }
     
@@ -449,9 +452,9 @@ extension ContactStore {
     }
     
     func unhideContact(_ contact: Contact) {
+        hiddenContactsIdentifiers.removeAll(where: { $0 == contact.identifier })
         if let index = contacts.firstIndex(of: contact) {
             contacts[index].isHidden = false
-            hiddenContactsIdentifiers.removeAll(where: { $0 == contact.identifier })
         }
     }
     
@@ -460,18 +463,28 @@ extension ContactStore {
             contacts[index].isDeleted = true
             deletedContacts.append(contacts[index])
             contacts.remove(at: index)
+            removeFromEmergencyContacts(contact)
+            removeFromFavorites(contact)
+            unhideContact(contact)
         }
-        let store = CNContactStore()
-        if let cnContact = try? store.unifiedContact(withIdentifier: contact.identifier, keysToFetch: []).mutableCopy() as? CNMutableContact {
-            let saveRequest = CNSaveRequest()
-            saveRequest.delete(cnContact)
-            try? store.execute(saveRequest)
+        if contact.isMyCard {
+            try? FileManager.default.removeItem(at: myCardPath)
+        } else {
+            let store = CNContactStore()
+            if let cnContact = try? store.unifiedContact(withIdentifier: contact.identifier, keysToFetch: []).mutableCopy() as? CNMutableContact {
+                let saveRequest = CNSaveRequest()
+                saveRequest.delete(cnContact)
+                try? store.execute(saveRequest)
+            }
         }
     }
     
     func permanentlyDelete(_ contact: Contact) {
         if let index = deletedContacts.firstIndex(of: contact) {
             deletedContacts.remove(at: index)
+            if contact.isEmergencyContact {
+                removeFromEmergencyContacts(contact)
+            }
         }
     }
     
