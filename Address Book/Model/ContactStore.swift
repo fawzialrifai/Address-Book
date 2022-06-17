@@ -374,44 +374,59 @@ extension ContactStore {
     }
     
     func update(_ contact: Contact, with newData: Contact) {
-        if let index = contacts.firstIndex(of: contact) {
-            contacts[index].firstName = newData.firstName
-            contacts[index].lastName = newData.lastName
-            contacts[index].company = newData.company
-            contacts[index].phoneNumbers = newData.phoneNumbers.filter({ !$0.value.isTotallyEmpty })
-            contacts[index].emailAddresses = newData.emailAddresses.filter({ !$0.value.isTotallyEmpty })
-            contacts[index].latitude = newData.latitude
-            contacts[index].longitude = newData.longitude
-            contacts[index].birthday = newData.birthday
-            contacts[index].notes = newData.notes
-            contacts[index].imageData = newData.imageData
-        }
-        if contact.isMyCard {
-            if let encodedMyCard = try? JSONEncoder().encode(contact) {
-                try? encodedMyCard.write(to: myCardPath, options: .atomic)
+        if contact.isDeleted {
+            if let index = deletedContacts.firstIndex(of: contact) {
+                deletedContacts[index].firstName = newData.firstName
+                deletedContacts[index].lastName = newData.lastName
+                deletedContacts[index].company = newData.company
+                deletedContacts[index].phoneNumbers = newData.phoneNumbers.filter({ !$0.value.isTotallyEmpty })
+                deletedContacts[index].emailAddresses = newData.emailAddresses.filter({ !$0.value.isTotallyEmpty })
+                deletedContacts[index].latitude = newData.latitude
+                deletedContacts[index].longitude = newData.longitude
+                deletedContacts[index].birthday = newData.birthday
+                deletedContacts[index].notes = newData.notes
+                deletedContacts[index].imageData = newData.imageData
             }
         } else {
-            let store = CNContactStore()
-            let keys = [CNContactIdentifierKey, CNContactGivenNameKey, CNContactFamilyNameKey, CNContactOrganizationNameKey, CNContactPhoneNumbersKey, CNContactEmailAddressesKey, CNContactPostalAddressesKey, CNContactBirthdayKey, CNContactImageDataKey] as [CNKeyDescriptor]
-            if let cnContact = try? store.unifiedContact(withIdentifier: contact.identifier, keysToFetch: keys).mutableCopy() as? CNMutableContact {
-                cnContact.givenName = newData.firstName
-                cnContact.familyName = newData.lastName ?? ""
-                cnContact.organizationName = newData.company ?? ""
-                cnContact.phoneNumbers.removeAll()
-                for phoneNumber in newData.phoneNumbers.filter({ !$0.value.isTotallyEmpty }) {
-                    cnContact.phoneNumbers.append(CNLabeledValue(label: phoneNumber.label, value: CNPhoneNumber(stringValue: phoneNumber.value)))
+            if let index = contacts.firstIndex(of: contact) {
+                contacts[index].firstName = newData.firstName
+                contacts[index].lastName = newData.lastName
+                contacts[index].company = newData.company
+                contacts[index].phoneNumbers = newData.phoneNumbers.filter({ !$0.value.isTotallyEmpty })
+                contacts[index].emailAddresses = newData.emailAddresses.filter({ !$0.value.isTotallyEmpty })
+                contacts[index].latitude = newData.latitude
+                contacts[index].longitude = newData.longitude
+                contacts[index].birthday = newData.birthday
+                contacts[index].notes = newData.notes
+                contacts[index].imageData = newData.imageData
+            }
+            if contact.isMyCard {
+                if let encodedMyCard = try? JSONEncoder().encode(newData) {
+                    try? encodedMyCard.write(to: myCardPath, options: .atomic)
                 }
-                cnContact.emailAddresses.removeAll()
-                for emailAddress in newData.emailAddresses.filter({ !$0.value.isTotallyEmpty }) {
-                    cnContact.emailAddresses.append(CNLabeledValue(label: emailAddress.label, value: emailAddress.value as NSString))
+            } else {
+                let store = CNContactStore()
+                let keys = [CNContactIdentifierKey, CNContactGivenNameKey, CNContactFamilyNameKey, CNContactOrganizationNameKey, CNContactPhoneNumbersKey, CNContactEmailAddressesKey, CNContactPostalAddressesKey, CNContactBirthdayKey, CNContactImageDataKey] as [CNKeyDescriptor]
+                if let cnContact = try? store.unifiedContact(withIdentifier: contact.identifier, keysToFetch: keys).mutableCopy() as? CNMutableContact {
+                    cnContact.givenName = newData.firstName
+                    cnContact.familyName = newData.lastName ?? ""
+                    cnContact.organizationName = newData.company ?? ""
+                    cnContact.phoneNumbers.removeAll()
+                    for phoneNumber in newData.phoneNumbers.filter({ !$0.value.isTotallyEmpty }) {
+                        cnContact.phoneNumbers.append(CNLabeledValue(label: phoneNumber.label, value: CNPhoneNumber(stringValue: phoneNumber.value)))
+                    }
+                    cnContact.emailAddresses.removeAll()
+                    for emailAddress in newData.emailAddresses.filter({ !$0.value.isTotallyEmpty }) {
+                        cnContact.emailAddresses.append(CNLabeledValue(label: emailAddress.label, value: emailAddress.value as NSString))
+                    }
+                    if let birthday = newData.birthday {
+                        cnContact.birthday = Calendar.current.dateComponents([.year, .month, .day], from: birthday)
+                    }
+                    cnContact.imageData = newData.imageData
+                    let saveRequest = CNSaveRequest()
+                    saveRequest.update(cnContact)
+                    try? store.execute(saveRequest)
                 }
-                if let birthday = newData.birthday {
-                    cnContact.birthday = Calendar.current.dateComponents([.year, .month, .day], from: birthday)
-                }
-                cnContact.imageData = newData.imageData
-                let saveRequest = CNSaveRequest()
-                saveRequest.update(cnContact)
-                try? store.execute(saveRequest)
             }
         }
     }

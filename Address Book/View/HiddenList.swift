@@ -43,7 +43,22 @@ struct HiddenList: View {
                                 ContactRow(contact: contact)
                             }
                         }
-                        
+                    }
+                    .confirmationDialog("Delete Contact?", isPresented: $contactStore.isDeleteContactDialogPresented) {
+                        Button("Delete", role: .destructive) {
+                            withAnimation {
+                                guard let contactToDelete = contactStore.contactToDelete else {
+                                    return
+                                }
+                                UINotificationFeedbackGenerator().notificationOccurred(.success)
+                                contactStore.moveToDeletedList(contactToDelete)
+                            }
+                            contactStore.contactToDelete = nil
+                        }
+                    } message: {
+                        if let contactToDelete = contactStore.contactToDelete {
+                            Text("Are you sure you want to delete \(contactToDelete.fullName(displayOrder: contactStore.displayOrder)) from your contacts?")
+                        }
                     }
                 }
             }
