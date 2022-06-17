@@ -106,6 +106,7 @@
 				5825BD392854EC9F0082069A /* AddressBookApp.swift */,
 				5825BDAC2854ED6E0082069A /* Model */,
 				5825BDB42854ED6F0082069A /* View */,
+				5825BDBA2854ED6F0082069A /* Code Scanner */,
 				5825BDA82854ED6E0082069A /* Extension */,
 				5825BD3D2854ECA10082069A /* Assets.xcassets */,
 				5825BD3F2854ECA10082069A /* Preview Content */,
@@ -162,7 +163,6 @@
 				5825BDB82854ED6F0082069A /* ImagePicker.swift */,
 				5825BDC22854ED6F0082069A /* ContactImage.swift */,
 				5825BDC02854ED6F0082069A /* EditableContactImage.swift */,
-				5825BDBA2854ED6F0082069A /* Code Scanner */,
 			);
 			path = View;
 			sourceTree = "<group>";
