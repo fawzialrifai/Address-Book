@@ -1,5 +1,5 @@
 //
-//  QRCodeGenerator.swift
+//  CodeGenerator.swift
 //  Address Book
 //
 //  Created by Fawzi Rifai on 15/05/2022.
@@ -8,7 +8,7 @@
 import SwiftUI
 import CoreImage.CIFilterBuiltins
 
-struct QRCodeGenerator: View {
+struct CodeGenerator: View {
     @Environment(\.dismiss) private var dismiss
     var contact: Contact
     @State var qrContact: Contact
@@ -126,6 +126,6 @@ struct QRCodeImage: View {
 
 struct QRCodeGenerator_Previews: PreviewProvider {
     static var previews: some View {
-        QRCodeGenerator(contact: .example)
+        CodeGenerator(contact: .example)
     }
 }

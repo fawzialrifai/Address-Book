@@ -12,7 +12,7 @@ struct AddressBookApp: App {
     @StateObject var contactStore = ContactStore()
     var body: some Scene {
         WindowGroup {
-            ContactList()
+            ContactList(folder: .all, isFolderLocked: false)
                 .environmentObject(contactStore)
         }
     }

@@ -69,7 +69,7 @@ struct ManageContacts: View {
                         }
                     }
                     NavigationLink {
-                        HiddenList()
+                        ContactList(folder: .hidden)
                     } label: {
                         HStack {
                             Text("Hidden")
@@ -79,7 +79,7 @@ struct ManageContacts: View {
                         }
                     }
                     NavigationLink {
-                        DeletedList()
+                        ContactList(folder: .deleted)
                     } label: {
                         HStack {
                             Text("Recently Deleted")

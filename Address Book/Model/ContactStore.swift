@@ -54,7 +54,9 @@ import Contacts
     private var hiddenContactsPath = FileManager.documentDirectory.appendingPathComponent("Hidden Contacts")
     private var deletedContactsPath = FileManager.documentDirectory.appendingPathComponent("Deleted Contacts")
     @Published var filterText = ""
-    @Published var isFirstLettersGridPresented = false
+    @Published var hiddenFilterText = ""
+    @Published var deletedFilterText = ""
+    @Published var isInitialsGridPresented = false
     @Published var isDeleteContactDialogPresented = false
     @Published var contactToDelete: Contact?
     @Published var isImporting = false
@@ -79,26 +81,53 @@ import Contacts
 
 extension ContactStore {
     
-    var filteredContacts: [Contact] {
-        contacts.filter {
-            !$0.isHidden && filterText.isEmpty || (
-                ($0.firstName + " " + ($0.lastName ?? "")).lowercased().contains(filterText.lowercased()) ||
-                (($0.lastName ?? "") + " " + ($0.firstName)).lowercased().contains(filterText.lowercased()) ||
-                $0.company?.lowercased().contains(filterText.lowercased()) == true ||
-                $0.notes?.lowercased().contains(filterText.lowercased()) == true ||
-                $0.phoneNumbers.contains(where: { $0.value.lowercased().contains(filterText.lowercased()) }) ||
-                $0.phoneNumbers.contains(where: { $0.value.plainPhoneNumber.lowercased().contains(filterText.plainPhoneNumber.lowercased()) }) ||
-                $0.emailAddresses.contains(where: { $0.value.lowercased().contains(filterText.lowercased()) })
-            )
+    func filteredContacts(for list: Folder) -> [Contact] {
+        if list == .all {
+            return contacts.filter {
+                !$0.isHidden && (filterText.isEmpty ||
+                    ($0.firstName + " " + ($0.lastName ?? "")).lowercased().contains(filterText.lowercased()) ||
+                    (($0.lastName ?? "") + " " + ($0.firstName)).lowercased().contains(filterText.lowercased()) ||
+                    $0.company?.lowercased().contains(filterText.lowercased()) == true ||
+                    $0.notes?.lowercased().contains(filterText.lowercased()) == true ||
+                    $0.phoneNumbers.contains(where: { $0.value.lowercased().contains(filterText.lowercased()) }) ||
+                    $0.phoneNumbers.contains(where: { $0.value.plainPhoneNumber.lowercased().contains(filterText.plainPhoneNumber.lowercased()) }) ||
+                    $0.emailAddresses.contains(where: { $0.value.lowercased().contains(filterText.lowercased()) })
+                )
+            }
+        }
+        else if list == .hidden {
+            return hiddenContacts.filter {
+                hiddenFilterText.isEmpty || (
+                    ($0.firstName + " " + ($0.lastName ?? "")).lowercased().contains(hiddenFilterText.lowercased()) ||
+                    (($0.lastName ?? "") + " " + ($0.firstName)).lowercased().contains(hiddenFilterText.lowercased()) ||
+                    $0.company?.lowercased().contains(hiddenFilterText.lowercased()) == true ||
+                    $0.notes?.lowercased().contains(hiddenFilterText.lowercased()) == true ||
+                    $0.phoneNumbers.contains(where: { $0.value.lowercased().contains(hiddenFilterText.lowercased()) }) ||
+                    $0.phoneNumbers.contains(where: { $0.value.plainPhoneNumber.lowercased().contains(hiddenFilterText.plainPhoneNumber.lowercased()) }) ||
+                    $0.emailAddresses.contains(where: { $0.value.lowercased().contains(hiddenFilterText.lowercased()) })
+                )
+            }
+        } else {
+            return deletedContacts.filter {
+                deletedFilterText.isEmpty || (
+                    ($0.firstName + " " + ($0.lastName ?? "")).lowercased().contains(deletedFilterText.lowercased()) ||
+                    (($0.lastName ?? "") + " " + ($0.firstName)).lowercased().contains(deletedFilterText.lowercased()) ||
+                    $0.company?.lowercased().contains(deletedFilterText.lowercased()) == true ||
+                    $0.notes?.lowercased().contains(deletedFilterText.lowercased()) == true ||
+                    $0.phoneNumbers.contains(where: { $0.value.lowercased().contains(deletedFilterText.lowercased()) }) ||
+                    $0.phoneNumbers.contains(where: { $0.value.plainPhoneNumber.lowercased().contains(deletedFilterText.plainPhoneNumber.lowercased()) }) ||
+                    $0.emailAddresses.contains(where: { $0.value.lowercased().contains(deletedFilterText.lowercased()) })
+                )
+            }
         }
     }
     
-    var emergencyContacts: [Contact] {
-        filteredContacts.filter({ $0.isEmergencyContact })
+    func emergencyContacts(in list: Folder) -> [Contact] {
+        filteredContacts(for: list).filter({ $0.isEmergencyContact })
     }
     
-    var favorites: [Contact] {
-        filteredContacts.filter({ $0.isFavorite })
+    func favorites(in list: Folder) -> [Contact] {
+        filteredContacts(for: list).filter({ $0.isFavorite })
     }
     
     var hiddenContacts: [Contact] {
@@ -145,10 +174,10 @@ extension ContactStore {
 
 extension ContactStore {
     
-    var contactsDictionary: [String: [Contact]] {
+    func contactsDictionary(for list: Folder) -> [String: [Contact]] {
         var keys = [String]()
         var contactsDictionary = [String: [Contact]]()
-        for contact in filteredContacts {
+        for contact in filteredContacts(for: list) {
             if !contact.isMyCard {
                 if let firstLetter = contact.firstLetter(sortOrder: sortOrder) {
                     if keys.contains(firstLetter) {

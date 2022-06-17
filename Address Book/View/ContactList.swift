@@ -6,37 +6,82 @@
 //
 
 import SwiftUI
-import MapKit
+import LocalAuthentication
 
 struct ContactList: View {
+    @Environment (\.scenePhase) private var scenePhase
+    var folder: Folder
+    @State var isFolderLocked = true
     @EnvironmentObject var contactStore: ContactStore
     var body: some View {
-        ScrollViewReader { scrollViewProxy in
-            ZStack {
-                Contacts(scrollViewProxy: scrollViewProxy)
-                if contactStore.isFirstLettersGridPresented {
-                    FirstLettersGrid(scrollViewProxy: scrollViewProxy)
-                        .zIndex(1)
+        ZStack {
+            Color.contactsBackgroundColor
+                .ignoresSafeArea()
+            if isFolderLocked {
+                VStack(alignment: .center, spacing: 8) {
+                    VStack(spacing: 8) {
+                        Image(systemName: "lock.fill")
+                            .foregroundColor(.secondary)
+                            .font(.largeTitle)
+                        Text("Authentication Required")
+                            .foregroundColor(.secondary)
+                            .font(.title2)
+                            .multilineTextAlignment(.center)
+                    }
+                    Button("View \(folder.rawValue)") {
+                        authenticate()
+                    }
+                }
+            } else {
+                ScrollViewReader { scrollViewProxy in
+                    ZStack {
+                        if folder == .all {
+                            NavigationView {
+                                Contacts(folder: folder, scrollViewProxy: scrollViewProxy)
+                            }
+                        } else {
+                            Contacts(folder: folder, scrollViewProxy: scrollViewProxy)
+                        }
+                        if contactStore.isInitialsGridPresented {
+                            InitialsGrid(folder: folder, scrollViewProxy: scrollViewProxy)
+                                .zIndex(1)
+                        }
+                    }
                 }
             }
+        }
+    }
+    func authenticate() {
+        let context = LAContext()
+        if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: nil) {
+            context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: "Authentication is required to view hidden contacts.") { success, _ in
+                Task { @MainActor in
+                    if success {
+                        isFolderLocked = false
+                    }
+                }
+            }
+        } else {
+            isFolderLocked = false
         }
     }
 }
 
 struct Contacts: View {
-    @Environment (\.scenePhase) private var scenePhase
+    var folder: Folder
     @EnvironmentObject var contactStore: ContactStore
     @State private var isManageContactsViewPresented = false
     @State private var isNewContactViewPresented = false
     @State private var isCodeScannerPresented = false
     var scrollViewProxy: ScrollViewProxy
     var body: some View {
-        NavigationView {
             List {
-                MyCardSection()
-                EmergencySection()
-                FavoritesSection()
-                FirstLettersSections()
+                if folder == .all {
+                    MyCardSection()
+                }
+                EmergencySection(folder: folder)
+                FavoritesSection(folder: folder)
+                FirstLettersSections(folder: folder)
             }
             .confirmationDialog("Delete Contact?", isPresented: $contactStore.isDeleteContactDialogPresented) {
                 Button("Delete", role: .destructive) {
@@ -55,28 +100,32 @@ struct Contacts: View {
                 }
             }
             .listStyle(InsetGroupedListStyle())
-            .navigationTitle("Contacts")
-            .searchable(text: $contactStore.filterText, placement: .navigationBarDrawer(displayMode: .automatic), prompt: "Search for a contact")
+            .navigationBarTitle(folder.rawValue, displayMode: folder == .all ? .large : .inline)
+            .searchable(text: folder == .all ? $contactStore.filterText : folder == .hidden ? $contactStore.hiddenFilterText : $contactStore.deletedFilterText, placement: .navigationBarDrawer(displayMode: .automatic), prompt: "Search for a contact")
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Manage") { isManageContactsViewPresented.toggle() }
-                }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Menu {
-                        Button {
-                            isNewContactViewPresented.toggle()
-                        } label: {
-                            Label("Add Manually", systemImage: "plus")
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        if folder == .all {
+                            Button("Manage") { isManageContactsViewPresented.toggle() }
                         }
-                        Button {
-                            isCodeScannerPresented = true
-                        } label: {
-                            Label("Scan QR Code", systemImage: "qrcode")
-                        }
-                    } label: {
-                        Image(systemName: "plus")
                     }
-                }
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        if folder == .all {
+                            Menu {
+                                Button {
+                                    isNewContactViewPresented.toggle()
+                                } label: {
+                                    Label("Add Manually", systemImage: "plus")
+                                }
+                                Button {
+                                    isCodeScannerPresented = true
+                                } label: {
+                                    Label("Scan QR Code", systemImage: "qrcode")
+                                }
+                            } label: {
+                                Image(systemName: "plus")
+                            }
+                        }
+                    }
             }
             .sheet(isPresented: $isNewContactViewPresented) {
                 NavigationView {
@@ -93,7 +142,6 @@ struct Contacts: View {
             }
             .sheet(isPresented: $isManageContactsViewPresented) {
                 ManageContacts()
-                    .environment(\.scenePhase, scenePhase)
             }
             .sheet(isPresented: $isCodeScannerPresented) {
                 NavigationView {
@@ -121,7 +169,6 @@ struct Contacts: View {
                 Text("Please allow Address Book access contacts from Settings.")
                 
             }
-        }
     }
     func handleScan(result: Result<Data?, ScanError>) {
         switch result {
@@ -204,11 +251,12 @@ struct MyCardSection: View {
 }
 
 struct EmergencySection: View {
+    var folder: Folder
     @EnvironmentObject var contactStore: ContactStore
     var body: some View {
-        if !contactStore.emergencyContacts.isEmpty {
+        if !contactStore.emergencyContacts(in: folder).isEmpty {
             Section(header: SectionHeader(view: AnyView(Image(systemName: "staroflife.fill")))) {
-                ForEach(contactStore.emergencyContacts) { contact in
+                ForEach(contactStore.emergencyContacts(in: folder)) { contact in
                     ContactRow(contact: contact)
                 }
             }
@@ -218,11 +266,12 @@ struct EmergencySection: View {
 }
 
 struct FavoritesSection: View {
+    var folder: Folder
     @EnvironmentObject var contactStore: ContactStore
     var body: some View {
-        if !contactStore.favorites.isEmpty {
+        if !contactStore.favorites(in: folder).isEmpty {
             Section(header: SectionHeader(view: AnyView(Text("★")))) {
-                ForEach(contactStore.favorites) { contact in
+                ForEach(contactStore.favorites(in: folder)) { contact in
                     ContactRow(contact: contact)
                 }
             }
@@ -232,11 +281,12 @@ struct FavoritesSection: View {
 }
 
 struct FirstLettersSections: View {
+    var folder: Folder
     @EnvironmentObject var contactStore: ContactStore
     var body: some View {
-        ForEach(contactStore.contactsDictionary.keys.sorted(by: <), id: \.self) { letter in
+        ForEach(contactStore.contactsDictionary(for: folder).keys.sorted(by: <), id: \.self) { letter in
             Section(header: SectionHeader(view: AnyView(Text(letter)))) {
-                ForEach(contactStore.contactsDictionary[letter] ?? []) { contact in
+                ForEach(contactStore.contactsDictionary(for: folder)[letter] ?? []) { contact in
                     ContactRow(contact: contact)
                         .id(contact.id)
                 }
@@ -344,7 +394,7 @@ struct SectionHeader: View {
             UISelectionFeedbackGenerator().selectionChanged()
             dismissSearch()
             withAnimation {
-                contactStore.isFirstLettersGridPresented.toggle()
+                contactStore.isInitialsGridPresented.toggle()
             }
         } label: {
             view.frame(maxWidth: .infinity, alignment: .leading)
@@ -355,7 +405,7 @@ struct SectionHeader: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContactList()
+        ContactList(folder: .all)
             .environmentObject(ContactStore())
     }
 }

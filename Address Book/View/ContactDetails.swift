@@ -154,7 +154,7 @@ struct ContactDetails: View {
                         isCodeGeneratorPresented = true
                     }
                     .sheet(isPresented: $isCodeGeneratorPresented) {
-                        QRCodeGenerator(contact: contact)
+                        CodeGenerator(contact: contact)
                     }
                     if contact.isDeleted {
                         Button("Restore Contact") {

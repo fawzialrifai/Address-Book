@@ -1,5 +1,5 @@
 //
-//  FirstLettersGrid.swift
+//  InitialsGrid.swift
 //  Address Book
 //
 //  Created by Fawzi Rifai on 08/05/2022.
@@ -7,7 +7,8 @@
 
 import SwiftUI
 
-struct FirstLettersGrid: View {
+struct InitialsGrid: View {
+    var folder: Folder
     @EnvironmentObject var contactStore: ContactStore
     let scrollViewProxy: ScrollViewProxy?
     var body: some View {
@@ -15,13 +16,13 @@ struct FirstLettersGrid: View {
             GeometryReader { proxy in
                 ScrollView {
                     LazyVGrid(columns: [GridItem(.adaptive(minimum: 75, maximum: 75))], spacing: 8) {
-                        if !contactStore.emergencyContacts.isEmpty {
+                        if !contactStore.emergencyContacts(in: folder).isEmpty {
                             LetterItem(scrollViewProxy: scrollViewProxy, id: "staroflife", view: AnyView(Image(systemName: "staroflife.fill")))
                         }
-                        if !contactStore.favorites.isEmpty {
+                        if !contactStore.favorites(in: folder).isEmpty {
                             LetterItem(scrollViewProxy: scrollViewProxy, id: "★", view: AnyView(Text("★")))
                         }
-                        ForEach(contactStore.contactsDictionary.keys.sorted(by: <), id: \.self) { letter in
+                        ForEach(contactStore.contactsDictionary(for: folder).keys.sorted(by: <), id: \.self) { letter in
                             LetterItem(scrollViewProxy: scrollViewProxy, id: letter, view: AnyView(Text(letter)))
                         }
                     }
@@ -36,7 +37,7 @@ struct FirstLettersGrid: View {
                     Button {
                         UISelectionFeedbackGenerator().selectionChanged()
                         withAnimation {
-                            contactStore.isFirstLettersGridPresented.toggle()
+                            contactStore.isInitialsGridPresented.toggle()
                         }
                     } label: {
                         Image(systemName: "arrow.backward")
@@ -56,7 +57,7 @@ struct LetterItem: View {
         Button {
             UISelectionFeedbackGenerator().selectionChanged()
             withAnimation {
-                contactStore.isFirstLettersGridPresented.toggle()
+                contactStore.isInitialsGridPresented.toggle()
                 scrollViewProxy?.scrollTo(id, anchor: UnitPoint.center)
             }
         } label: {
@@ -74,6 +75,6 @@ struct LetterItem: View {
 
 struct FirstLettersGrid_Previews: PreviewProvider {
     static var previews: some View {
-        FirstLettersGrid(scrollViewProxy: nil)
+        InitialsGrid(folder: .all, scrollViewProxy: nil)
     }
 }

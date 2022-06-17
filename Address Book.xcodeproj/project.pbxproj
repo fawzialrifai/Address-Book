@@ -22,20 +22,19 @@
 		5825BDD02854ED6F0082069A /* ContactDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDB62854ED6F0082069A /* ContactDetails.swift */; };
 		5825BDD12854ED6F0082069A /* EditContact.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDB72854ED6F0082069A /* EditContact.swift */; };
 		5825BDD22854ED6F0082069A /* ImagePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDB82854ED6F0082069A /* ImagePicker.swift */; };
-		5825BDD32854ED6F0082069A /* FirstLettersGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDB92854ED6F0082069A /* FirstLettersGrid.swift */; };
+		5825BDD32854ED6F0082069A /* InitialsGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDB92854ED6F0082069A /* InitialsGrid.swift */; };
 		5825BDD42854ED6F0082069A /* CodeScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDBB2854ED6F0082069A /* CodeScanner.swift */; };
 		5825BDD52854ED6F0082069A /* ScannerCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDBC2854ED6F0082069A /* ScannerCoordinator.swift */; };
 		5825BDD62854ED6F0082069A /* ScannerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDBD2854ED6F0082069A /* ScannerViewController.swift */; };
-		5825BDD72854ED6F0082069A /* QRCodeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDBE2854ED6F0082069A /* QRCodeGenerator.swift */; };
+		5825BDD72854ED6F0082069A /* CodeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDBE2854ED6F0082069A /* CodeGenerator.swift */; };
 		5825BDD82854ED6F0082069A /* ManageContacts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDBF2854ED6F0082069A /* ManageContacts.swift */; };
 		5825BDD92854ED6F0082069A /* EditableContactImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDC02854ED6F0082069A /* EditableContactImage.swift */; };
 		5825BDDA2854ED6F0082069A /* ContactList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDC12854ED6F0082069A /* ContactList.swift */; };
 		5825BDDB2854ED6F0082069A /* ContactImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDC22854ED6F0082069A /* ContactImage.swift */; };
 		58725AB82857C4C6004BF574 /* LabeledValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58725AB72857C4C6004BF574 /* LabeledValue.swift */; };
-		58725ABA28587EDC004BF574 /* HiddenList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58725AB928587EDC004BF574 /* HiddenList.swift */; };
 		58725AD628590BA2004BF574 /* DuplicatesList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58725AD528590BA1004BF574 /* DuplicatesList.swift */; };
 		58725AD828594B11004BF574 /* MergeContact.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58725AD728594B11004BF574 /* MergeContact.swift */; };
-		587EB063285A98100047A5C9 /* DeletedList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 587EB062285A98100047A5C9 /* DeletedList.swift */; };
+		58745610285D04D5004EEFD1 /* Folder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5874560F285D04D5004EEFD1 /* Folder.swift */; };
 		58DA70CA285B602900BEA685 /* CNContact-extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58DA70C9285B602900BEA685 /* CNContact-extension.swift */; };
 /* End PBXBuildFile section */
 
@@ -56,20 +55,19 @@
 		5825BDB62854ED6F0082069A /* ContactDetails.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactDetails.swift; sourceTree = "<group>"; };
 		5825BDB72854ED6F0082069A /* EditContact.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EditContact.swift; sourceTree = "<group>"; };
 		5825BDB82854ED6F0082069A /* ImagePicker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImagePicker.swift; sourceTree = "<group>"; };
-		5825BDB92854ED6F0082069A /* FirstLettersGrid.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FirstLettersGrid.swift; sourceTree = "<group>"; };
+		5825BDB92854ED6F0082069A /* InitialsGrid.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InitialsGrid.swift; sourceTree = "<group>"; };
 		5825BDBB2854ED6F0082069A /* CodeScanner.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CodeScanner.swift; sourceTree = "<group>"; };
 		5825BDBC2854ED6F0082069A /* ScannerCoordinator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScannerCoordinator.swift; sourceTree = "<group>"; };
 		5825BDBD2854ED6F0082069A /* ScannerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScannerViewController.swift; sourceTree = "<group>"; };
-		5825BDBE2854ED6F0082069A /* QRCodeGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QRCodeGenerator.swift; sourceTree = "<group>"; };
+		5825BDBE2854ED6F0082069A /* CodeGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CodeGenerator.swift; sourceTree = "<group>"; };
 		5825BDBF2854ED6F0082069A /* ManageContacts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ManageContacts.swift; sourceTree = "<group>"; };
 		5825BDC02854ED6F0082069A /* EditableContactImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EditableContactImage.swift; sourceTree = "<group>"; };
 		5825BDC12854ED6F0082069A /* ContactList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactList.swift; sourceTree = "<group>"; };
 		5825BDC22854ED6F0082069A /* ContactImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactImage.swift; sourceTree = "<group>"; };
 		58725AB72857C4C6004BF574 /* LabeledValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabeledValue.swift; sourceTree = "<group>"; };
-		58725AB928587EDC004BF574 /* HiddenList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HiddenList.swift; sourceTree = "<group>"; };
 		58725AD528590BA1004BF574 /* DuplicatesList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicatesList.swift; sourceTree = "<group>"; };
 		58725AD728594B11004BF574 /* MergeContact.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MergeContact.swift; sourceTree = "<group>"; };
-		587EB062285A98100047A5C9 /* DeletedList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeletedList.swift; sourceTree = "<group>"; };
+		5874560F285D04D5004EEFD1 /* Folder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Folder.swift; sourceTree = "<group>"; };
 		58DA70C9285B602900BEA685 /* CNContact-extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CNContact-extension.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -141,6 +139,7 @@
 				58725AB72857C4C6004BF574 /* LabeledValue.swift */,
 				5825BDAF2854ED6E0082069A /* Order.swift */,
 				5825BDA72854ED6E0082069A /* LocationManager.swift */,
+				5874560F285D04D5004EEFD1 /* Folder.swift */,
 				5825BDAD2854ED6E0082069A /* JSONFile.swift */,
 			);
 			path = Model;
@@ -150,16 +149,14 @@
 			isa = PBXGroup;
 			children = (
 				5825BDC12854ED6F0082069A /* ContactList.swift */,
-				5825BDB92854ED6F0082069A /* FirstLettersGrid.swift */,
+				5825BDB92854ED6F0082069A /* InitialsGrid.swift */,
 				5825BDB62854ED6F0082069A /* ContactDetails.swift */,
-				5825BDBE2854ED6F0082069A /* QRCodeGenerator.swift */,
+				5825BDBE2854ED6F0082069A /* CodeGenerator.swift */,
 				5825BDB72854ED6F0082069A /* EditContact.swift */,
 				5825BDB52854ED6F0082069A /* LabelPicker.swift */,
 				5825BDBF2854ED6F0082069A /* ManageContacts.swift */,
 				58725AD528590BA1004BF574 /* DuplicatesList.swift */,
 				58725AD728594B11004BF574 /* MergeContact.swift */,
-				58725AB928587EDC004BF574 /* HiddenList.swift */,
-				587EB062285A98100047A5C9 /* DeletedList.swift */,
 				5825BDB82854ED6F0082069A /* ImagePicker.swift */,
 				5825BDC22854ED6F0082069A /* ContactImage.swift */,
 				5825BDC02854ED6F0082069A /* EditableContactImage.swift */,
@@ -248,22 +245,20 @@
 			buildActionMask = 2147483647;
 			files = (
 				5825BDCE2854ED6F0082069A /* Contact.swift in Sources */,
-				587EB063285A98100047A5C9 /* DeletedList.swift in Sources */,
 				5825BDD02854ED6F0082069A /* ContactDetails.swift in Sources */,
 				5825BDC72854ED6F0082069A /* String-extension.swift in Sources */,
 				5825BDD22854ED6F0082069A /* ImagePicker.swift in Sources */,
-				5825BDD72854ED6F0082069A /* QRCodeGenerator.swift in Sources */,
+				5825BDD72854ED6F0082069A /* CodeGenerator.swift in Sources */,
 				5825BDD92854ED6F0082069A /* EditableContactImage.swift in Sources */,
 				58DA70CA285B602900BEA685 /* CNContact-extension.swift in Sources */,
 				5825BDD42854ED6F0082069A /* CodeScanner.swift in Sources */,
 				5825BDD62854ED6F0082069A /* ScannerViewController.swift in Sources */,
-				5825BDD32854ED6F0082069A /* FirstLettersGrid.swift in Sources */,
+				5825BDD32854ED6F0082069A /* InitialsGrid.swift in Sources */,
 				5825BD3A2854EC9F0082069A /* AddressBookApp.swift in Sources */,
 				58725AB82857C4C6004BF574 /* LabeledValue.swift in Sources */,
 				5825BDCA2854ED6F0082069A /* Order.swift in Sources */,
 				5825BDC82854ED6F0082069A /* JSONFile.swift in Sources */,
 				5825BDDA2854ED6F0082069A /* ContactList.swift in Sources */,
-				58725ABA28587EDC004BF574 /* HiddenList.swift in Sources */,
 				5825BDD82854ED6F0082069A /* ManageContacts.swift in Sources */,
 				5825BDC42854ED6F0082069A /* LocationManager.swift in Sources */,
 				5825BDCF2854ED6F0082069A /* LabelPicker.swift in Sources */,
@@ -275,6 +270,7 @@
 				5825BDC92854ED6F0082069A /* ContactStore.swift in Sources */,
 				5825BDC52854ED6F0082069A /* FileManager-extension.swift in Sources */,
 				5825BDD12854ED6F0082069A /* EditContact.swift in Sources */,
+				58745610285D04D5004EEFD1 /* Folder.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
