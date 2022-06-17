@@ -104,7 +104,6 @@
 			isa = PBXGroup;
 			children = (
 				5825BD392854EC9F0082069A /* AddressBookApp.swift */,
-				5825BDA72854ED6E0082069A /* LocationManager.swift */,
 				5825BDAC2854ED6E0082069A /* Model */,
 				5825BDB42854ED6F0082069A /* View */,
 				5825BDA82854ED6E0082069A /* Extension */,
@@ -140,6 +139,7 @@
 				5825BDAE2854ED6E0082069A /* ContactStore.swift */,
 				58725AB72857C4C6004BF574 /* LabeledValue.swift */,
 				5825BDAF2854ED6E0082069A /* Order.swift */,
+				5825BDA72854ED6E0082069A /* LocationManager.swift */,
 				5825BDAD2854ED6E0082069A /* JSONFile.swift */,
 			);
 			path = Model;
