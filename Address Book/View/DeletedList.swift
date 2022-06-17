@@ -68,7 +68,7 @@ struct DeletedList: View {
                         .background(Material.thinMaterial)
                         .shadow(radius: 0.5)
                     }
-                    .confirmationDialog("Merge Duplicates?", isPresented: $isDeleteAlertPresented) {
+                    .confirmationDialog("Delete All Permanently?", isPresented: $isDeleteAlertPresented) {
                         Button("Delete All Permanently") {
                             for contact in contactStore.deletedContacts {
                                 contactStore.permanentlyDelete(contact)
