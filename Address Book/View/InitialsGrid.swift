@@ -33,14 +33,12 @@ struct InitialsGrid: View {
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") {
                         UISelectionFeedbackGenerator().selectionChanged()
                         withAnimation {
                             contactStore.isInitialsGridPresented.toggle()
                         }
-                    } label: {
-                        Image(systemName: "arrow.backward")
                     }
                 }
             }

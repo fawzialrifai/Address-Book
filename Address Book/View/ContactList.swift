@@ -41,6 +41,7 @@ struct ContactList: View {
                             }
                         } else {
                             Contacts(folder: folder, scrollViewProxy: scrollViewProxy)
+                                .navigationBarHidden(contactStore.isInitialsGridPresented)
                         }
                         if contactStore.isInitialsGridPresented {
                             InitialsGrid(folder: folder, scrollViewProxy: scrollViewProxy)
