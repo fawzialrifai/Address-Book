@@ -15,7 +15,7 @@ struct ContactList: View {
             Color.contactsBackgroundColor
                 .ignoresSafeArea()
             if viewModel.isFolderLocked {
-                VStack(alignment: .center, spacing: 8) {
+                VStack(spacing: 8) {
                     Image(systemName: "lock.fill")
                         .font(.largeTitle)
                         .foregroundColor(.secondary)
