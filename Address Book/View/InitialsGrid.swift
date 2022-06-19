@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct InitialsGrid: View {
+    @Binding var isInitialsPresented: Bool
     var folder: Folder
     @EnvironmentObject var contactStore: ContactStore
     let scrollViewProxy: ScrollViewProxy?
@@ -17,13 +18,13 @@ struct InitialsGrid: View {
                 ScrollView {
                     LazyVGrid(columns: [GridItem(.adaptive(minimum: 75, maximum: 75))], spacing: 8) {
                         if !contactStore.emergencyContacts(in: folder).isEmpty {
-                            LetterItem(scrollViewProxy: scrollViewProxy, id: "staroflife", view: AnyView(Image(systemName: "staroflife.fill")))
+                            LetterItem(isInitialsPresented: $isInitialsPresented, scrollViewProxy: scrollViewProxy, id: "staroflife", view: AnyView(Image(systemName: "staroflife.fill")))
                         }
                         if !contactStore.favorites(in: folder).isEmpty {
-                            LetterItem(scrollViewProxy: scrollViewProxy, id: "★", view: AnyView(Text("★")))
+                            LetterItem(isInitialsPresented: $isInitialsPresented, scrollViewProxy: scrollViewProxy, id: "★", view: AnyView(Text("★")))
                         }
                         ForEach(contactStore.contactsDictionary(for: folder).keys.sorted(by: <), id: \.self) { letter in
-                            LetterItem(scrollViewProxy: scrollViewProxy, id: letter, view: AnyView(Text(letter)))
+                            LetterItem(isInitialsPresented: $isInitialsPresented, scrollViewProxy: scrollViewProxy, id: letter, view: AnyView(Text(letter)))
                         }
                     }
                     .padding()
@@ -37,7 +38,7 @@ struct InitialsGrid: View {
                     Button("Done") {
                         UISelectionFeedbackGenerator().selectionChanged()
                         withAnimation {
-                            contactStore.isInitialsGridPresented.toggle()
+                            isInitialsPresented.toggle()
                         }
                     }
                 }
@@ -47,6 +48,7 @@ struct InitialsGrid: View {
 }
 
 struct LetterItem: View {
+    @Binding var isInitialsPresented: Bool
     @EnvironmentObject var contactStore: ContactStore
     let scrollViewProxy: ScrollViewProxy?
     let id: String
@@ -55,7 +57,7 @@ struct LetterItem: View {
         Button {
             UISelectionFeedbackGenerator().selectionChanged()
             withAnimation {
-                contactStore.isInitialsGridPresented.toggle()
+                isInitialsPresented.toggle()
                 scrollViewProxy?.scrollTo(id, anchor: UnitPoint.center)
             }
         } label: {
@@ -73,6 +75,6 @@ struct LetterItem: View {
 
 struct FirstLettersGrid_Previews: PreviewProvider {
     static var previews: some View {
-        InitialsGrid(folder: .all, scrollViewProxy: nil)
+        InitialsGrid(isInitialsPresented: .constant(true), folder: .all, scrollViewProxy: nil)
     }
 }

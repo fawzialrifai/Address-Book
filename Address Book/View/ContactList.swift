@@ -6,18 +6,15 @@
 //
 
 import SwiftUI
-import LocalAuthentication
 
 struct ContactList: View {
-    @Environment (\.scenePhase) private var scenePhase
-    var folder: Folder
-    @State var isFolderLocked = true
+    @StateObject var viewModel: ContactListViewModel
     @EnvironmentObject var contactStore: ContactStore
     var body: some View {
         ZStack {
             Color.contactsBackgroundColor
                 .ignoresSafeArea()
-            if isFolderLocked {
+            if viewModel.isFolderLocked {
                 VStack(alignment: .center, spacing: 8) {
                     VStack(spacing: 8) {
                         Image(systemName: "lock.fill")
@@ -28,97 +25,84 @@ struct ContactList: View {
                             .font(.title2)
                             .multilineTextAlignment(.center)
                     }
-                    Button("View \(folder.rawValue)") {
-                        authenticate()
+                    Button("View \(viewModel.folder.rawValue)") {
+                        viewModel.authenticate()
                     }
                 }
             } else {
                 ScrollViewReader { scrollViewProxy in
                     ZStack {
-                        if folder == .all {
+                        if viewModel.folder == .all {
                             NavigationView {
-                                Contacts(folder: folder, scrollViewProxy: scrollViewProxy)
+                                Contacts(scrollViewProxy: scrollViewProxy)
                             }
                         } else {
-                            Contacts(folder: folder, scrollViewProxy: scrollViewProxy)
-                                .navigationBarHidden(contactStore.isInitialsGridPresented)
+                            Contacts(scrollViewProxy: scrollViewProxy)
+                                .navigationBarHidden(viewModel.isInitialsPresented)
                         }
-                        if contactStore.isInitialsGridPresented {
-                            InitialsGrid(folder: folder, scrollViewProxy: scrollViewProxy)
+                        if viewModel.isInitialsPresented {
+                            InitialsGrid(isInitialsPresented: $viewModel.isInitialsPresented, folder: viewModel.folder, scrollViewProxy: scrollViewProxy)
                                 .zIndex(1)
                         }
                     }
                 }
             }
         }
+        .environmentObject(viewModel)
     }
-    func authenticate() {
-        let context = LAContext()
-        if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: nil) {
-            context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: "Authentication is required to view hidden contacts.") { success, _ in
-                Task { @MainActor in
-                    if success {
-                        isFolderLocked = false
-                    }
-                }
-            }
-        } else {
-            isFolderLocked = false
-        }
+    init(folder: Folder, isFolderLocked: Bool = true) {
+        _viewModel = StateObject(wrappedValue: ContactListViewModel(folder: folder, isFolderLocked: isFolderLocked))
     }
 }
 
 struct Contacts: View {
-    var folder: Folder
+    @EnvironmentObject var viewModel: ContactListViewModel
     @EnvironmentObject var contactStore: ContactStore
-    @State private var isManageContactsViewPresented = false
-    @State private var isNewContactViewPresented = false
-    @State private var isCodeScannerPresented = false
     var scrollViewProxy: ScrollViewProxy
     var body: some View {
             List {
-                if folder == .all {
+                if viewModel.folder == .all {
                     MyCardSection()
                 }
-                EmergencySection(folder: folder)
-                FavoritesSection(folder: folder)
-                FirstLettersSections(folder: folder)
+                EmergencySection()
+                FavoritesSection()
+                FirstLettersSections()
             }
-            .confirmationDialog("Delete Contact?", isPresented: $contactStore.isDeleteContactDialogPresented) {
+            .confirmationDialog("Delete Contact?", isPresented: $viewModel.isDeleteContactDialogPresented) {
                 Button("Delete", role: .destructive) {
                     withAnimation {
-                        guard let contactToDelete = contactStore.contactToDelete else {
+                        guard let contactToDelete = viewModel.contactToDelete else {
                             return
                         }
                         UINotificationFeedbackGenerator().notificationOccurred(.success)
                         contactStore.moveToDeletedList(contactToDelete)
                     }
-                    contactStore.contactToDelete = nil
+                    viewModel.contactToDelete = nil
                 }
             } message: {
-                if let contactToDelete = contactStore.contactToDelete {
+                if let contactToDelete = viewModel.contactToDelete {
                     Text("Are you sure you want to delete \(contactToDelete.fullName(displayOrder: contactStore.displayOrder)) from your contacts?")
                 }
             }
             .listStyle(InsetGroupedListStyle())
-            .navigationBarTitle(folder.rawValue, displayMode: folder == .all ? .large : .inline)
-            .searchable(text: folder == .all ? $contactStore.filterText : folder == .hidden ? $contactStore.hiddenFilterText : $contactStore.deletedFilterText, placement: .navigationBarDrawer(displayMode: .automatic), prompt: "Search for a contact")
+            .navigationBarTitle(viewModel.folder.rawValue, displayMode: viewModel.folder == .all ? .large : .inline)
+            .searchable(text: viewModel.folder == .all ? $contactStore.filterText : viewModel.folder == .hidden ? $contactStore.hiddenFilterText : $contactStore.deletedFilterText, placement: .navigationBarDrawer(displayMode: .automatic), prompt: "Search for a contact")
             .toolbar {
                     ToolbarItem(placement: .navigationBarLeading) {
-                        if folder == .all {
-                            Button("Manage") { isManageContactsViewPresented.toggle() }
+                        if viewModel.folder == .all {
+                            Button("Manage") { viewModel.isManageContactsViewPresented.toggle() }
                         }
                     }
                     ToolbarItem(placement: .navigationBarTrailing) {
-                        if folder == .all {
+                        if viewModel.folder == .all {
                             Menu {
                                 Button {
-                                    isNewContactViewPresented.toggle()
+                                    viewModel.isNewContactViewPresented.toggle()
                                 } label: {
                                     Label("Add Manually", systemImage: "plus")
                                 }
                                 Button {
-                                    isCodeScannerPresented = true
+                                    viewModel.isCodeScannerPresented = true
                                 } label: {
                                     Label("Scan QR Code", systemImage: "qrcode")
                                 }
@@ -128,7 +112,7 @@ struct Contacts: View {
                         }
                     }
             }
-            .sheet(isPresented: $isNewContactViewPresented) {
+            .sheet(isPresented: $viewModel.isNewContactViewPresented) {
                 NavigationView {
                     EditContact(contact: Contact()) { newContact in
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -141,10 +125,10 @@ struct Contacts: View {
                     .navigationBarTitleDisplayMode(.inline)
                 }
             }
-            .sheet(isPresented: $isManageContactsViewPresented) {
+            .sheet(isPresented: $viewModel.isManageContactsViewPresented) {
                 ManageContacts()
             }
-            .sheet(isPresented: $isCodeScannerPresented) {
+            .sheet(isPresented: $viewModel.isCodeScannerPresented) {
                 NavigationView {
                     CodeScannerView() { result in
                         handleScan(result: result)
@@ -155,12 +139,11 @@ struct Contacts: View {
                     .toolbar {
                         ToolbarItem(placement: ToolbarItemPlacement.navigationBarLeading) {
                             Button("Cancel") {
-                                isCodeScannerPresented = false
+                                viewModel.isCodeScannerPresented = false
                             }
                         }
                     }
                 }
-                
             }
             .alert("Cannot Access Contacts", isPresented: $contactStore.isNotAuthorized) {
                 Button("Exit") {
@@ -178,7 +161,7 @@ struct Contacts: View {
                 guard let data = data else { return }
                 var newContact = try JSONDecoder().decode(Contact.self, from: data)
                 newContact.id = UUID()
-                isCodeScannerPresented = false
+                viewModel.isCodeScannerPresented = false
                 contactStore.add(newContact)
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     withAnimation {
@@ -193,8 +176,8 @@ struct Contacts: View {
 }
 
 struct MyCardSection: View {
+    @EnvironmentObject var viewModel: ContactListViewModel
     @EnvironmentObject var contactStore: ContactStore
-    @State private var isSettingUpMyCard = false
     var body: some View {
         Section(header: Text("My Card").textCase(nil)) {
             if let myCard = contactStore.contacts.first(where: { $0.isMyCard }) {
@@ -232,7 +215,7 @@ struct MyCardSection: View {
                         .shadow(radius: 0.5)
                         .foregroundStyle(.white, .gray)
                     VStack(alignment: .leading) {
-                        Button("Set up your card") { isSettingUpMyCard.toggle() }
+                        Button("Set up your card") { viewModel.isSettingUpMyCard.toggle() }
                         Text("Add your info.")
                             .font(Font.callout)
                             .foregroundColor(.secondary)
@@ -241,7 +224,7 @@ struct MyCardSection: View {
                 .padding(.vertical, 8)
             }
         }
-        .sheet(isPresented: $isSettingUpMyCard) {
+        .sheet(isPresented: $viewModel.isSettingUpMyCard) {
             NavigationView {
                 EditContact(contact: Contact(isMyCard: true))
                 .navigationTitle("My Card")
@@ -252,12 +235,12 @@ struct MyCardSection: View {
 }
 
 struct EmergencySection: View {
-    var folder: Folder
+    @EnvironmentObject var viewModel: ContactListViewModel
     @EnvironmentObject var contactStore: ContactStore
     var body: some View {
-        if !contactStore.emergencyContacts(in: folder).isEmpty {
+        if !contactStore.emergencyContacts(in: viewModel.folder).isEmpty {
             Section(header: SectionHeader(view: AnyView(Image(systemName: "staroflife.fill")))) {
-                ForEach(contactStore.emergencyContacts(in: folder)) { contact in
+                ForEach(contactStore.emergencyContacts(in: viewModel.folder)) { contact in
                     ContactRow(contact: contact)
                 }
             }
@@ -267,12 +250,12 @@ struct EmergencySection: View {
 }
 
 struct FavoritesSection: View {
-    var folder: Folder
+    @EnvironmentObject var viewModel: ContactListViewModel
     @EnvironmentObject var contactStore: ContactStore
     var body: some View {
-        if !contactStore.favorites(in: folder).isEmpty {
+        if !contactStore.favorites(in: viewModel.folder).isEmpty {
             Section(header: SectionHeader(view: AnyView(Text("★")))) {
-                ForEach(contactStore.favorites(in: folder)) { contact in
+                ForEach(contactStore.favorites(in: viewModel.folder)) { contact in
                     ContactRow(contact: contact)
                 }
             }
@@ -282,12 +265,12 @@ struct FavoritesSection: View {
 }
 
 struct FirstLettersSections: View {
-    var folder: Folder
+    @EnvironmentObject var viewModel: ContactListViewModel
     @EnvironmentObject var contactStore: ContactStore
     var body: some View {
-        ForEach(contactStore.contactsDictionary(for: folder).keys.sorted(by: <), id: \.self) { letter in
+        ForEach(contactStore.contactsDictionary(for: viewModel.folder).keys.sorted(by: <), id: \.self) { letter in
             Section(header: SectionHeader(view: AnyView(Text(letter)))) {
-                ForEach(contactStore.contactsDictionary(for: folder)[letter] ?? []) { contact in
+                ForEach(contactStore.contactsDictionary(for: viewModel.folder)[letter] ?? []) { contact in
                     ContactRow(contact: contact)
                         .id(contact.id)
                 }
@@ -298,6 +281,7 @@ struct FirstLettersSections: View {
 }
 
 struct ContactRow: View {
+    @EnvironmentObject var viewModel: ContactListViewModel
     @EnvironmentObject var contactStore: ContactStore
     var contact: Contact
     var body: some View {
@@ -376,8 +360,8 @@ struct ContactRow: View {
         .swipeActions(edge: .trailing) {
             Button  {
                 UINotificationFeedbackGenerator().notificationOccurred(.warning)
-                contactStore.isDeleteContactDialogPresented.toggle()
-                contactStore.contactToDelete = contact
+                viewModel.isDeleteContactDialogPresented.toggle()
+                viewModel.contactToDelete = contact
             } label: {
                 Label("Delete", systemImage: "trash.fill")
             }
@@ -388,6 +372,7 @@ struct ContactRow: View {
 
 struct SectionHeader: View {
     @EnvironmentObject var contactStore: ContactStore
+    @EnvironmentObject var viewModel: ContactListViewModel
     @Environment(\.dismissSearch) private var dismissSearch
     let view: AnyView
     var body: some View {
@@ -395,7 +380,7 @@ struct SectionHeader: View {
             UISelectionFeedbackGenerator().selectionChanged()
             dismissSearch()
             withAnimation {
-                contactStore.isInitialsGridPresented.toggle()
+                viewModel.isInitialsPresented.toggle()
             }
         } label: {
             view.frame(maxWidth: .infinity, alignment: .leading)

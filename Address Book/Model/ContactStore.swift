@@ -56,9 +56,6 @@ import Contacts
     @Published var filterText = ""
     @Published var hiddenFilterText = ""
     @Published var deletedFilterText = ""
-    @Published var isInitialsGridPresented = false
-    @Published var isDeleteContactDialogPresented = false
-    @Published var contactToDelete: Contact?
     @Published var isImporting = false
     @Published var isExporting = false
     @Published var isNotAuthorized = false
