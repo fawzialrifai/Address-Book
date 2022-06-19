@@ -16,6 +16,7 @@ import LocalAuthentication
     @Published var isNewContactViewPresented = false
     @Published var isCodeScannerPresented = false
     @Published var isDeleteContactDialogPresented = false
+    @Published var isDeleteAllContactsDialogPresented = false
     @Published var contactToDelete: Contact?
     @Published var isSettingUpMyCard = false
     init(folder: Folder, isFolderLocked: Bool) {

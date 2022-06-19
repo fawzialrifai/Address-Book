@@ -39,6 +39,31 @@ struct ContactList: View {
                         } else {
                             Contacts(scrollViewProxy: scrollViewProxy)
                                 .navigationBarHidden(viewModel.isInitialsPresented)
+                                .safeAreaInset(edge: .bottom) {
+                                    if viewModel.folder == .deleted {
+                                        VStack(spacing: 16) {
+                                            Button {
+                                                viewModel.isDeleteAllContactsDialogPresented = true
+                                            } label: {
+                                                Label("Delete All Permanently", systemImage: "trash.fill")
+                                                    .padding()
+                                                    .frame(maxWidth: .infinity)
+                                                    .foregroundColor(.white)
+                                                    .background(.red)
+                                                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                                            }
+                                            .padding([.horizontal, .top], 20)
+                                            Button("Restore All") {
+                                                for contact in contactStore.deletedContacts {
+                                                    contactStore.restore(contact)
+                                                }
+                                            }
+                                            .padding(.bottom, 20)
+                                        }
+                                        .background(Material.thinMaterial)
+                                        .shadow(radius: 0.5)
+                                    }
+                                }
                         }
                         if viewModel.isInitialsPresented {
                             InitialsGrid(isInitialsPresented: $viewModel.isInitialsPresented, folder: viewModel.folder, scrollViewProxy: scrollViewProxy)
