@@ -40,7 +40,7 @@ struct ContactList: View {
                             Contacts(scrollViewProxy: scrollViewProxy)
                                 .navigationBarHidden(viewModel.isInitialsPresented)
                                 .safeAreaInset(edge: .bottom) {
-                                    if viewModel.folder == .deleted {
+                                    if viewModel.folder == .deleted && !contactStore.deletedContacts.isEmpty {
                                         VStack(spacing: 16) {
                                             Button {
                                                 viewModel.isDeleteAllContactsDialogPresented = true
@@ -53,6 +53,15 @@ struct ContactList: View {
                                                     .clipShape(RoundedRectangle(cornerRadius: 10))
                                             }
                                             .padding([.horizontal, .top], 20)
+                                            .confirmationDialog("Delete All Permanently?", isPresented: $viewModel.isDeleteAllContactsDialogPresented) {
+                                                Button("Delete All Permanently") {
+                                                    for contact in contactStore.deletedContacts {
+                                                        contactStore.permanentlyDelete(contact)
+                                                    }
+                                                }
+                                            } message: {
+                                                Text("These contacts will be deleted permanently, This action cannot be undone.")
+                                            }
                                             Button("Restore All") {
                                                 for contact in contactStore.deletedContacts {
                                                     contactStore.restore(contact)
