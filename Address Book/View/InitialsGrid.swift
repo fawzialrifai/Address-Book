@@ -9,7 +9,7 @@ import SwiftUI
 
 struct InitialsGrid: View {
     @Binding var isInitialsPresented: Bool
-    var folder: Folder
+    @EnvironmentObject var viewModel: ContactListViewModel
     @EnvironmentObject var contactStore: ContactStore
     let scrollViewProxy: ScrollViewProxy?
     var body: some View {
@@ -17,13 +17,13 @@ struct InitialsGrid: View {
             GeometryReader { proxy in
                 ScrollView {
                     LazyVGrid(columns: [GridItem(.adaptive(minimum: 75, maximum: 75))], spacing: 8) {
-                        if !contactStore.emergencyContacts(in: folder).isEmpty {
+                        if !viewModel.emergencyContacts.isEmpty {
                             LetterItem(isInitialsPresented: $isInitialsPresented, scrollViewProxy: scrollViewProxy, id: "staroflife", view: AnyView(Image(systemName: "staroflife.fill")))
                         }
-                        if !contactStore.favorites(in: folder).isEmpty {
+                        if !viewModel.favorites.isEmpty {
                             LetterItem(isInitialsPresented: $isInitialsPresented, scrollViewProxy: scrollViewProxy, id: "★", view: AnyView(Text("★")))
                         }
-                        ForEach(contactStore.contactsDictionary(for: folder).keys.sorted(by: <), id: \.self) { letter in
+                        ForEach(viewModel.initials, id: \.self) { letter in
                             LetterItem(isInitialsPresented: $isInitialsPresented, scrollViewProxy: scrollViewProxy, id: letter, view: AnyView(Text(letter)))
                         }
                     }
@@ -75,6 +75,6 @@ struct LetterItem: View {
 
 struct FirstLettersGrid_Previews: PreviewProvider {
     static var previews: some View {
-        InitialsGrid(isInitialsPresented: .constant(true), folder: .all, scrollViewProxy: nil)
+        InitialsGrid(isInitialsPresented: .constant(true), scrollViewProxy: nil)
     }
 }

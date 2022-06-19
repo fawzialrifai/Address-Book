@@ -9,7 +9,7 @@ import SwiftUI
 
 @main
 struct AddressBookApp: App {
-    @StateObject var contactStore = ContactStore()
+    @StateObject var contactStore = ContactStore.shared
     var body: some Scene {
         WindowGroup {
             ContactList(folder: .all, isFolderLocked: false)

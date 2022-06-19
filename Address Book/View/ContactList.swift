@@ -45,7 +45,7 @@ struct ContactList: View {
                             }
                         }
                         if viewModel.isInitialsPresented {
-                            InitialsGrid(isInitialsPresented: $viewModel.isInitialsPresented, folder: viewModel.folder, scrollViewProxy: scrollViewProxy)
+                            InitialsGrid(isInitialsPresented: $viewModel.isInitialsPresented, scrollViewProxy: scrollViewProxy)
                                 .zIndex(1)
                         }
                     }
@@ -74,7 +74,7 @@ struct Contacts: View {
         }
         .listStyle(InsetGroupedListStyle())
         .navigationBarTitle(viewModel.folder.rawValue, displayMode: viewModel.folder == .all ? .large : .inline)
-        .searchable(text: viewModel.folder == .all ? $contactStore.filterText : viewModel.folder == .hidden ? $contactStore.hiddenFilterText : $contactStore.deletedFilterText, placement: .navigationBarDrawer(displayMode: .automatic), prompt: "Search for a contact")
+        .searchable(text: $viewModel.searchText, prompt: "Search for a contact")
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 if viewModel.folder == .all {
@@ -211,9 +211,9 @@ struct EmergencySection: View {
     @EnvironmentObject var viewModel: ContactListViewModel
     @EnvironmentObject var contactStore: ContactStore
     var body: some View {
-        if !contactStore.emergencyContacts(in: viewModel.folder).isEmpty {
+        if !viewModel.emergencyContacts.isEmpty {
             Section(header: SectionHeader(view: AnyView(Image(systemName: "staroflife.fill")))) {
-                ForEach(contactStore.emergencyContacts(in: viewModel.folder)) { contact in
+                ForEach(viewModel.emergencyContacts) { contact in
                     ContactRow(contact: contact)
                 }
             }
@@ -226,9 +226,9 @@ struct FavoritesSection: View {
     @EnvironmentObject var viewModel: ContactListViewModel
     @EnvironmentObject var contactStore: ContactStore
     var body: some View {
-        if !contactStore.favorites(in: viewModel.folder).isEmpty {
+        if !viewModel.favorites.isEmpty {
             Section(header: SectionHeader(view: AnyView(Text("★")))) {
-                ForEach(contactStore.favorites(in: viewModel.folder)) { contact in
+                ForEach(viewModel.favorites) { contact in
                     ContactRow(contact: contact)
                 }
             }
@@ -241,9 +241,9 @@ struct FirstLettersSections: View {
     @EnvironmentObject var viewModel: ContactListViewModel
     @EnvironmentObject var contactStore: ContactStore
     var body: some View {
-        ForEach(contactStore.contactsDictionary(for: viewModel.folder).keys.sorted(by: <), id: \.self) { letter in
+        ForEach(viewModel.initials, id: \.self) { letter in
             Section(header: SectionHeader(view: AnyView(Text(letter)))) {
-                ForEach(contactStore.contactsDictionary(for: viewModel.folder)[letter] ?? []) { contact in
+                ForEach(viewModel.groupedContacts[letter] ?? []) { contact in
                     ContactRow(contact: contact)
                         .id(contact.id)
                 }
@@ -420,6 +420,6 @@ struct SectionHeader: View {
 struct ContactList_Previews: PreviewProvider {
     static var previews: some View {
         ContactList(folder: .all)
-            .environmentObject(ContactStore())
+            .environmentObject(ContactStore.shared)
     }
 }

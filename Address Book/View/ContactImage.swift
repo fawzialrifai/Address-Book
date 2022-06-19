@@ -37,6 +37,6 @@ struct ContactHeader_Previews: PreviewProvider {
     static var previews: some View {
         ContactImagee(contact: .example)
             .previewLayout(.sizeThatFits)
-            .environmentObject(ContactStore())
+            .environmentObject(ContactStore.shared)
     }
 }
