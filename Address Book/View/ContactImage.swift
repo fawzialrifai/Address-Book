@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ContactImage: View {
+struct ContactImagee: View {
     @EnvironmentObject var contactStore: ContactStore
     var contact: Contact
     var body: some View {
@@ -35,7 +35,7 @@ struct ContactImage: View {
 
 struct ContactHeader_Previews: PreviewProvider {
     static var previews: some View {
-        ContactImage(contact: .example)
+        ContactImagee(contact: .example)
             .previewLayout(.sizeThatFits)
             .environmentObject(ContactStore())
     }

@@ -16,9 +16,12 @@ import LocalAuthentication
     @Published var isNewContactViewPresented = false
     @Published var isCodeScannerPresented = false
     @Published var isDeleteContactDialogPresented = false
+    @Published var isPermanentlyDeleteContactDialogPresented = false
+    @Published var isRestoreAllContactsDialogPresented = false
     @Published var isDeleteAllContactsDialogPresented = false
     @Published var contactToDelete: Contact?
     @Published var isSettingUpMyCard = false
+    
     init(folder: Folder, isFolderLocked: Bool) {
         self.folder = folder
         self.isFolderLocked = isFolderLocked
@@ -35,6 +38,20 @@ import LocalAuthentication
             }
         } else {
             isFolderLocked = false
+        }
+    }
+    func handleScan(result: Result<Data?, ScanError>, onSuccess: (Contact) -> Void) {
+        switch result {
+        case .success(let data):
+            do {
+                guard let data = data else { return }
+                var contact = try JSONDecoder().decode(Contact.self, from: data)
+                contact.id = UUID()
+                isCodeScannerPresented = false
+                onSuccess(contact)
+            } catch {}
+        case .failure(let error):
+            print("Scanning failed: \(error.localizedDescription)")
         }
     }
 }

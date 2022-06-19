@@ -502,6 +502,7 @@ extension ContactStore {
     func moveToDeletedList(_ contact: Contact) {
         if let index = contacts.firstIndex(of: contact) {
             contacts[index].isDeleted = true
+            contacts[index].isMyCard = false
             deletedContacts.append(contacts[index])
             contacts.remove(at: index)
             removeFromEmergencyContacts(contact)
@@ -526,6 +527,18 @@ extension ContactStore {
             if contact.isEmergencyContact {
                 removeFromEmergencyContacts(contact)
             }
+        }
+    }
+    
+    func emptyRecentlyDeletedFolder() {
+        for contact in deletedContacts {
+            permanentlyDelete(contact)
+        }
+    }
+    
+    func restoreAllDeletedContacts() {
+        for contact in deletedContacts {
+            restore(contact)
         }
     }
     

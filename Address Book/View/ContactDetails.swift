@@ -21,7 +21,7 @@ struct ContactDetails: View {
     var body: some View {
         ZStack {
             Form {
-                Section(header:ContactImage(contact: contact)) {}
+                Section(header:ContactImagee(contact: contact)) {}
                 if contact.phoneNumbers.count > 0 {
                     Section() {
                         ForEach(contact.phoneNumbers) { phone in
