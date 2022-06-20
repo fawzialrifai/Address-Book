@@ -25,31 +25,37 @@ struct ContactList: View {
                     Button("View \(viewModel.folder.rawValue)", action: { viewModel.authenticate() })
                 }
             } else {
-                ScrollViewReader { scrollViewProxy in
-                    ZStack {
-                        if viewModel.folder == .all {
-                            NavigationView {
+                if viewModel.folder != .all && viewModel.categorizedContacts.isEmpty {
+                    Text("No Contacts")
+                        .foregroundColor(.secondary)
+                        .font(.title2)
+                } else {
+                    ScrollViewReader { scrollViewProxy in
+                        ZStack {
+                            if viewModel.folder == .all {
+                                NavigationView {
+                                    Contacts { contact in
+                                        scrollViewProxy.scrollTo(contact.id, anchor: .center)
+                                    }
+                                }
+                            } else {
                                 Contacts { contact in
                                     scrollViewProxy.scrollTo(contact.id, anchor: .center)
                                 }
-                            }
-                        } else {
-                            Contacts { contact in
-                                scrollViewProxy.scrollTo(contact.id, anchor: .center)
-                            }
-                            .navigationBarHidden(viewModel.isInitialsGridPresented)
-                            .safeAreaInset(edge: .bottom) {
-                                if (viewModel.folder == .duplicates && !contactStore.duplicates.isEmpty) || (viewModel.folder == .deleted && !contactStore.deletedContacts.isEmpty){
-                                    BottomButton()
+                                .navigationBarHidden(viewModel.isInitialsGridPresented)
+                                .safeAreaInset(edge: .bottom) {
+                                    if (viewModel.folder == .duplicates && !contactStore.duplicates.isEmpty) || (viewModel.folder == .deleted && !contactStore.deletedContacts.isEmpty){
+                                        BottomButton()
+                                    }
                                 }
                             }
+                            if viewModel.isInitialsGridPresented {
+                                InitialsGrid(isInitialsPresented: $viewModel.isInitialsGridPresented, scrollViewProxy: scrollViewProxy)
+                                    .zIndex(1)
+                            }
                         }
-                        if viewModel.isInitialsGridPresented {
-                            InitialsGrid(isInitialsPresented: $viewModel.isInitialsGridPresented, scrollViewProxy: scrollViewProxy)
-                                .zIndex(1)
-                        }
+                        .environmentObject(viewModel)
                     }
-                    .environmentObject(viewModel)
                 }
             }
         }
