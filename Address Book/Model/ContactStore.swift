@@ -89,7 +89,7 @@ extension ContactStore {
     var duplicates: [[Contact]] {
         var arrayOfduplicates = [[Contact]]()
         var scannedContacts = [String]()
-        let contacts = self.contacts
+        let contacts = self.unhiddenContacts
         if self.contacts.isEmpty {
             return []
         }
