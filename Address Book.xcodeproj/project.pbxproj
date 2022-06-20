@@ -30,6 +30,7 @@
 		5825BDD82854ED6F0082069A /* ManageContacts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDBF2854ED6F0082069A /* ManageContacts.swift */; };
 		5825BDD92854ED6F0082069A /* ContactHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDC02854ED6F0082069A /* ContactHeader.swift */; };
 		5825BDDA2854ED6F0082069A /* ContactList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDC12854ED6F0082069A /* ContactList.swift */; };
+		5864D5D2286113520035D671 /* View-extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5864D5D1286113520035D671 /* View-extension.swift */; };
 		58725AB82857C4C6004BF574 /* LabeledValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58725AB72857C4C6004BF574 /* LabeledValue.swift */; };
 		58725AD828594B11004BF574 /* MergeContact.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58725AD728594B11004BF574 /* MergeContact.swift */; };
 		58745610285D04D5004EEFD1 /* Folder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5874560F285D04D5004EEFD1 /* Folder.swift */; };
@@ -63,6 +64,7 @@
 		5825BDBF2854ED6F0082069A /* ManageContacts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ManageContacts.swift; sourceTree = "<group>"; };
 		5825BDC02854ED6F0082069A /* ContactHeader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactHeader.swift; sourceTree = "<group>"; };
 		5825BDC12854ED6F0082069A /* ContactList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactList.swift; sourceTree = "<group>"; };
+		5864D5D1286113520035D671 /* View-extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View-extension.swift"; sourceTree = "<group>"; };
 		58725AB72857C4C6004BF574 /* LabeledValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabeledValue.swift; sourceTree = "<group>"; };
 		58725AD728594B11004BF574 /* MergeContact.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MergeContact.swift; sourceTree = "<group>"; };
 		5874560F285D04D5004EEFD1 /* Folder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Folder.swift; sourceTree = "<group>"; };
@@ -124,10 +126,11 @@
 		5825BDA82854ED6E0082069A /* Extension */ = {
 			isa = PBXGroup;
 			children = (
+				5864D5D1286113520035D671 /* View-extension.swift */,
+				5825BDAA2854ED6E0082069A /* ShapeStyle-extension.swift */,
 				5825BDA92854ED6E0082069A /* FileManager-extension.swift */,
 				5825BDAB2854ED6E0082069A /* String-extension.swift */,
 				58DA70C9285B602900BEA685 /* CNContact-extension.swift */,
-				5825BDAA2854ED6E0082069A /* ShapeStyle-extension.swift */,
 			);
 			path = Extension;
 			sourceTree = "<group>";
@@ -264,6 +267,7 @@
 				5825BDD62854ED6F0082069A /* ScannerViewController.swift in Sources */,
 				5825BDD32854ED6F0082069A /* InitialsGrid.swift in Sources */,
 				5825BD3A2854EC9F0082069A /* AddressBookApp.swift in Sources */,
+				5864D5D2286113520035D671 /* View-extension.swift in Sources */,
 				58725AB82857C4C6004BF574 /* LabeledValue.swift in Sources */,
 				5825BDCA2854ED6F0082069A /* Order.swift in Sources */,
 				5825BDC82854ED6F0082069A /* JSONFile.swift in Sources */,

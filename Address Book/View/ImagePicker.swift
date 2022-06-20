@@ -33,11 +33,18 @@ struct ImagePicker: UIViewControllerRepresentable {
         func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
             picker.dismiss(animated: true)
             guard let result = results.first else { return }
-            if result.itemProvider.canLoadObject(ofClass: UIImage.self) {
-                result.itemProvider.loadObject(ofClass: UIImage.self) { selectedImage, error in
-                    if let selectedImage = selectedImage as? UIImage {
-                        UINotificationFeedbackGenerator().notificationOccurred(.success)
-                        self.parent.imageData = selectedImage.pngData()
+            if result.itemProvider.hasItemConformingToTypeIdentifier(UTType.webP.identifier) {
+                result.itemProvider.loadDataRepresentation(forTypeIdentifier: UTType.webP.identifier) { selectedImage, error in
+                    UINotificationFeedbackGenerator().notificationOccurred(.success)
+                    self.parent.imageData = selectedImage
+                }
+            } else {
+                if result.itemProvider.canLoadObject(ofClass: UIImage.self) {
+                    result.itemProvider.loadObject(ofClass: UIImage.self) { selectedImage, error in
+                        if let selectedImage = selectedImage as? UIImage {
+                            UINotificationFeedbackGenerator().notificationOccurred(.success)
+                            self.parent.imageData = selectedImage.pngData()
+                        }
                     }
                 }
             }

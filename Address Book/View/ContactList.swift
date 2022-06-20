@@ -161,7 +161,7 @@ struct Contacts: View {
             }
         } message: {
             if viewModel.isDeleteContactsDialogPresented {
-                Text(viewModel.contactsToDelete.count > 1 ? "These cards" : viewModel.contactsToDelete[0].fullName(displayOrder: contactStore.displayOrder) + "will be deleted and moved to the Recently Deleted folder.")
+                Text((viewModel.contactsToDelete.count > 1 ? "These cards" : viewModel.contactsToDelete[0].fullName(displayOrder: contactStore.displayOrder)) + " will be deleted and moved to the Recently Deleted folder.")
             }
         }
         .confirmationDialog("Delete All Permanently?", isPresented: $viewModel.isDeleteAllContactsDialogPresented) {
@@ -286,11 +286,13 @@ struct ContactRow: View {
                         if let index = cards.firstIndex(of: card) {
                             ContactImage(contact: card)
                                 .frame(width: 45, height: 45)
-                                .padding(.leading, index == 0 ? 0 : -42.5)
+                                .padding(.leading, index == 0 ? 0 : -42)
                         }
                     }
                 }
-                //.frame(width: 70)
+                .if(cards.count == 2) { view in
+                    view.frame(width: 67)
+                }
                 VStack(alignment: .leading) {
                     Text(cards[0].fullName(displayOrder: contactStore.displayOrder))
                     Group {
@@ -408,7 +410,7 @@ struct ContactImage: View {
             .scaledToFill()
             .foregroundStyle(.white, .gray)
             .clipShape(Circle())
-            .shadow(radius: 0.5)
+            .shadow(radius: 1)
     }
 }
 
