@@ -14,6 +14,8 @@ struct ContactDetails: View {
     @State private var isDeleteContactAlertPresented = false
     @State private var isPermanentlyDeleteContactAlertPresented = false
     @State private var isHideContactAlertPresented = false
+    @State private var isUnhideContactAlertPresented = false
+    @State private var isRestoreContactAlertPresented = false
     @State var region: MKCoordinateRegion?
     var contact: Contact
     @State var isEditingContact = false
@@ -158,13 +160,21 @@ struct ContactDetails: View {
                     }
                     if contact.isDeleted {
                         Button("Restore Contact") {
-                            dismiss()
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                UINotificationFeedbackGenerator().notificationOccurred(.success)
-                                withAnimation {
-                                    contactStore.restore(contact)
+                            UINotificationFeedbackGenerator().notificationOccurred(.warning)
+                            isRestoreContactAlertPresented = true
+                        }
+                        .confirmationDialog("Restore Contact?", isPresented: $isRestoreContactAlertPresented) {
+                            Button("Restore", role: .destructive) {
+                                dismiss()
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                    UINotificationFeedbackGenerator().notificationOccurred(.success)
+                                    withAnimation {
+                                        contactStore.restore(contact)
+                                    }
                                 }
                             }
+                        } message: {
+                            Text("\(contact.fullName(displayOrder: contactStore.displayOrder)) will be restored and moved out of the Recently Deleted folder.")
                         }
                         Button("Delete Contact", role: .destructive) {
                             UINotificationFeedbackGenerator().notificationOccurred(.warning)
@@ -202,9 +212,8 @@ struct ContactDetails: View {
                         }
                         Button(contact.isHidden ? "Unhide Contact" : "Hide Contact") {
                             if contact.isHidden {
-                                UINotificationFeedbackGenerator().notificationOccurred(.success)
-                                contactStore.unhideContact(contact)
-                                dismiss()
+                                UINotificationFeedbackGenerator().notificationOccurred(.warning)
+                                isUnhideContactAlertPresented = true
                             } else {
                                 UINotificationFeedbackGenerator().notificationOccurred(.warning)
                                 isHideContactAlertPresented.toggle()
@@ -216,11 +225,29 @@ struct ContactDetails: View {
                         }
                         .confirmationDialog("Hide Contact?", isPresented: $isHideContactAlertPresented) {
                             Button("Hide") {
-                                UINotificationFeedbackGenerator().notificationOccurred(.success)
-                                contactStore.hideContact(contact)
+                                dismiss()
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                    UINotificationFeedbackGenerator().notificationOccurred(.success)
+                                    withAnimation {
+                                        contactStore.hideContact(contact)
+                                    }
+                                }
                             }
                         } message: {
                             Text("This contact will be hidden but can be found in the Hidden folder.")
+                        }
+                        .confirmationDialog("Unhide Contact?", isPresented: $isUnhideContactAlertPresented) {
+                            Button("Unhide") {
+                                dismiss()
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                    UINotificationFeedbackGenerator().notificationOccurred(.success)
+                                    withAnimation {
+                                        contactStore.unhideContact(contact)
+                                    }
+                                }
+                            }
+                        } message: {
+                            Text("This contact will be unhidden and moved out of the Hidden folder.")
                         }
                         .confirmationDialog("Delete Contact?", isPresented: $isDeleteContactAlertPresented) {
                             Button("Delete", role: .destructive) {
@@ -242,7 +269,6 @@ struct ContactDetails: View {
                         }
                         .confirmationDialog("Delete Your Card?", isPresented: $isDeleteContactAlertPresented) {
                             Button("Delete", role: .destructive) {
-                                dismiss()
                                 contactStore.moveToDeletedList(contact)
                             }
                         } message: {
@@ -267,8 +293,6 @@ struct ContactDetails: View {
                     .navigationBarBackButtonHidden(true)
             }
         }
-        
-        
     }
     init(contact: Contact) {
         self.contact = contact

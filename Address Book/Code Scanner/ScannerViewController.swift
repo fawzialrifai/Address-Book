@@ -67,7 +67,7 @@ extension CodeScannerView {
                 print("Something went wrong")
             }
 
-            dismiss(animated: true, completion: nil)
+            dismiss(animated: true)
         }
         
         public func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
