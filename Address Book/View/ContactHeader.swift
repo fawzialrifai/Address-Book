@@ -62,7 +62,7 @@ struct ContactHeader: View {
 struct ContactHeader_Previews: PreviewProvider {
     static var previews: some View {
         ContactHeader(contact: .constant(.example), isEditing: true)
-            .previewLayout(.sizeThatFits)
             .environmentObject(ContactStore.shared)
+            .previewLayout(.sizeThatFits)
     }
 }
