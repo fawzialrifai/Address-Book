@@ -154,7 +154,9 @@ struct Contacts: View {
                 viewModel.contactsToDelete.removeAll()
             }
         } message: {
-            //Text(viewModel.contactsToDelete.count > 1 ? "These cards" : viewModel.contactsToDelete[0].fullName(displayOrder: contactStore.displayOrder) + "will be deleted and moved to the Recently Deleted folder.")
+            if viewModel.isDeleteContactsDialogPresented {
+                Text(viewModel.contactsToDelete.count > 1 ? "These cards" : viewModel.contactsToDelete[0].fullName(displayOrder: contactStore.displayOrder) + "will be deleted and moved to the Recently Deleted folder.")
+            }
         }
         .confirmationDialog("Delete All Permanently?", isPresented: $viewModel.isDeleteAllContactsDialogPresented) {
             Button("Delete All Permanently") {
@@ -179,7 +181,9 @@ struct Contacts: View {
                 viewModel.contactsToDelete.removeAll()
             }
         } message: {
-            //Text("\(viewModel.contactsToDelete[0].fullName(displayOrder: contactStore.displayOrder)) will be deleted permanently, This action cannot be undone.")
+            if viewModel.isPermanentlyDeleteContactsDialogPresented {
+                Text("\(viewModel.contactsToDelete[0].fullName(displayOrder: contactStore.displayOrder)) will be deleted permanently, This action cannot be undone.")
+            }
         }
     }
 }
