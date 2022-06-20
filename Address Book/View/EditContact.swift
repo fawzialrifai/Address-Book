@@ -22,7 +22,7 @@ struct EditContact: View {
     @Binding var isEditingContact: Bool
     var body: some View {
         Form {
-            Section(header: EditableContactImage(imageData: $newData.imageData)) {}
+            Section(header: ContactHeader(contact: $newData, isEditing: true)) {}
             Section {
                 let lastName: Binding<String> = Binding {
                     newData.lastName ?? ""

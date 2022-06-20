@@ -28,9 +28,8 @@
 		5825BDD62854ED6F0082069A /* ScannerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDBD2854ED6F0082069A /* ScannerViewController.swift */; };
 		5825BDD72854ED6F0082069A /* CodeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDBE2854ED6F0082069A /* CodeGenerator.swift */; };
 		5825BDD82854ED6F0082069A /* ManageContacts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDBF2854ED6F0082069A /* ManageContacts.swift */; };
-		5825BDD92854ED6F0082069A /* EditableContactImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDC02854ED6F0082069A /* EditableContactImage.swift */; };
+		5825BDD92854ED6F0082069A /* ContactHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDC02854ED6F0082069A /* ContactHeader.swift */; };
 		5825BDDA2854ED6F0082069A /* ContactList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDC12854ED6F0082069A /* ContactList.swift */; };
-		5825BDDB2854ED6F0082069A /* ContactImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5825BDC22854ED6F0082069A /* ContactImage.swift */; };
 		58725AB82857C4C6004BF574 /* LabeledValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58725AB72857C4C6004BF574 /* LabeledValue.swift */; };
 		58725AD828594B11004BF574 /* MergeContact.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58725AD728594B11004BF574 /* MergeContact.swift */; };
 		58745610285D04D5004EEFD1 /* Folder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5874560F285D04D5004EEFD1 /* Folder.swift */; };
@@ -62,9 +61,8 @@
 		5825BDBD2854ED6F0082069A /* ScannerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScannerViewController.swift; sourceTree = "<group>"; };
 		5825BDBE2854ED6F0082069A /* CodeGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CodeGenerator.swift; sourceTree = "<group>"; };
 		5825BDBF2854ED6F0082069A /* ManageContacts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ManageContacts.swift; sourceTree = "<group>"; };
-		5825BDC02854ED6F0082069A /* EditableContactImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EditableContactImage.swift; sourceTree = "<group>"; };
+		5825BDC02854ED6F0082069A /* ContactHeader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactHeader.swift; sourceTree = "<group>"; };
 		5825BDC12854ED6F0082069A /* ContactList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactList.swift; sourceTree = "<group>"; };
-		5825BDC22854ED6F0082069A /* ContactImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactImage.swift; sourceTree = "<group>"; };
 		58725AB72857C4C6004BF574 /* LabeledValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabeledValue.swift; sourceTree = "<group>"; };
 		58725AD728594B11004BF574 /* MergeContact.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MergeContact.swift; sourceTree = "<group>"; };
 		5874560F285D04D5004EEFD1 /* Folder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Folder.swift; sourceTree = "<group>"; };
@@ -160,9 +158,8 @@
 				5825BDB52854ED6F0082069A /* LabelPicker.swift */,
 				5825BDBF2854ED6F0082069A /* ManageContacts.swift */,
 				58725AD728594B11004BF574 /* MergeContact.swift */,
+				5825BDC02854ED6F0082069A /* ContactHeader.swift */,
 				5825BDB82854ED6F0082069A /* ImagePicker.swift */,
-				5825BDC22854ED6F0082069A /* ContactImage.swift */,
-				5825BDC02854ED6F0082069A /* EditableContactImage.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -261,7 +258,7 @@
 				5825BDD22854ED6F0082069A /* ImagePicker.swift in Sources */,
 				5825BDD72854ED6F0082069A /* CodeGenerator.swift in Sources */,
 				58745615285F505F004EEFD1 /* ContactListViewModel.swift in Sources */,
-				5825BDD92854ED6F0082069A /* EditableContactImage.swift in Sources */,
+				5825BDD92854ED6F0082069A /* ContactHeader.swift in Sources */,
 				58DA70CA285B602900BEA685 /* CNContact-extension.swift in Sources */,
 				5825BDD42854ED6F0082069A /* CodeScanner.swift in Sources */,
 				5825BDD62854ED6F0082069A /* ScannerViewController.swift in Sources */,
@@ -274,7 +271,6 @@
 				5825BDD82854ED6F0082069A /* ManageContacts.swift in Sources */,
 				5825BDC42854ED6F0082069A /* LocationManager.swift in Sources */,
 				5825BDCF2854ED6F0082069A /* LabelPicker.swift in Sources */,
-				5825BDDB2854ED6F0082069A /* ContactImage.swift in Sources */,
 				5825BDD52854ED6F0082069A /* ScannerCoordinator.swift in Sources */,
 				58725AD828594B11004BF574 /* MergeContact.swift in Sources */,
 				58745618285FED8B004EEFD1 /* RequestAccess.swift in Sources */,
