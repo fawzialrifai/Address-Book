@@ -57,7 +57,7 @@ import Contacts
     private var deletedContactsPath = FileManager.documentDirectory.appendingPathComponent("Deleted Contacts")
     @Published var isImporting = false
     @Published var isExporting = false
-    @Published var isNotAuthorized = false
+    @Published var isAuthorized = false
     @AppStorage("Sort Order") var sortOrder = Order.firstNameLastName
     @AppStorage("Order Display") var displayOrder = Order.firstNameLastName
     
@@ -72,6 +72,8 @@ import Contacts
         }
         loadDeletedContacts()
     }
+    
+    
     
 }
 
@@ -125,31 +127,6 @@ extension ContactStore {
 
 extension ContactStore {
     
-    var duplicatesDictionary: [String: [[Contact]]] {
-        var keys = [String]()
-        var contactsDictionary = [String: [[Contact]]]()
-        for duplicate in duplicates {
-            if let firstDuplicate = duplicate.first {
-                if !firstDuplicate.isMyCard {
-                    if let firstLetter = firstDuplicate.firstLetter(sortOrder: sortOrder) {
-                        if keys.contains(firstLetter) {
-                            contactsDictionary[firstLetter]?.append(duplicate)
-                        } else {
-                            contactsDictionary[firstLetter] = [duplicate]
-                            keys.append(firstLetter)
-                        }
-                    }
-                }
-            }
-            
-        }
-        return contactsDictionary
-    }
-    
-}
-
-extension ContactStore {
-    
     func fetchMyCard() {
         do {
             let encodedMyCard = try Data(contentsOf: myCardPath)
@@ -180,23 +157,12 @@ extension ContactStore {
     }
     
     func requestContactsAccess(onSuccess: @escaping () -> Void) {
-        let contactStore = CNContactStore()
         if CNContactStore.authorizationStatus(for: .contacts) == .authorized {
+            isAuthorized = true
             onSuccess()
-        } else if CNContactStore.authorizationStatus(for: .contacts) == .notDetermined {
-            contactStore.requestAccess(for: .contacts) { success, _ in
-                if success {
-                    onSuccess()
-                } else {
-                    DispatchQueue.main.async {
-                        self.isNotAuthorized = true
-                    }
-                }
-            }
-        } else if CNContactStore.authorizationStatus(for: .contacts) == .denied {
-            self.isNotAuthorized = true
+        } else {
+            isAuthorized = false
         }
-        
     }
     
     func fetchContacts() {
@@ -398,6 +364,43 @@ extension ContactStore {
         }
     }
     
+    func mergeContactCards(_ cards: [Contact]) {
+        
+    }
+    
+    func mergeAllDuplicates() {
+        for contactCards in duplicates {
+            var contact = Contact()
+            for card in contactCards {
+                contact.firstName = card.firstName
+                if let lastName = card.lastName {
+                    contact.lastName = lastName
+                }
+                if let company = card.company {
+                    contact.company = company
+                }
+                for phoneNumber in card.phoneNumbers {
+                    if !contact.phoneNumbers.contains(phoneNumber) {
+                        contact.phoneNumbers.append(phoneNumber)
+                    }
+                }
+                for emailAdress in card.emailAddresses {
+                    if !contact.emailAddresses.contains(emailAdress) {
+                        contact.emailAddresses.append(emailAdress)
+                    }
+                }
+                if let birthday = card.birthday {
+                    contact.birthday = birthday
+                }
+                if let imageData = card.imageData {
+                    contact.imageData = imageData
+                }
+                moveToDeletedList(card)
+            }
+            add(contact)
+        }
+    }
+    
     func hideContact(_ contact: Contact) {
         if let index = contacts.firstIndex(of: contact) {
             contacts[index].isHidden = true
@@ -409,6 +412,18 @@ extension ContactStore {
         hiddenContactsIdentifiers.removeAll(where: { $0 == contact.identifier })
         if let index = contacts.firstIndex(of: contact) {
             contacts[index].isHidden = false
+        }
+    }
+    
+    func moveToDeletedList(_ contacts: [Contact]) {
+        for contact in contacts {
+            moveToDeletedList(contact)
+        }
+    }
+    
+    func permanentlyDelete(_ contacts: [Contact]) {
+        for contact in contacts {
+            permanentlyDelete(contact)
         }
     }
     

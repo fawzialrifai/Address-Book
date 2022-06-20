@@ -37,15 +37,15 @@ struct ContactList: View {
                             Contacts { contact in
                                 scrollViewProxy.scrollTo(contact.id, anchor: .center)
                             }
-                            .navigationBarHidden(viewModel.isInitialsPresented)
+                            .navigationBarHidden(viewModel.isInitialsGridPresented)
                             .safeAreaInset(edge: .bottom) {
-                                if viewModel.folder == .deleted && !contactStore.deletedContacts.isEmpty {
+                                if (viewModel.folder == .duplicates && !contactStore.duplicates.isEmpty) || (viewModel.folder == .deleted && !contactStore.deletedContacts.isEmpty){
                                     BottomButton()
                                 }
                             }
                         }
-                        if viewModel.isInitialsPresented {
-                            InitialsGrid(isInitialsPresented: $viewModel.isInitialsPresented, scrollViewProxy: scrollViewProxy)
+                        if viewModel.isInitialsGridPresented {
+                            InitialsGrid(isInitialsPresented: $viewModel.isInitialsGridPresented, scrollViewProxy: scrollViewProxy)
                                 .zIndex(1)
                         }
                     }
@@ -54,7 +54,7 @@ struct ContactList: View {
             }
         }
     }
-    init(folder: Folder, isFolderLocked: Bool = true) {
+    init(folder: Folder, isFolderLocked: Bool) {
         _viewModel = StateObject(wrappedValue: ContactListViewModel(folder: folder, isFolderLocked: isFolderLocked))
     }
 }
@@ -80,7 +80,7 @@ struct Contacts: View {
                 if viewModel.folder == .all {
                     Menu {
                         Button {
-                            viewModel.isNewContactViewPresented.toggle()
+                            viewModel.isAddContactViewPresented.toggle()
                         } label: {
                             Label("Add Manually", systemImage: "plus")
                         }
@@ -103,7 +103,7 @@ struct Contacts: View {
         .sheet(isPresented: $viewModel.isManageContactsViewPresented) {
             ManageContacts()
         }
-        .sheet(isPresented: $viewModel.isNewContactViewPresented) {
+        .sheet(isPresented: $viewModel.isAddContactViewPresented) {
             NavigationView {
                 EditContact(contact: Contact()) { contact in
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -138,41 +138,48 @@ struct Contacts: View {
                 }
             }
         }
-        .alert("Cannot Access Contacts", isPresented: $contactStore.isNotAuthorized) {
-            Button("Exit") {
-                fatalError()
+        .confirmationDialog("Merge Duplicates?", isPresented: $viewModel.isMergeAllDuplicatesDialogPresented) {
+            Button("Merge All") {
+                contactStore.mergeAllDuplicates()
             }
         } message: {
-            Text("Please allow Address Book access contacts from Settings.")
-            
+            Text("Merging duplicate cards combines those with the same information into a single contact card.")
         }
-        .confirmationDialog("Delete Contact?", isPresented: $viewModel.isDeleteContactDialogPresented) {
+        .confirmationDialog(viewModel.contactsToDelete.count > 1 ? "Delete Cards?" : "Delete Contact?", isPresented: $viewModel.isDeleteContactsDialogPresented) {
             Button("Delete", role: .destructive) {
-                guard let contactToDelete = viewModel.contactToDelete else { return }
                 UINotificationFeedbackGenerator().notificationOccurred(.success)
                 withAnimation {
-                    contactStore.moveToDeletedList(contactToDelete)
+                    contactStore.moveToDeletedList(viewModel.contactsToDelete)
                 }
-                viewModel.contactToDelete = nil
+                viewModel.contactsToDelete.removeAll()
             }
         } message: {
-            if let contactToDelete = viewModel.contactToDelete {
-                Text("\(contactToDelete.fullName(displayOrder: contactStore.displayOrder)) will be deleted and moved to the Recently Deleted folder.")
-            }
+            //Text(viewModel.contactsToDelete.count > 1 ? "These cards" : viewModel.contactsToDelete[0].fullName(displayOrder: contactStore.displayOrder) + "will be deleted and moved to the Recently Deleted folder.")
         }
-        .confirmationDialog("Permanently Delete Contact?", isPresented: $viewModel.isPermanentlyDeleteContactDialogPresented) {
-            Button("Delete Permanently", role: .destructive) {
-                guard let contactToDelete = viewModel.contactToDelete else { return }
-                UINotificationFeedbackGenerator().notificationOccurred(.success)
-                withAnimation {
-                    contactStore.permanentlyDelete(contactToDelete)
-                }
-                viewModel.contactToDelete = nil
+        .confirmationDialog("Delete All Permanently?", isPresented: $viewModel.isDeleteAllContactsDialogPresented) {
+            Button("Delete All Permanently") {
+                contactStore.emptyRecentlyDeletedFolder()
             }
         } message: {
-            if let contactToDelete = viewModel.contactToDelete {
-                Text("\(contactToDelete.fullName(displayOrder: contactStore.displayOrder)) will be deleted permanently, This action cannot be undone.")
+            Text("These contacts will be deleted permanently, This action cannot be undone.")
+        }
+        .confirmationDialog("Restore All?", isPresented: $viewModel.isRestoreAllContactsDialogPresented) {
+            Button("Restore All") {
+                contactStore.restoreAllDeletedContacts()
             }
+        } message: {
+            Text("These contacts will be restored and moved out of the Recently Deleted folder.")
+        }
+        .confirmationDialog("Permanently Delete Contact?", isPresented: $viewModel.isPermanentlyDeleteContactsDialogPresented) {
+            Button("Delete Permanently", role: .destructive) {
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
+                withAnimation {
+                    contactStore.permanentlyDelete(viewModel.contactsToDelete)
+                }
+                viewModel.contactsToDelete.removeAll()
+            }
+        } message: {
+            //Text("\(viewModel.contactsToDelete[0].fullName(displayOrder: contactStore.displayOrder)) will be deleted permanently, This action cannot be undone.")
         }
     }
 }
@@ -183,7 +190,7 @@ struct MyCardSection: View {
     var body: some View {
         Section(header: Text("My Card").textCase(nil)) {
             if let myCard = contactStore.contacts.first { $0.isMyCard } {
-                ContactRow(contact: myCard)
+                ContactRow(cards: [myCard])
             } else {
                 HStack {
                     ContactImage(contact: Contact())
@@ -213,8 +220,8 @@ struct EmergencySection: View {
     var body: some View {
         if !viewModel.emergencyContacts.isEmpty {
             Section(header: SectionHeader(view: AnyView(Image(systemName: "staroflife.fill")))) {
-                ForEach(viewModel.emergencyContacts) { contact in
-                    ContactRow(contact: contact)
+                ForEach(viewModel.emergencyContacts, id: \.[0].id) { cards in
+                    ContactRow(cards: cards)
                 }
             }
             .id("staroflife")
@@ -228,8 +235,8 @@ struct FavoritesSection: View {
     var body: some View {
         if !viewModel.favorites.isEmpty {
             Section(header: SectionHeader(view: AnyView(Text("★")))) {
-                ForEach(viewModel.favorites) { contact in
-                    ContactRow(contact: contact)
+                ForEach(viewModel.favorites, id: \.[0].id) { cards in
+                    ContactRow(cards: cards)
                 }
             }
             .id("★")
@@ -243,70 +250,92 @@ struct FirstLettersSections: View {
     var body: some View {
         ForEach(viewModel.initials, id: \.self) { letter in
             Section(header: SectionHeader(view: AnyView(Text(letter)))) {
-                ForEach(viewModel.groupedContacts[letter] ?? []) { contact in
-                    ContactRow(contact: contact)
-                        .id(contact.id)
+                ForEach(viewModel.groupedContacts[letter] ?? [], id: \.[0].id) { cards in
+                    ContactRow(cards: cards)
                 }
             }
-            .id(letter)
         }
     }
 }
 
 struct ContactRow: View {
-    var contact: Contact
+    var cards: [Contact]
     @EnvironmentObject var viewModel: ContactListViewModel
     @EnvironmentObject var contactStore: ContactStore
     var body: some View {
-        NavigationLink(destination: ContactDetails(contact: contact)) {
+        NavigationLink {
+            if cards.count > 1 {
+                MergeContact(duplicates: cards)
+            } else {
+                ContactDetails(contact: cards[0])
+            }
+        } label: {
             HStack {
-                ContactImage(contact: contact)
-                    .frame(width: 45, height: 45)
-                VStack(alignment: .leading) {
-                    Text(contact.fullName(displayOrder: contactStore.displayOrder))
-                    if contact.phoneNumbers.count > 0 {
-                        Text(contact.phoneNumbers[0].value)
-                            .font(Font.callout)
-                            .foregroundColor(.secondary)
-                    } else if contact.emailAddresses.count > 0 {
-                        Text(contact.emailAddresses[0].value)
-                            .font(Font.callout)
-                            .foregroundColor(.secondary)
+                HStack {
+                    ForEach(cards.prefix(3)) { card in
+                        if let index = cards.firstIndex(of: card) {
+                            ContactImage(contact: card)
+                                .frame(width: 45, height: 45)
+                                .padding(.leading, index == 0 ? 0 : -42.5)
+                        }
                     }
+                }
+                //.frame(width: 70)
+                VStack(alignment: .leading) {
+                    Text(cards[0].fullName(displayOrder: contactStore.displayOrder))
+                    Group {
+                        if cards.count == 1 {
+                            if cards[0].phoneNumbers.count > 0 {
+                                Text(cards[0].phoneNumbers[0].value)
+                            } else if cards[0].emailAddresses.count > 0 {
+                                Text(cards[0].emailAddresses[0].value)
+                            }
+                        } else {
+                            Text("\(cards.count) cards")
+                        }
+                    }
+                    .font(Font.callout)
+                    .foregroundColor(.secondary)
                 }
             }
             .padding(.vertical, 8)
         }
         .contextMenu {
-            if !contact.isMyCard {
-                if contact.phoneNumbers.count > 0 {
+            if !cards.contains { $0.isMyCard } {
+                if !cards.allSatisfy({ $0.phoneNumbers.count == 0 }) {
                     Menu {
-                        ForEach(contact.phoneNumbers) { phoneNumber in
-                            Button("\(phoneNumber.label ?? "")\n\(phoneNumber.value)") {
-                                guard let phone = URL(string: "tel:\(phoneNumber.value.plainPhoneNumber)") else { return }
-                                UIApplication.shared.open(phone)
+                        ForEach(cards) { card in
+                            ForEach(card.phoneNumbers) { phoneNumber in
+                                Button("\(phoneNumber.label ?? "")\n\(phoneNumber.value)") {
+                                    guard let phone = URL(string: "tel:\(phoneNumber.value.plainPhoneNumber)") else { return }
+                                    UIApplication.shared.open(phone)
+                                }
                             }
                         }
                     } label: {
                         Label("Call", systemImage: "phone")
                     }
                     Menu {
-                        ForEach(contact.phoneNumbers) { phoneNumber in
-                            Button("\(phoneNumber.label ?? "")\n\(phoneNumber.value)") {
-                                guard let messages = URL(string: "sms:\(phoneNumber.value.plainPhoneNumber)") else { return }
-                                UIApplication.shared.open(messages)
+                        ForEach(cards) { card in
+                            ForEach(card.phoneNumbers) { phoneNumber in
+                                Button("\(phoneNumber.label ?? "")\n\(phoneNumber.value)") {
+                                    guard let messages = URL(string: "tel:\(phoneNumber.value.plainPhoneNumber)") else { return }
+                                    UIApplication.shared.open(messages)
+                                }
                             }
                         }
                     } label: {
                         Label("Message", systemImage: "message")
                     }
                 }
-                if contact.emailAddresses.count > 0 {
+                if !cards.allSatisfy({ $0.emailAddresses.count == 0 }) {
                     Menu {
-                        ForEach(contact.emailAddresses) { emailAddress in
-                            Button("\(emailAddress.label ?? "")\n\(emailAddress.value)") {
-                                guard let mail = URL(string: "mailto:\(emailAddress.value)") else { return }
-                                UIApplication.shared.open(mail)
+                        ForEach(cards) { card in
+                            ForEach(card.emailAddresses) { emailAddress in
+                                Button("\(emailAddress.label ?? "")\n\(emailAddress.value)") {
+                                    guard let mail = URL(string: "tel:\(emailAddress.value)") else { return }
+                                    UIApplication.shared.open(mail)
+                                }
                             }
                         }
                     } label: {
@@ -316,30 +345,44 @@ struct ContactRow: View {
             }
         }
         .swipeActions(edge: .leading) {
-            if !contact.isMyCard {
+            if !cards.allSatisfy({ $0.isMyCard }) {
                 Button  {
                     UINotificationFeedbackGenerator().notificationOccurred(.success)
                     withAnimation {
-                        contact.isFavorite ? contactStore.removeFromFavorites(contact) : contactStore.addToFavorites(contact)
+                        if cards.contains(where: { $0.isFavorite }) {
+                            for card in cards {
+                                contactStore.removeFromFavorites(card)
+                            }
+                        } else {
+                            for card in cards {
+                                if !card.isMyCard {
+                                    contactStore.addToFavorites(card)
+                                }
+                            }
+                        }
                     }
                 } label: {
-                    Label(contact.isFavorite ? "Remove for Favorites" : "Add to Favorites", systemImage: contact.isFavorite ? "star.slash.fill" : "star.fill")
+                    if cards.contains(where: { $0.isFavorite }) {
+                        Label("Remove for Favorites", systemImage: "star.slash.fill")
+                    } else {
+                        Label("Add to Favorites", systemImage: "star.fill")
+                    }
                 }
                 .tint(.yellow)
             }
         }
         .swipeActions(edge: .trailing) {
-            if !contact.isMyCard {
+            if !cards.allSatisfy({ $0.isMyCard }) {
                 Button  {
                     UINotificationFeedbackGenerator().notificationOccurred(.warning)
-                    viewModel.contactToDelete = contact
-                    if contact.isDeleted {
-                        viewModel.isPermanentlyDeleteContactDialogPresented.toggle()
+                    viewModel.contactsToDelete = cards
+                    if cards[0].isDeleted {
+                        viewModel.isPermanentlyDeleteContactsDialogPresented.toggle()
                     } else {
-                        viewModel.isDeleteContactDialogPresented.toggle()
+                        viewModel.isDeleteContactsDialogPresented.toggle()
                     }
                 } label: {
-                    Label(contact.isDeleted ? "Delete Permanently" : "Delete", systemImage: "trash.fill")
+                    Label(cards[0].isDeleted ? "Delete Permanently" : "Delete", systemImage: "trash.fill")
                 }
                 .tint(.red)
             }
@@ -363,39 +406,43 @@ struct BottomButton: View {
     @EnvironmentObject var viewModel: ContactListViewModel
     @EnvironmentObject var contactStore: ContactStore
     var body: some View {
-        VStack(spacing: 16) {
-            Button {
-                viewModel.isDeleteAllContactsDialogPresented = true
-            } label: {
-                Label("Delete All Permanently", systemImage: "trash.fill")
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .foregroundColor(.white)
-                    .background(.red)
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-            }
-            .padding([.horizontal, .top], 20)
-            .confirmationDialog("Delete All Permanently?", isPresented: $viewModel.isDeleteAllContactsDialogPresented) {
-                Button("Delete All Permanently") {
-                    contactStore.emptyRecentlyDeletedFolder()
+        if viewModel.folder == .duplicates {
+            HStack {
+                Button {
+                    viewModel.isMergeAllDuplicatesDialogPresented = true
+                } label: {
+                    Text("Merge All")
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .foregroundColor(.white)
+                        .background(.blue)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
                 }
-            } message: {
-                Text("These contacts will be deleted permanently, This action cannot be undone.")
+                .padding(20)
             }
-            Button("Restore All") {
-                viewModel.isRestoreAllContactsDialogPresented.toggle()
-            }
-            .padding(.bottom, 20)
-            .confirmationDialog("Restore All?", isPresented: $viewModel.isRestoreAllContactsDialogPresented) {
+            .background(Material.thinMaterial)
+            .shadow(radius: 0.5)
+        } else if viewModel.folder == .deleted {
+            VStack(spacing: 16) {
+                Button {
+                    viewModel.isDeleteAllContactsDialogPresented = true
+                } label: {
+                    Label("Delete All Permanently", systemImage: "trash.fill")
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .foregroundColor(.white)
+                        .background(.red)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                }
+                .padding([.horizontal, .top], 20)
                 Button("Restore All") {
-                    contactStore.restoreAllDeletedContacts()
+                    viewModel.isRestoreAllContactsDialogPresented.toggle()
                 }
-            } message: {
-                Text("These contacts will be restored and moved out of the Recently Deleted folder.")
+                .padding(.bottom, 20)
             }
+            .background(Material.thinMaterial)
+            .shadow(radius: 0.5)
         }
-        .background(Material.thinMaterial)
-        .shadow(radius: 0.5)
     }
 }
 
@@ -408,7 +455,7 @@ struct SectionHeader: View {
             UISelectionFeedbackGenerator().selectionChanged()
             dismissSearch()
             withAnimation {
-                viewModel.isInitialsPresented.toggle()
+                viewModel.isInitialsGridPresented.toggle()
             }
         } label: {
             view.frame(maxWidth: .infinity, alignment: .leading)
@@ -419,7 +466,7 @@ struct SectionHeader: View {
 
 struct ContactList_Previews: PreviewProvider {
     static var previews: some View {
-        ContactList(folder: .all)
+        ContactList(folder: .all, isFolderLocked: false)
             .environmentObject(ContactStore.shared)
     }
 }

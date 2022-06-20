@@ -9,83 +9,66 @@ import SwiftUI
 import LocalAuthentication
 
 @MainActor class ContactListViewModel: ObservableObject {
+    var contactStore = ContactStore.shared
     var folder: Folder
     @Published var isFolderLocked: Bool
     @Published var searchText = ""
-    var contactStore = ContactStore.shared
-    @Published var isInitialsPresented = false
+    @Published var isInitialsGridPresented = false
     @Published var isManageContactsViewPresented = false
-    @Published var isNewContactViewPresented = false
-    @Published var isCodeScannerPresented = false
-    @Published var isDeleteContactDialogPresented = false
-    @Published var isPermanentlyDeleteContactDialogPresented = false
-    @Published var isRestoreAllContactsDialogPresented = false
-    @Published var isDeleteAllContactsDialogPresented = false
-    @Published var contactToDelete: Contact?
     @Published var isSettingUpMyCard = false
+    @Published var isAddContactViewPresented = false
+    @Published var isCodeScannerPresented = false
+    @Published var isDeleteContactsDialogPresented = false
+    @Published var isMergeAllDuplicatesDialogPresented = false
+    @Published var isPermanentlyDeleteContactsDialogPresented = false
+    @Published var isDeleteAllContactsDialogPresented = false
+    @Published var isRestoreAllContactsDialogPresented = false
+    @Published var contactsToDelete = [Contact]()
     
     init(folder: Folder, isFolderLocked: Bool) {
         self.folder = folder
         self.isFolderLocked = isFolderLocked
     }
     
-    var categorizedContacts: [Contact] {
-        if folder == .all {
-            return contactStore.unhiddenContacts
-        }
-        else if folder == .hidden {
-            return contactStore.hiddenContacts
-        } else {
-            return contactStore.deletedContacts
+    var categorizedContacts: [[Contact]] {
+        switch folder {
+        case .all:
+            return contactStore.unhiddenContacts.map { [$0] }
+        case .hidden:
+            return contactStore.hiddenContacts.map { [$0] }
+        case .deleted:
+            return contactStore.deletedContacts.map { [$0] }
+        case .duplicates:
+            return contactStore.duplicates
         }
     }
     
-    var filteredContacts: [Contact] {
-        return categorizedContacts.filter {
+    var filteredContacts: [[Contact]] {
+        categorizedContacts.filter {
             searchText.isEmpty ||
-            ($0.firstName + " " + ($0.lastName ?? "")).lowercased().contains(searchText.lowercased()) ||
-            (($0.lastName ?? "") + " " + ($0.firstName)).lowercased().contains(searchText.lowercased()) ||
-            $0.company?.lowercased().contains(searchText.lowercased()) == true ||
-            $0.notes?.lowercased().contains(searchText.lowercased()) == true ||
-            $0.phoneNumbers.contains(where: { $0.value.lowercased().contains(searchText.lowercased()) }) ||
-            $0.phoneNumbers.contains(where: { $0.value.plainPhoneNumber.lowercased().contains(searchText.plainPhoneNumber.lowercased()) }) ||
-            $0.emailAddresses.contains(where: { $0.value.lowercased().contains(searchText.lowercased()) })
-            
+            ($0[0].firstName + " " + ($0[0].lastName ?? "")).lowercased().contains(searchText.lowercased()) ||
+            (($0[0].lastName ?? "") + " " + ($0[0].firstName)).lowercased().contains(searchText.lowercased()) ||
+            $0.contains { $0.company?.lowercased().contains(searchText.lowercased()) == true } ||
+            $0.contains { $0.notes?.lowercased().contains(searchText.lowercased()) == true } ||
+            $0.contains { $0.phoneNumbers.contains(where: { $0.value.lowercased().contains(searchText.lowercased()) }) } ||
+            $0.contains { $0.phoneNumbers.contains(where: { $0.value.plainPhoneNumber.lowercased().contains(searchText.plainPhoneNumber.lowercased()) }) } ||
+            $0.contains { $0.emailAddresses.contains(where: { $0.value.lowercased().contains(searchText.lowercased()) }) }
         }
     }
     
-    var groupedContacts: [String: [Contact]] {
-        var keys = [String]()
-        var groupedContacts = [String: [Contact]]()
-        for contact in filteredContacts {
-            if !contact.isMyCard {
-                if let firstLetter = contact.firstLetter(sortOrder: contactStore.sortOrder) {
-                    if keys.contains(firstLetter) {
-                        groupedContacts[firstLetter]?.append(contact)
-                    } else {
-                        groupedContacts[firstLetter] = [contact]
-                        keys.append(firstLetter)
-                    }
-                }
-                
-            }
-        }
-        return groupedContacts
+    var emergencyContacts: [[Contact]] {
+        filteredContacts.filter { $0.contains { $0.isEmergencyContact } }
     }
     
-    var emergencyContacts: [Contact] {
-        filteredContacts.filter({ $0.isEmergencyContact })
-    }
-    
-    var favorites: [Contact] {
-        filteredContacts.filter({ $0.isFavorite })
+    var favorites: [[Contact]] {
+        filteredContacts.filter { $0.contains { $0.isFavorite } }
     }
     
     var initials: [String] {
         var keys = [String]()
-        for contact in filteredContacts {
-            if !contact.isMyCard {
-                if let firstLetter = contact.firstLetter(sortOrder: contactStore.sortOrder) {
+        for contacts in filteredContacts {
+            if !contacts.allSatisfy({ $0.isMyCard }) {
+                if let firstLetter = contacts[0].firstLetter(sortOrder: contactStore.sortOrder) {
                     if !keys.contains(firstLetter) {
                         keys.append(firstLetter)
                     }
@@ -93,6 +76,25 @@ import LocalAuthentication
             }
         }
         return keys.sorted()
+    }
+    
+    var groupedContacts: [String: [[Contact]]] {
+        var keys = [String]()
+        var groupedContacts = [String: [[Contact]]]()
+        for contacts in filteredContacts {
+            if !contacts.allSatisfy({ $0.isMyCard }) {
+                if let firstLetter = contacts[0].firstLetter(sortOrder: contactStore.sortOrder) {
+                    if keys.contains(firstLetter) {
+                        groupedContacts[firstLetter]?.append(contacts)
+                    } else {
+                        groupedContacts[firstLetter] = [contacts]
+                        keys.append(firstLetter)
+                    }
+                }
+                
+            }
+        }
+        return groupedContacts
     }
     
     func authenticate() {
@@ -124,4 +126,5 @@ import LocalAuthentication
             print("Scanning failed: \(error.localizedDescription)")
         }
     }
+    
 }

@@ -33,7 +33,7 @@ struct ContactImagee: View {
     }
 }
 
-struct ContactHeader_Previews: PreviewProvider {
+struct ContactImagee_Previews: PreviewProvider {
     static var previews: some View {
         ContactImagee(contact: .example)
             .previewLayout(.sizeThatFits)

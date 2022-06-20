@@ -124,7 +124,7 @@ struct QRCodeImage: View {
     }
 }
 
-struct QRCodeGenerator_Previews: PreviewProvider {
+struct CodeGenerator_Previews: PreviewProvider {
     static var previews: some View {
         CodeGenerator(contact: .example)
     }

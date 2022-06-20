@@ -73,7 +73,7 @@ struct LetterItem: View {
     }
 }
 
-struct FirstLettersGrid_Previews: PreviewProvider {
+struct InitialsGrid_Previews: PreviewProvider {
     static var previews: some View {
         InitialsGrid(isInitialsPresented: .constant(true), scrollViewProxy: nil)
     }

@@ -12,8 +12,14 @@ struct AddressBookApp: App {
     @StateObject var contactStore = ContactStore.shared
     var body: some Scene {
         WindowGroup {
-            ContactList(folder: .all, isFolderLocked: false)
-                .environmentObject(contactStore)
+            if contactStore.isAuthorized {
+                ContactList(folder: .all, isFolderLocked: false)
+                    .environmentObject(contactStore)
+                
+            } else {
+                RequestAccess()
+                    .environmentObject(contactStore)
+            }
         }
     }
     init() {

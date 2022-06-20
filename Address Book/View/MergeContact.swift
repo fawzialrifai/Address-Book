@@ -231,7 +231,7 @@ struct MergeContact: View {
     }
 }
 
-struct MergeFactory_Previews: PreviewProvider {
+struct MergeContact_Previews: PreviewProvider {
     static var previews: some View {
         MergeContact(duplicates: [])
     }

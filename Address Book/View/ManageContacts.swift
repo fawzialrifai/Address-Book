@@ -59,7 +59,7 @@ struct ManageContacts: View {
                 }
                 Section {
                     NavigationLink {
-                        DuplicatesList()
+                        ContactList(folder: .duplicates, isFolderLocked: false)
                     } label: {
                         HStack {
                             Text("Duplicates")
@@ -69,7 +69,7 @@ struct ManageContacts: View {
                         }
                     }
                     NavigationLink {
-                        ContactList(folder: .hidden)
+                        ContactList(folder: .hidden, isFolderLocked: true)
                     } label: {
                         HStack {
                             Text("Hidden")
@@ -79,7 +79,7 @@ struct ManageContacts: View {
                         }
                     }
                     NavigationLink {
-                        ContactList(folder: .deleted)
+                        ContactList(folder: .deleted, isFolderLocked: true)
                     } label: {
                         HStack {
                             Text("Recently Deleted")
