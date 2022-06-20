@@ -63,10 +63,11 @@ struct EditContact: View {
                     newData.movePhoneNumbers(at: $0, to: $1)
                 }
                 .onDelete {
+                    UISelectionFeedbackGenerator().selectionChanged()
                     newData.removePhoneNumbers(at: $0)
                 }
                 Button {
-                    UINotificationFeedbackGenerator().notificationOccurred(.success)
+                    UISelectionFeedbackGenerator().selectionChanged()
                     withAnimation {
                         newData.addNewPhoneNumber()
                     }
@@ -98,10 +99,11 @@ struct EditContact: View {
                     newData.moveEmailAddresses(at: $0, to: $1)
                 }
                 .onDelete {
+                    UISelectionFeedbackGenerator().selectionChanged()
                     newData.removeEmailAddresses(at: $0)
                 }
                 Button {
-                    UINotificationFeedbackGenerator().notificationOccurred(.success)
+                    UISelectionFeedbackGenerator().selectionChanged()
                     withAnimation {
                         newData.addNewEmailAddress()
                     }

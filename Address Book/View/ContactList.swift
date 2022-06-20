@@ -146,6 +146,7 @@ struct Contacts: View {
         }
         .confirmationDialog("Merge Duplicates?", isPresented: $viewModel.isMergeAllDuplicatesDialogPresented) {
             Button("Merge All") {
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
                 contactStore.mergeAllDuplicates()
             }
         } message: {
@@ -166,6 +167,7 @@ struct Contacts: View {
         }
         .confirmationDialog("Delete All Permanently?", isPresented: $viewModel.isDeleteAllContactsDialogPresented) {
             Button("Delete All Permanently") {
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
                 contactStore.emptyRecentlyDeletedFolder()
             }
         } message: {
@@ -173,6 +175,7 @@ struct Contacts: View {
         }
         .confirmationDialog("Restore All?", isPresented: $viewModel.isRestoreAllContactsDialogPresented) {
             Button("Restore All") {
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
                 contactStore.restoreAllDeletedContacts()
             }
         } message: {
@@ -421,6 +424,7 @@ struct BottomButton: View {
         if viewModel.folder == .duplicates {
             HStack {
                 Button {
+                    UINotificationFeedbackGenerator().notificationOccurred(.warning)
                     viewModel.isMergeAllDuplicatesDialogPresented = true
                 } label: {
                     Text("Merge All")
@@ -437,6 +441,7 @@ struct BottomButton: View {
         } else if viewModel.folder == .deleted {
             VStack(spacing: 16) {
                 Button {
+                    UINotificationFeedbackGenerator().notificationOccurred(.warning)
                     viewModel.isDeleteAllContactsDialogPresented = true
                 } label: {
                     Label("Delete All Permanently", systemImage: "trash.fill")
@@ -448,6 +453,7 @@ struct BottomButton: View {
                 }
                 .padding([.horizontal, .top], 20)
                 Button("Restore All") {
+                    UINotificationFeedbackGenerator().notificationOccurred(.warning)
                     viewModel.isRestoreAllContactsDialogPresented.toggle()
                 }
                 .padding(.bottom, 20)

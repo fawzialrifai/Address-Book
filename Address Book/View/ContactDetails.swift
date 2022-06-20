@@ -269,6 +269,7 @@ struct ContactDetails: View {
                         }
                         .confirmationDialog("Delete Your Card?", isPresented: $isDeleteContactAlertPresented) {
                             Button("Delete", role: .destructive) {
+                                UINotificationFeedbackGenerator().notificationOccurred(.success)
                                 contactStore.moveToDeletedList(contact)
                             }
                         } message: {

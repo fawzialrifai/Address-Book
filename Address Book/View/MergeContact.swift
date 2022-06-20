@@ -28,6 +28,7 @@ struct MergeContact: View {
                             HStack(spacing: 24) {
                                 ForEach(images, id: \.self) { imageData in
                                     Button {
+                                        UISelectionFeedbackGenerator().selectionChanged()
                                         if mergedContact.imageData == imageData {
                                             mergedContact.imageData = nil
                                         } else {
@@ -62,6 +63,7 @@ struct MergeContact: View {
                             Text(company)
                             Spacer()
                             Button {
+                                UISelectionFeedbackGenerator().selectionChanged()
                                 if mergedContact.company == company {
                                     mergedContact.company = nil
                                 } else {
@@ -92,6 +94,7 @@ struct MergeContact: View {
                             .padding(.vertical, 8)
                             Spacer()
                             Button {
+                                UISelectionFeedbackGenerator().selectionChanged()
                                 if mergedContact.phoneNumbers.contains(phoneNumber) {
                                     if let index = mergedContact.phoneNumbers.firstIndex(of: phoneNumber) {
                                         mergedContact.phoneNumbers.remove(at: index)
@@ -124,6 +127,7 @@ struct MergeContact: View {
                             .padding(.vertical, 8)
                             Spacer()
                             Button {
+                                UISelectionFeedbackGenerator().selectionChanged()
                                 if mergedContact.emailAddresses.contains(emailAddress) {
                                     if let index = mergedContact.emailAddresses.firstIndex(of: emailAddress) {
                                         mergedContact.emailAddresses.remove(at: index)
@@ -151,6 +155,7 @@ struct MergeContact: View {
                             Text(birthday.formatted(.dateTime.year().month().day()))
                             Spacer()
                             Button {
+                                UISelectionFeedbackGenerator().selectionChanged()
                                 if mergedContact.birthday == birthday {
                                     mergedContact.birthday = nil
                                 } else {
@@ -177,6 +182,7 @@ struct MergeContact: View {
                     contactStore.moveToDeletedList(contact)
                 }
                 contactStore.add(mergedContact)
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
                 dismiss()
             }
         } message: {
@@ -186,6 +192,7 @@ struct MergeContact: View {
             ToolbarItem(placement: .confirmationAction) {
                 Button("Merge") {
                     isMergeAlertPresented = true
+                    UINotificationFeedbackGenerator().notificationOccurred(.warning)
                 }
             }
         }
