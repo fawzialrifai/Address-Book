@@ -27,11 +27,13 @@ struct RequestAccess: View {
                     Button {
                         if CNContactStore.authorizationStatus(for: .contacts) == .notDetermined {
                             CNContactStore().requestAccess(for: .contacts) { success, _ in
-                                if success {
-                                    contactStore.isAuthorized = true
-                                    contactStore.fetchContacts()
-                                } else {
-                                    contactStore.isAuthorized = false
+                                DispatchQueue.main.async {
+                                    if success {
+                                        contactStore.isAuthorized = true
+                                        contactStore.fetchContacts()
+                                    } else {
+                                        contactStore.isAuthorized = false
+                                    }
                                 }
                             }
                         } else if CNContactStore.authorizationStatus(for: .contacts) == .denied {

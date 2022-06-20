@@ -68,7 +68,6 @@ import Contacts
         loadHiddenContactsIdentifiers()
         requestContactsAccess {
             self.fetchContacts()
-            self.sortContacts()
         }
         loadDeletedContacts()
     }
@@ -179,7 +178,9 @@ extension ContactStore {
                 self.contacts.append(contact)
             }
         }
-        sortContacts()
+        DispatchQueue.main.async {
+            self.sortContacts()
+        }
     }
     
     func loadDeletedContacts() {
