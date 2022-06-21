@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import LocalAuthentication
 
 struct ManageContacts: View {
     @EnvironmentObject var contactStore: ContactStore
@@ -128,11 +129,8 @@ struct ManageContacts: View {
                 }
             })
             .confirmationDialog("Delete all Contacts?", isPresented: $isDeleteContactsAlertPresented) {
-                Button("Delete", role: .destructive) {
-                    UINotificationFeedbackGenerator().notificationOccurred(.success)
-                    for contact in contactStore.contacts {
-                        contactStore.moveToDeletedList(contact)
-                    }
+                Button("Delete All", role: .destructive) {
+                    authenticate()
                 }
             } message: {
                 Text("Are you sure you want to delete all your contacts?")
@@ -142,6 +140,22 @@ struct ManageContacts: View {
                     Button("Done", action: dismiss.callAsFunction)
                 }
             }
+        }
+    }
+    func authenticate() {
+        let context = LAContext()
+        if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: nil) {
+            context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: "Authentication is required to delete all contacts.") { success, _ in
+                Task { @MainActor in
+                    if success {
+                        UINotificationFeedbackGenerator().notificationOccurred(.success)
+                        contactStore.moveToDeletedList(contactStore.contacts)
+                    }
+                }
+            }
+        } else {
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+            contactStore.moveToDeletedList(contactStore.contacts)
         }
     }
 }
