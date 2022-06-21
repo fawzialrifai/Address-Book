@@ -43,9 +43,27 @@ struct ContactList: View {
                                 Contacts { contact in
                                     scrollViewProxy.scrollTo(contact.id, anchor: .center)
                                 }
-                                .safeAreaInset(edge: .bottom) {
-                                    if (viewModel.category == .duplicates && !contactStore.duplicates.isEmpty) || (viewModel.category == .deleted && !contactStore.deletedContacts.isEmpty){
-                                        BottomButton()
+                                .toolbar {
+                                    ToolbarItemGroup(placement: SwiftUI.ToolbarItemPlacement.confirmationAction) {
+                                        if viewModel.category == .duplicates && !contactStore.duplicates.isEmpty && !viewModel.isInitialsGridPresented {
+                                            Button("Merge") {
+                                                UINotificationFeedbackGenerator().notificationOccurred(.warning)
+                                                viewModel.isMergeAllDuplicatesDialogPresented = true
+                                            }
+                                        }
+                                    }
+                                    ToolbarItemGroup(placement: .bottomBar) {
+                                        if viewModel.category == .deleted && !contactStore.deletedContacts.isEmpty && !viewModel.isInitialsGridPresented {
+                                            Button("Delete All", role: .destructive) {
+                                                UINotificationFeedbackGenerator().notificationOccurred(.warning)
+                                                viewModel.isDeleteAllContactsDialogPresented = true
+                                            }
+                                            .foregroundColor(.red)
+                                            Button("Restore All") {
+                                                UINotificationFeedbackGenerator().notificationOccurred(.warning)
+                                                viewModel.isRestoreAllContactsDialogPresented.toggle()
+                                            }
+                                        }
                                     }
                                 }
                                 if viewModel.isInitialsGridPresented {
@@ -171,7 +189,7 @@ struct Contacts: View {
             }
         }
         .confirmationDialog("Delete All Permanently?", isPresented: $viewModel.isDeleteAllContactsDialogPresented) {
-            Button("Delete All Permanently") {
+            Button("Delete All Permanently", role: .destructive) {
                 UINotificationFeedbackGenerator().notificationOccurred(.success)
                 contactStore.emptyRecentlyDeletedFolder()
             }
@@ -419,53 +437,6 @@ struct ContactImage: View {
             .foregroundStyle(.white, .gray)
             .clipShape(Circle())
             .shadow(radius: 1)
-    }
-}
-
-struct BottomButton: View {
-    @EnvironmentObject var viewModel: ContactListViewModel
-    @EnvironmentObject var contactStore: ContactStore
-    var body: some View {
-        if viewModel.category == .duplicates {
-            HStack {
-                Button {
-                    UINotificationFeedbackGenerator().notificationOccurred(.warning)
-                    viewModel.isMergeAllDuplicatesDialogPresented = true
-                } label: {
-                    Text("Merge All")
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .foregroundColor(.white)
-                        .background(.blue)
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                }
-                .padding(20)
-            }
-            .background(Material.thinMaterial)
-            .shadow(radius: 0.5)
-        } else if viewModel.category == .deleted {
-            VStack(spacing: 16) {
-                Button {
-                    UINotificationFeedbackGenerator().notificationOccurred(.warning)
-                    viewModel.isDeleteAllContactsDialogPresented = true
-                } label: {
-                    Label("Delete All Permanently", systemImage: "trash.fill")
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .foregroundColor(.white)
-                        .background(.red)
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                }
-                .padding([.horizontal, .top], 20)
-                Button("Restore All") {
-                    UINotificationFeedbackGenerator().notificationOccurred(.warning)
-                    viewModel.isRestoreAllContactsDialogPresented.toggle()
-                }
-                .padding(.bottom, 20)
-            }
-            .background(Material.thinMaterial)
-            .shadow(radius: 0.5)
-        }
     }
 }
 

@@ -164,7 +164,7 @@ struct ContactDetails: View {
                             isRestoreContactAlertPresented = true
                         }
                         .confirmationDialog("Restore Contact?", isPresented: $isRestoreContactAlertPresented) {
-                            Button("Restore", role: .destructive) {
+                            Button("Restore") {
                                 dismiss()
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                                     UINotificationFeedbackGenerator().notificationOccurred(.success)
