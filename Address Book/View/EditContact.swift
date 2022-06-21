@@ -78,6 +78,7 @@ struct EditContact: View {
                             .symbolRenderingMode(.multicolor)
                         Text("New Phone")
                     }
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
             .buttonStyle(BorderlessButtonStyle())
@@ -114,6 +115,7 @@ struct EditContact: View {
                             .symbolRenderingMode(.multicolor)
                         Text("New Email")
                     }
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
             .buttonStyle(BorderlessButtonStyle())
