@@ -14,14 +14,19 @@ struct ContactList: View {
         ZStack {
             Color.contactsBackgroundColor.ignoresSafeArea()
             if viewModel.isFolderLocked {
-                VStack(spacing: 8) {
-                    Image(systemName: "lock.fill")
-                        .font(.largeTitle)
-                        .foregroundColor(.secondary)
-                    Text("Authentication Required")
-                        .font(.title2)
-                        .foregroundColor(.secondary)
-                    Button("View \(viewModel.category.rawValue)", action: { viewModel.authenticate() })
+                GeometryReader { geometryProxy in
+                    ScrollView {
+                        VStack(spacing: 8) {
+                            Image(systemName: "lock.fill")
+                                .font(.largeTitle)
+                                .foregroundColor(.secondary)
+                            Text("Authentication Required")
+                                .font(.title2)
+                                .foregroundColor(.secondary)
+                            Button("View \(viewModel.category.rawValue)", action: { viewModel.authenticate() })
+                        }
+                        .frame(minWidth: geometryProxy.size.width, minHeight: geometryProxy.size.height)
+                    }
                 }
             } else {
                 if viewModel.category == .unhidden || viewModel.categorizedContacts.isEmpty == false {
@@ -43,29 +48,6 @@ struct ContactList: View {
                                 Contacts { contact in
                                     scrollViewProxy.scrollTo(contact.id, anchor: .center)
                                 }
-                                .toolbar {
-                                    ToolbarItemGroup(placement: SwiftUI.ToolbarItemPlacement.confirmationAction) {
-                                        if viewModel.category == .duplicates && !contactStore.duplicates.isEmpty && !viewModel.isInitialsGridPresented {
-                                            Button("Merge") {
-                                                UINotificationFeedbackGenerator().notificationOccurred(.warning)
-                                                viewModel.isMergeAllDuplicatesDialogPresented = true
-                                            }
-                                        }
-                                    }
-                                    ToolbarItemGroup(placement: .bottomBar) {
-                                        if viewModel.category == .deleted && !contactStore.deletedContacts.isEmpty && !viewModel.isInitialsGridPresented {
-                                            Button("Delete All", role: .destructive) {
-                                                UINotificationFeedbackGenerator().notificationOccurred(.warning)
-                                                viewModel.isDeleteAllContactsDialogPresented = true
-                                            }
-                                            .foregroundColor(.red)
-                                            Button("Restore All") {
-                                                UINotificationFeedbackGenerator().notificationOccurred(.warning)
-                                                viewModel.isRestoreAllContactsDialogPresented.toggle()
-                                            }
-                                        }
-                                    }
-                                }
                                 if viewModel.isInitialsGridPresented {
                                     InitialsGrid(isInitialsPresented: $viewModel.isInitialsGridPresented, scrollViewProxy: scrollViewProxy)
                                         .zIndex(1)
@@ -75,13 +57,44 @@ struct ContactList: View {
                     }
                     .environmentObject(viewModel)
                 } else if viewModel.category != .unhidden {
-                    Text("No Contacts")
-                        .foregroundColor(.secondary)
-                        .font(.title2)
+                    GeometryReader { geometryProxy in
+                        ScrollView {
+                            Text("No Contacts")
+                                .foregroundColor(.secondary)
+                                .font(.title2)
+                                .frame(minWidth: geometryProxy.size.width, minHeight: geometryProxy.size.height)
+                        }
+                    }
                 }
             }
         }
         .navigationBarTitle(viewModel.category.rawValue)
+        .toolbar {
+            ToolbarItemGroup(placement: .confirmationAction) {
+                if viewModel.category == .duplicates && !viewModel.isInitialsGridPresented && !viewModel.isFolderLocked {
+                    Button("Merge") {
+                        UINotificationFeedbackGenerator().notificationOccurred(.warning)
+                        viewModel.isMergeAllDuplicatesDialogPresented = true
+                    }
+                    .disabled(contactStore.duplicates.isEmpty)
+                }
+            }
+            ToolbarItemGroup(placement: .bottomBar) {
+                if viewModel.category == .deleted && !viewModel.isInitialsGridPresented && !viewModel.isFolderLocked {
+                    Button("Delete All", role: .destructive) {
+                        UINotificationFeedbackGenerator().notificationOccurred(.warning)
+                        viewModel.isDeleteAllContactsDialogPresented = true
+                    }
+                    .tint(.red)
+                    .disabled(contactStore.deletedContacts.isEmpty)
+                    Button("Restore All") {
+                        UINotificationFeedbackGenerator().notificationOccurred(.warning)
+                        viewModel.isRestoreAllContactsDialogPresented.toggle()
+                    }
+                    .disabled(contactStore.deletedContacts.isEmpty)
+                }
+            }
+        }
     }
     init(folder: Category, isFolderLocked: Bool) {
         _viewModel = StateObject(wrappedValue: ContactListViewModel(folder: folder, isFolderLocked: isFolderLocked))
