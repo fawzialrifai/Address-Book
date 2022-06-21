@@ -217,7 +217,9 @@ struct MergeContact: View {
                 }
             }
             if let birthday = contact.birthday {
-                if !birthdays.contains(birthday) {
+                if !birthdays.contains(where: {
+                    $0.formatted(date: .numeric, time: .omitted) == birthday.formatted(date: .numeric, time: .omitted)
+                }) {
                     birthdays.append(birthday)
                 }
             }
