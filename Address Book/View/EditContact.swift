@@ -18,7 +18,7 @@ struct EditContact: View {
     @State private var newData: Contact
     @State private var isPhoneLabelPickerPresented = false
     @State private var isEmailLabelPickerPresented = false
-    @State private var selectedLabel: Int = 0
+    @State private var selectedLabel: Int? = nil
     @Binding var isEditingContact: Bool
     var body: some View {
         Form {
@@ -261,10 +261,14 @@ struct EditContact: View {
             
         }
         .sheet(isPresented: $isPhoneLabelPickerPresented) {
-            LabelPicker(labeledValue: $newData.phoneNumbers[selectedLabel])
+            if let selectedLabel = selectedLabel {
+                LabelPicker(labeledValue: $newData.phoneNumbers[selectedLabel])
+            }
         }
         .sheet(isPresented: $isEmailLabelPickerPresented) {
-            LabelPicker(labeledValue: $newData.emailAddresses[selectedLabel])
+            if let selectedLabel = selectedLabel {
+                LabelPicker(labeledValue: $newData.emailAddresses[selectedLabel])
+            }
         }
     }
     
