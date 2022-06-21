@@ -178,12 +178,12 @@ struct MergeContact: View {
         .navigationTitle(mergedContact.fullName(displayOrder: contactStore.displayOrder))
         .confirmationDialog("Merge Duplicates?", isPresented: $isMergeAlertPresented) {
             Button("Merge") {
-                for contact in duplicates {
-                    contactStore.moveToDeletedList(contact)
-                }
-                contactStore.add(mergedContact)
-                UINotificationFeedbackGenerator().notificationOccurred(.success)
                 dismiss()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    UINotificationFeedbackGenerator().notificationOccurred(.success)
+                    contactStore.moveToDeletedList(duplicates)
+                    contactStore.add(mergedContact)
+                }
             }
         } message: {
             Text("Merging duplicate cards combines those with the same information into a single contact card.")
@@ -199,10 +199,8 @@ struct MergeContact: View {
     }
     init(duplicates: [Contact]) {
         self.duplicates = duplicates
-        var newContact = Contact()
+        _mergedContact = State(initialValue: ContactStore.shared.mergedContact(from: self.duplicates))
         for contact in duplicates {
-            newContact.firstName = contact.firstName
-            newContact.lastName = contact.lastName
             if let company = contact.company {
                 if !companies.contains(company) {
                     companies.append(company)
@@ -229,12 +227,6 @@ struct MergeContact: View {
                 }
             }
         }
-        newContact.company = companies.first
-        newContact.phoneNumbers = phoneNumbers
-        newContact.emailAddresses = emailAddresses
-        newContact.birthday = birthdays.first
-        newContact.imageData = images.first
-        _mergedContact = State(initialValue: newContact)
     }
 }
 

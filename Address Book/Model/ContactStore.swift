@@ -365,40 +365,53 @@ extension ContactStore {
         }
     }
     
-    func mergeContactCards(_ cards: [Contact]) {
-        
+    func mergedContact(from cards: [Contact]) -> Contact {
+        var contact = Contact()
+        for card in cards {
+            contact.firstName = card.firstName
+            contact.lastName = card.lastName
+            if let company = card.company, contact.company == nil {
+                contact.company = company
+            }
+            for phoneNumber in card.phoneNumbers {
+                if !contact.phoneNumbers.contains(phoneNumber) {
+                    contact.phoneNumbers.append(phoneNumber)
+                }
+            }
+            for emailAdress in card.emailAddresses {
+                if !contact.emailAddresses.contains(emailAdress) {
+                    contact.emailAddresses.append(emailAdress)
+                }
+            }
+            if let birthday = card.birthday, contact.birthday == nil {
+                contact.birthday = birthday
+            }
+            if let imageData = card.imageData, contact.imageData == nil {
+                contact.imageData = imageData
+            }
+            if cards.contains(where: {
+                $0.isFavorite
+            }) {
+                contact.isFavorite = true
+            }
+            if cards.contains(where: {
+                $0.isEmergencyContact
+            }) {
+                contact.isEmergencyContact = true
+            }
+            if cards.contains(where: {
+                $0.isMyCard
+            }) {
+                contact.isMyCard = true
+            }
+        }
+        return contact
     }
     
     func mergeAllDuplicates() {
         for contactCards in duplicates {
-            var contact = Contact()
-            for card in contactCards {
-                contact.firstName = card.firstName
-                if let lastName = card.lastName {
-                    contact.lastName = lastName
-                }
-                if let company = card.company {
-                    contact.company = company
-                }
-                for phoneNumber in card.phoneNumbers {
-                    if !contact.phoneNumbers.contains(phoneNumber) {
-                        contact.phoneNumbers.append(phoneNumber)
-                    }
-                }
-                for emailAdress in card.emailAddresses {
-                    if !contact.emailAddresses.contains(emailAdress) {
-                        contact.emailAddresses.append(emailAdress)
-                    }
-                }
-                if let birthday = card.birthday {
-                    contact.birthday = birthday
-                }
-                if let imageData = card.imageData {
-                    contact.imageData = imageData
-                }
-                moveToDeletedList(card)
-            }
-            add(contact)
+            add(mergedContact(from: contactCards))
+            moveToDeletedList(contactCards)
         }
     }
     
