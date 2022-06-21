@@ -10,7 +10,7 @@ import LocalAuthentication
 
 @MainActor class ContactListViewModel: ObservableObject {
     var contactStore = ContactStore.shared
-    var folder: Folder
+    var category: Category
     @Published var isFolderLocked: Bool
     @Published var searchText = ""
     @Published var isInitialsGridPresented = false
@@ -25,14 +25,14 @@ import LocalAuthentication
     @Published var isRestoreAllContactsDialogPresented = false
     @Published var contactsToDelete = [Contact]()
     
-    init(folder: Folder, isFolderLocked: Bool) {
-        self.folder = folder
+    init(folder: Category, isFolderLocked: Bool) {
+        self.category = folder
         self.isFolderLocked = isFolderLocked
     }
     
     var categorizedContacts: [[Contact]] {
-        switch folder {
-        case .all:
+        switch category {
+        case .unhidden:
             return contactStore.unhiddenContacts.map { [$0] }
         case .hidden:
             return contactStore.hiddenContacts.map { [$0] }
@@ -100,7 +100,7 @@ import LocalAuthentication
     func authenticate() {
         let context = LAContext()
         if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: nil) {
-            context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: "Authentication is required to view \(folder.rawValue.lowercased()).") { success, _ in
+            context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: "Authentication is required to view \(category.rawValue.lowercased()).") { success, _ in
                 Task { @MainActor in
                     if success {
                         self.isFolderLocked = false

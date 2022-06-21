@@ -12,8 +12,7 @@ struct ContactList: View {
     @EnvironmentObject var contactStore: ContactStore
     var body: some View {
         ZStack {
-            Color.contactsBackgroundColor
-                .ignoresSafeArea()
+            Color.contactsBackgroundColor.ignoresSafeArea()
             if viewModel.isFolderLocked {
                 VStack(spacing: 8) {
                     Image(systemName: "lock.fill")
@@ -22,47 +21,51 @@ struct ContactList: View {
                     Text("Authentication Required")
                         .font(.title2)
                         .foregroundColor(.secondary)
-                    Button("View \(viewModel.folder.rawValue)", action: { viewModel.authenticate() })
+                    Button("View \(viewModel.category.rawValue)", action: { viewModel.authenticate() })
                 }
-                .navigationBarTitle(viewModel.folder.rawValue)
             } else {
-                if viewModel.folder != .all && viewModel.categorizedContacts.isEmpty {
-                    Text("No Contacts")
-                        .foregroundColor(.secondary)
-                        .font(.title2)
-                        .navigationBarTitle(viewModel.folder.rawValue)
-                } else {
+                if viewModel.category == .unhidden || viewModel.categorizedContacts.isEmpty == false {
                     ScrollViewReader { scrollViewProxy in
                         ZStack {
-                            if viewModel.folder == .all {
+                            if viewModel.category == .unhidden {
                                 NavigationView {
                                     Contacts { contact in
                                         scrollViewProxy.scrollTo(contact.id, anchor: .center)
+                                    }
+                                }
+                                if viewModel.isInitialsGridPresented {
+                                    NavigationView {
+                                        InitialsGrid(isInitialsPresented: $viewModel.isInitialsGridPresented, scrollViewProxy: scrollViewProxy)
+                                            .zIndex(1)
                                     }
                                 }
                             } else {
                                 Contacts { contact in
                                     scrollViewProxy.scrollTo(contact.id, anchor: .center)
                                 }
-                                .navigationBarHidden(viewModel.isInitialsGridPresented)
                                 .safeAreaInset(edge: .bottom) {
-                                    if (viewModel.folder == .duplicates && !contactStore.duplicates.isEmpty) || (viewModel.folder == .deleted && !contactStore.deletedContacts.isEmpty){
+                                    if (viewModel.category == .duplicates && !contactStore.duplicates.isEmpty) || (viewModel.category == .deleted && !contactStore.deletedContacts.isEmpty){
                                         BottomButton()
                                     }
                                 }
-                            }
-                            if viewModel.isInitialsGridPresented {
-                                InitialsGrid(isInitialsPresented: $viewModel.isInitialsGridPresented, scrollViewProxy: scrollViewProxy)
-                                    .zIndex(1)
+                                if viewModel.isInitialsGridPresented {
+                                    InitialsGrid(isInitialsPresented: $viewModel.isInitialsGridPresented, scrollViewProxy: scrollViewProxy)
+                                        .zIndex(1)
+                                }
                             }
                         }
-                        .environmentObject(viewModel)
                     }
+                    .environmentObject(viewModel)
+                } else if viewModel.category != .unhidden {
+                    Text("No Contacts")
+                        .foregroundColor(.secondary)
+                        .font(.title2)
                 }
             }
         }
+        .navigationBarTitle(viewModel.category.rawValue)
     }
-    init(folder: Folder, isFolderLocked: Bool) {
+    init(folder: Category, isFolderLocked: Bool) {
         _viewModel = StateObject(wrappedValue: ContactListViewModel(folder: folder, isFolderLocked: isFolderLocked))
     }
 }
@@ -73,7 +76,7 @@ struct Contacts: View {
     @EnvironmentObject var contactStore: ContactStore
     var body: some View {
         List {
-            if viewModel.folder == .all {
+            if viewModel.category == .unhidden {
                 MyCardSection()
             }
             EmergencySection()
@@ -81,11 +84,11 @@ struct Contacts: View {
             FirstLettersSections()
         }
         .listStyle(InsetGroupedListStyle())
-        .navigationBarTitle(viewModel.folder.rawValue, displayMode: viewModel.folder == .all ? .large : .inline)
+        .navigationBarTitle(viewModel.category.rawValue, displayMode: viewModel.category == .unhidden ? .large : .inline)
         .searchable(text: $viewModel.searchText, prompt: "Search for a contact")
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                if viewModel.folder == .all {
+                if viewModel.category == .unhidden {
                     Menu {
                         Button {
                             viewModel.isAddContactViewPresented.toggle()
@@ -103,7 +106,7 @@ struct Contacts: View {
                 }
             }
             ToolbarItem(placement: .navigationBarLeading) {
-                if viewModel.folder == .all {
+                if viewModel.category == .unhidden {
                     Button("Manage") { viewModel.isManageContactsViewPresented.toggle() }
                 }
             }
@@ -423,7 +426,7 @@ struct BottomButton: View {
     @EnvironmentObject var viewModel: ContactListViewModel
     @EnvironmentObject var contactStore: ContactStore
     var body: some View {
-        if viewModel.folder == .duplicates {
+        if viewModel.category == .duplicates {
             HStack {
                 Button {
                     UINotificationFeedbackGenerator().notificationOccurred(.warning)
@@ -440,7 +443,7 @@ struct BottomButton: View {
             }
             .background(Material.thinMaterial)
             .shadow(radius: 0.5)
-        } else if viewModel.folder == .deleted {
+        } else if viewModel.category == .deleted {
             VStack(spacing: 16) {
                 Button {
                     UINotificationFeedbackGenerator().notificationOccurred(.warning)
@@ -486,7 +489,7 @@ struct SectionHeader: View {
 
 struct ContactList_Previews: PreviewProvider {
     static var previews: some View {
-        ContactList(folder: .all, isFolderLocked: false)
+        ContactList(folder: .unhidden, isFolderLocked: false)
             .environmentObject(ContactStore.shared)
     }
 }

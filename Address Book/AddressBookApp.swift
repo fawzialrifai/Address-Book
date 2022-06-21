@@ -13,7 +13,7 @@ struct AddressBookApp: App {
     var body: some Scene {
         WindowGroup {
             if contactStore.isAuthorized {
-                ContactList(folder: .all, isFolderLocked: false)
+                ContactList(folder: .unhidden, isFolderLocked: false)
                     .environmentObject(contactStore)
                 
             } else {

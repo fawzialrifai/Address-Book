@@ -13,33 +13,31 @@ struct InitialsGrid: View {
     @EnvironmentObject var contactStore: ContactStore
     let scrollViewProxy: ScrollViewProxy?
     var body: some View {
-        NavigationView {
-            GeometryReader { proxy in
-                ScrollView {
-                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 75, maximum: 75))], spacing: 8) {
-                        if !viewModel.emergencyContacts.isEmpty {
-                            LetterItem(isInitialsPresented: $isInitialsPresented, scrollViewProxy: scrollViewProxy, id: "staroflife", view: AnyView(Image(systemName: "staroflife.fill")))
-                        }
-                        if !viewModel.favorites.isEmpty {
-                            LetterItem(isInitialsPresented: $isInitialsPresented, scrollViewProxy: scrollViewProxy, id: "★", view: AnyView(Text("★")))
-                        }
-                        ForEach(viewModel.initials, id: \.self) { letter in
-                            LetterItem(isInitialsPresented: $isInitialsPresented, scrollViewProxy: scrollViewProxy, id: letter, view: AnyView(Text(letter)))
-                        }
+        GeometryReader { proxy in
+            ScrollView {
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 75, maximum: 75))], spacing: 8) {
+                    if !viewModel.emergencyContacts.isEmpty {
+                        LetterItem(isInitialsPresented: $isInitialsPresented, scrollViewProxy: scrollViewProxy, id: "staroflife", view: AnyView(Image(systemName: "staroflife.fill")))
                     }
-                    .padding()
-                    .frame(minHeight: proxy.size.height)
+                    if !viewModel.favorites.isEmpty {
+                        LetterItem(isInitialsPresented: $isInitialsPresented, scrollViewProxy: scrollViewProxy, id: "★", view: AnyView(Text("★")))
+                    }
+                    ForEach(viewModel.initials, id: \.self) { letter in
+                        LetterItem(isInitialsPresented: $isInitialsPresented, scrollViewProxy: scrollViewProxy, id: letter, view: AnyView(Text(letter)))
+                    }
                 }
-                .background(.contactsBackgroundColor)
+                .padding()
+                .frame(minHeight: proxy.size.height)
             }
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") {
-                        UISelectionFeedbackGenerator().selectionChanged()
-                        withAnimation {
-                            isInitialsPresented.toggle()
-                        }
+            .background(.contactsBackgroundColor)
+        }
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .confirmationAction) {
+                Button("Done") {
+                    UISelectionFeedbackGenerator().selectionChanged()
+                    withAnimation {
+                        isInitialsPresented.toggle()
                     }
                 }
             }
