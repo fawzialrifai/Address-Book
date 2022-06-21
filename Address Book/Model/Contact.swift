@@ -27,6 +27,7 @@ struct Contact: Identifiable, Codable, Equatable {
     var isFavorite = false
     var isHidden = false
     var isDeleted = false
+    var dateDeleted: Date?
     static let example = Contact(firstName: "Fawzi", lastName: "Rifai", company: "Apple")
 }
 

@@ -188,6 +188,13 @@ extension ContactStore {
             let encodedContacts = try Data(contentsOf: deletedContactsPath)
             deletedContacts = try JSONDecoder().decode([Contact].self, from: encodedContacts)
         } catch {}
+        for contact in deletedContacts {
+            if let dateDeleted = contact.dateDeleted {
+                if dateDeleted.distance(to: Date()) > 2592000 {
+                    permanentlyDelete(contact)
+                }
+            }
+        }
     }
     
 }
@@ -445,6 +452,7 @@ extension ContactStore {
         if let index = contacts.firstIndex(of: contact) {
             contacts[index].isDeleted = true
             contacts[index].isMyCard = false
+            contacts[index].dateDeleted = Date()
             deletedContacts.append(contacts[index])
             contacts.remove(at: index)
             removeFromEmergencyContacts(contact)
@@ -481,6 +489,7 @@ extension ContactStore {
     func restore(_ contact: Contact) {
         if let index = deletedContacts.firstIndex(of: contact) {
             deletedContacts[index].isDeleted = false
+            deletedContacts[index].dateDeleted = nil
             add(deletedContacts[index])
             deletedContacts.remove(at: index)
         }
