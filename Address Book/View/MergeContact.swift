@@ -87,7 +87,7 @@ struct MergeContact: View {
                     ForEach(phoneNumbers) { phoneNumber in
                         HStack {
                             VStack(alignment: .leading) {
-                                Text(phoneNumber.label ?? "")
+                                Text(phoneNumber.label)
                                 Text(phoneNumber.value)
                                     .foregroundColor(.secondary)
                             }
@@ -120,7 +120,7 @@ struct MergeContact: View {
                     ForEach(emailAddresses) { emailAddress in
                         HStack {
                             VStack(alignment: .leading) {
-                                Text(emailAddress.label ?? "")
+                                Text(emailAddress.label)
                                 Text(emailAddress.value)
                                     .foregroundColor(.secondary)
                             }

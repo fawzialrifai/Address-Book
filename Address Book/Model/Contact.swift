@@ -110,7 +110,7 @@ extension Contact {
     }
     
     mutating func addNewPhoneNumber() {
-        phoneNumbers.append(LabeledValue(type: .phone))
+        phoneNumbers.append(LabeledValue(label: "Mobile", type: .phone))
     }
     mutating func movePhoneNumbers(at offsets: IndexSet, to index: Int) {
         phoneNumbers.move(fromOffsets: offsets, toOffset: index)
@@ -119,7 +119,7 @@ extension Contact {
         phoneNumbers.remove(atOffsets: offsets)
     }
     mutating func addNewEmailAddress() {
-        emailAddresses.append(LabeledValue(type: .email))
+        emailAddresses.append(LabeledValue(label: "Personal", type: .email))
     }
     mutating func moveEmailAddresses(at offsets: IndexSet, to index: Int) {
         emailAddresses.move(fromOffsets: offsets, toOffset: index)

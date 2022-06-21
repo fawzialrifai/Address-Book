@@ -29,7 +29,7 @@ struct ContactDetails: View {
                         ForEach(contact.phoneNumbers) { phone in
                             HStack {
                                 VStack(alignment: .leading) {
-                                    Text(phone.label ?? "")
+                                    Text(phone.label)
                                     Text(phone.value)
                                         .foregroundColor(.secondary)
                                         .textSelection(.enabled)
@@ -73,7 +73,7 @@ struct ContactDetails: View {
                         ForEach(contact.emailAddresses) { email in
                             HStack {
                                 VStack(alignment: .leading) {
-                                    Text(email.label ?? "")
+                                    Text(email.label)
                                     Text(email.value)
                                         .foregroundColor(.secondary)
                                         .textSelection(.enabled)

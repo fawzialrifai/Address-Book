@@ -321,7 +321,7 @@ struct ContactRow: View {
                     Menu {
                         ForEach(cards) { card in
                             ForEach(card.phoneNumbers) { phoneNumber in
-                                Button("\(phoneNumber.label ?? "")\n\(phoneNumber.value)") {
+                                Button("\(phoneNumber.label)\n\(phoneNumber.value)") {
                                     guard let phone = URL(string: "tel:\(phoneNumber.value.plainPhoneNumber)") else { return }
                                     UIApplication.shared.open(phone)
                                 }
@@ -333,7 +333,7 @@ struct ContactRow: View {
                     Menu {
                         ForEach(cards) { card in
                             ForEach(card.phoneNumbers) { phoneNumber in
-                                Button("\(phoneNumber.label ?? "")\n\(phoneNumber.value)") {
+                                Button("\(phoneNumber.label)\n\(phoneNumber.value)") {
                                     guard let messages = URL(string: "tel:\(phoneNumber.value.plainPhoneNumber)") else { return }
                                     UIApplication.shared.open(messages)
                                 }
@@ -347,7 +347,7 @@ struct ContactRow: View {
                     Menu {
                         ForEach(cards) { card in
                             ForEach(card.emailAddresses) { emailAddress in
-                                Button("\(emailAddress.label ?? "")\n\(emailAddress.value)") {
+                                Button("\(emailAddress.label)\n\(emailAddress.value)") {
                                     guard let mail = URL(string: "tel:\(emailAddress.value)") else { return }
                                     UIApplication.shared.open(mail)
                                 }

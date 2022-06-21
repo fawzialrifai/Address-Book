@@ -10,16 +10,16 @@ import SwiftUI
 struct LabelPicker: View {
     @Environment(\.dismiss) private var dismiss
     @Binding var labeledValue: LabeledValue
-    @State private var newLabel = ""
-    @State private var selectedLabel: String?
-    @State private var labels: [String]
-    @State private var customLabels: [String]
+    @State private var selectedLabel: String
+    @State private var customLabel: String
+    @FocusState private var isCustomLabelFocused: Bool
     var body: some View {
         NavigationView {
             List {
-                ForEach(labels, id: \.self) { label in
+                ForEach(labeledValue.defaultLabels, id: \.self) { label in
                     Button {
                         selectedLabel = label
+                        isCustomLabelFocused = false
                     } label: {
                         HStack {
                             Text(label)
@@ -32,53 +32,37 @@ struct LabelPicker: View {
                         }
                     }
                 }
-                Section("Custom labels") {
-                    ForEach(customLabels, id: \.self) { label in
-                        Button {
-                            selectedLabel = label
-                        } label: {
-                            HStack {
-                                Text(label)
-                                    .foregroundColor(.primary)
-                                Spacer()
-                                if label == selectedLabel {
-                                    Image(systemName: "checkmark")
-                                        .font(.headline)
-                                }
-                            }
-                        }
-                    }
-                    .onDelete(perform: deleteLabels)
+                Section {
                     HStack {
-                        TextField("Label", text: $newLabel)
-                        Spacer()
-                        Button {
-                            withAnimation {
-                                if customLabels.contains(newLabel) {
-                                    newLabel.removeAll()
-                                } else {
-                                    customLabels.append(newLabel)
-                                    newLabel.removeAll()
-                                }
+                        TextField("Custom label", text: $customLabel)
+                            .focused($isCustomLabelFocused)
+                            .onTapGesture  {
+                                isCustomLabelFocused = true
+                                selectedLabel = customLabel
                             }
-                        } label: {
-                            Image(systemName: "plus.circle.fill")
+                            .onChange(of: customLabel) { newValue in
+                                selectedLabel = newValue
+                            }
+                        Spacer()
+                        if selectedLabel == customLabel && !labeledValue.defaultLabels.contains(customLabel) {
+                            Image(systemName: "checkmark")
+                                .font(.headline)
+                                .foregroundColor(.blue)
                         }
-                        .buttonStyle(BorderlessButtonStyle())
-                        .disabled(newLabel.isTotallyEmpty)
                     }
                 }
             }
-            .navigationTitle("Label")
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarTitle("Label", displayMode: .inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") {
-                        labeledValue.customLabels = customLabels
                         labeledValue.label = selectedLabel
+                        if !labeledValue.defaultLabels.contains(customLabel) {
+                            labeledValue.customLabel = customLabel
+                        }
                         dismiss()
                     }
-                    .disabled(selectedLabel == nil || labeledValue.label == selectedLabel && customLabels == labeledValue.customLabels)
+                    .disabled(selectedLabel == customLabel && customLabel.isTotallyEmpty)
                 }
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
@@ -87,28 +71,16 @@ struct LabelPicker: View {
                 }
             }
         }
-        
     }
     init(labeledValue: Binding<LabeledValue>) {
         self._labeledValue = labeledValue
         _selectedLabel = State(initialValue: labeledValue.label.wrappedValue)
-        _labels = State(initialValue: labeledValue.defaultLabels.wrappedValue)
-        _customLabels = State(initialValue: labeledValue.customLabels.wrappedValue)
-    }
-    func deleteLabels(at offsets: IndexSet) {
-        withAnimation {
-            if let firstIndex = offsets.first {
-                if selectedLabel == customLabels[firstIndex] {
-                    selectedLabel = nil
-                }
-            }
-            customLabels.remove(atOffsets: offsets)
-        }
+        _customLabel = State(initialValue: labeledValue.customLabel.wrappedValue)
     }
 }
 
 struct LabelPicker_Previews: PreviewProvider {
     static var previews: some View {
-        LabelPicker(labeledValue: .constant(LabeledValue(type: .phone)))
+        LabelPicker(labeledValue: .constant(LabeledValue(label: "Mobile", type: .phone)))
     }
 }

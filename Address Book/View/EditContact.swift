@@ -51,7 +51,7 @@ struct EditContact: View {
             Section {
                 ForEach(Array(newData.phoneNumbers.enumerated()), id: \.element.id) { item in
                     VStack(alignment: .leading, spacing: 0) {
-                        Button(item.element.label ?? "") {
+                        Button(item.element.label) {
                             selectedLabel = item.offset
                             isPhoneLabelPickerPresented = true
                         }
@@ -87,7 +87,7 @@ struct EditContact: View {
             Section {
                 ForEach(Array(newData.emailAddresses.enumerated()), id: \.element.id) { item in
                     VStack(alignment: .leading, spacing: 0) {
-                        Button(item.element.label ?? "") {
+                        Button(item.element.label) {
                             selectedLabel = item.offset
                             isEmailLabelPickerPresented = true
                         }
