@@ -189,7 +189,7 @@ struct EditContact: View {
                     newData.birthday != nil
                 } set: {
                     if $0 == true {
-                        newData.birthday = contact.birthday ?? Date.now
+                        newData.birthday = Calendar.current.startOfDay(for: contact.birthday ?? Date.now)
                     }
                     else {
                         newData.birthday = nil
@@ -198,7 +198,7 @@ struct EditContact: View {
                 let strongBirthday: Binding<Date> = Binding {
                     newData.birthday ?? Date.now
                 } set: {
-                    newData.birthday = $0
+                    newData.birthday = Calendar.current.startOfDay(for: $0)
                 }
                 Toggle("Birthday", isOn: isDatePickerPresented)
                 if newData.birthday != nil {
