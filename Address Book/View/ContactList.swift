@@ -246,6 +246,7 @@ struct MyCardSection: View {
                         .frame(width: 45, height: 45)
                     VStack(alignment: .leading) {
                         Button("Set up your card") { viewModel.isSettingUpMyCard.toggle() }
+                            .foregroundColor(.blue)
                         Text("Add your info.")
                             .font(Font.callout)
                             .foregroundColor(.secondary)
