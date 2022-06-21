@@ -24,11 +24,13 @@ struct ContactList: View {
                         .foregroundColor(.secondary)
                     Button("View \(viewModel.folder.rawValue)", action: { viewModel.authenticate() })
                 }
+                .navigationBarTitle(viewModel.folder.rawValue)
             } else {
                 if viewModel.folder != .all && viewModel.categorizedContacts.isEmpty {
                     Text("No Contacts")
                         .foregroundColor(.secondary)
                         .font(.title2)
+                        .navigationBarTitle(viewModel.folder.rawValue)
                 } else {
                     ScrollViewReader { scrollViewProxy in
                         ZStack {
