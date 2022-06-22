@@ -16,6 +16,8 @@ struct ContactDetails: View {
     @State private var isHideContactAlertPresented = false
     @State private var isUnhideContactAlertPresented = false
     @State private var isRestoreContactAlertPresented = false
+    @State private var expandedPhoneNumber: LabeledValue? = nil
+    @State private var expandedEmailAddress: LabeledValue? = nil
     @State var region: MKCoordinateRegion?
     var contact: Contact
     @State var isEditingContact = false
@@ -36,26 +38,40 @@ struct ContactDetails: View {
                                 }
                                 .padding(.vertical, 8)
                             } else {
-                                DisclosureGroup {
-                                    Button("Call \(phone.value)") {
+                                let isExpanded: Binding<Bool> = Binding {
+                                    expandedPhoneNumber == phone
+                                } set: { value in }
+                                DisclosureGroup(isExpanded: isExpanded) {
+                                    Button {
                                         guard let url = URL(string: "tel:\(phone.value.plainPhoneNumber)") else { return }
                                         UIApplication.shared.open(url)
+                                    } label: {
+                                        Label("Call", systemImage: "phone")
                                     }
-                                    Button("Message \(phone.value)") {
+                                    Button {
                                         guard let url = URL(string: "sms:\(phone.value.plainPhoneNumber)") else { return }
                                         UIApplication.shared.open(url)
+                                    } label: {
+                                        Label("Message", systemImage: "message")
                                     }
-                                    Button("FaceTime \(phone.value)") {}
-                                    Button("WhatsApp \(phone.value)") {
-                                        guard let url = URL(string: "https://api.whatsapp.com/send?phone=\(phone.value.plainPhoneNumber)") else { return }
-                                        UIApplication.shared.open(url)
+                                    Button {
+                                    } label: {
+                                        Label("FaceTime", systemImage: "video")
                                     }
                                 } label: {
                                     VStack(alignment: .leading) {
                                         Text(phone.label)
-                                        Text(phone.value)
-                                            .foregroundColor(.secondary)
-                                            .textSelection(.enabled)
+                                        Button(phone.value) {
+                                            withAnimation {
+                                                if expandedPhoneNumber == phone {
+                                                    expandedPhoneNumber = nil
+                                                } else {
+                                                    expandedPhoneNumber = phone
+                                                }
+                                            }
+                                        }
+                                        .foregroundColor(.secondary)
+                                        .textSelection(.enabled)
                                     }
                                     .padding(8)
                                 }
@@ -75,18 +91,34 @@ struct ContactDetails: View {
                                 }
                                 .padding(.vertical, 8)
                             } else {
-                                DisclosureGroup {
-                                    Button("Mail \(email.value)") {
+                                let isEmailExpanded: Binding<Bool> = Binding {
+                                    expandedEmailAddress == email
+                                } set: { value in }
+                                DisclosureGroup(isExpanded: isEmailExpanded) {
+                                    Button {
                                         guard let url = URL(string: "mailto:\(email.value)") else { return }
                                         UIApplication.shared.open(url)
+                                    } label: {
+                                        Label("Mail", systemImage: "envelope")
                                     }
-                                    Button("FaceTime \(email.value)") {}
+                                    Button {
+                                    } label: {
+                                        Label("FaceTime", systemImage: "video")
+                                    }
                                 } label: {
                                     VStack(alignment: .leading) {
                                         Text(email.label)
-                                        Text(email.value)
-                                            .foregroundColor(.secondary)
-                                            .textSelection(.enabled)
+                                        Button(email.value) {
+                                            withAnimation {
+                                                if expandedEmailAddress == email {
+                                                    expandedEmailAddress = nil
+                                                } else {
+                                                    expandedEmailAddress = email
+                                                }
+                                            }
+                                        }
+                                        .foregroundColor(.secondary)
+                                        .textSelection(.enabled)
                                     }
                                     .padding(8)
                                 }
