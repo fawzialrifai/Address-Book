@@ -256,7 +256,7 @@ struct EditContact: View {
         .alert("Cannot Access Location", isPresented: $isLocationAlertPresented) {
             Button("OK") {}
         } message: {
-            
+            Text("Please allow Address Book access your location from Settings.")
         }
         .sheet(item: $selectedLabel) { strongLabel in
             if strongLabel.type == .phone {
