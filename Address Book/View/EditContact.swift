@@ -15,58 +15,58 @@ struct EditContact: View {
     @State private var isLocationAlertPresented = false
     @StateObject var locationManager: LocationManager
     var contact: Contact
-    @State private var newData: Contact
+    @State private var draft: Contact
     @State private var selectedLabel: LabeledValue? = nil
     @Binding var isEditingContact: Bool
     var body: some View {
         Form {
-            Section(header: ContactHeader(contact: $newData, isEditing: true)) {}
+            Section(header: ContactHeader(contact: $draft, isEditing: true)) {}
             Section {
                 let lastName: Binding<String> = Binding {
-                    newData.lastName ?? ""
+                    draft.lastName ?? ""
                 } set: {
-                    newData.lastName = $0
+                    draft.lastName = $0
                 }
                 let company: Binding<String> = Binding {
-                    newData.company ?? ""
+                    draft.company ?? ""
                 } set: {
-                    newData.company = $0
+                    draft.company = $0
                 }
                 if contactStore.displayOrder == .firstNameLastName {
-                    TextField("First name", text: $newData.firstName)
+                    TextField("First name", text: $draft.firstName)
                         .textContentType(.givenName)
                     TextField("Last name", text: lastName)
                         .textContentType(.familyName)
                 } else {
                     TextField("Last name", text: lastName)
                         .textContentType(.familyName)
-                    TextField("First name", text: $newData.firstName)
+                    TextField("First name", text: $draft.firstName)
                         .textContentType(.givenName)
                 }
                 TextField("Company", text: company)
             }
             .disableAutocorrection(true)
             Section {
-                ForEach(Array(newData.phoneNumbers.enumerated()), id: \.element.id) { item in
+                ForEach(Array(draft.phoneNumbers.enumerated()), id: \.element.id) { item in
                     VStack(alignment: .leading, spacing: 0) {
                         Button(item.element.label) {
                             selectedLabel = item.element
                         }
-                        TextField("Phone number", text: $newData.phoneNumbers[item.offset].value)
+                        TextField("Phone number", text: $draft.phoneNumbers[item.offset].value)
                     }
                     .padding(.vertical, 8)
                 }
                 .onMove {
-                    newData.movePhoneNumbers(at: $0, to: $1)
+                    draft.movePhoneNumbers(at: $0, to: $1)
                 }
                 .onDelete {
                     UISelectionFeedbackGenerator().selectionChanged()
-                    newData.removePhoneNumbers(at: $0)
+                    draft.removePhoneNumbers(at: $0)
                 }
                 Button {
                     UISelectionFeedbackGenerator().selectionChanged()
                     withAnimation {
-                        newData.addNewPhoneNumber()
+                        draft.addNewPhoneNumber()
                     }
                 } label: {
                     HStack(spacing: 18) {
@@ -83,26 +83,26 @@ struct EditContact: View {
             .keyboardType(UIKit.UIKeyboardType.phonePad)
             .textContentType(.telephoneNumber)
             Section {
-                ForEach(Array(newData.emailAddresses.enumerated()), id: \.element.id) { item in
+                ForEach(Array(draft.emailAddresses.enumerated()), id: \.element.id) { item in
                     VStack(alignment: .leading, spacing: 0) {
                         Button(item.element.label) {
                             selectedLabel = item.element
                         }
-                        TextField("Email address", text: $newData.emailAddresses[item.offset].value)
+                        TextField("Email address", text: $draft.emailAddresses[item.offset].value)
                     }
                     .padding(.vertical, 8)
                 }
                 .onMove {
-                    newData.moveEmailAddresses(at: $0, to: $1)
+                    draft.moveEmailAddresses(at: $0, to: $1)
                 }
                 .onDelete {
                     UISelectionFeedbackGenerator().selectionChanged()
-                    newData.removeEmailAddresses(at: $0)
+                    draft.removeEmailAddresses(at: $0)
                 }
                 Button {
                     UISelectionFeedbackGenerator().selectionChanged()
                     withAnimation {
-                        newData.addNewEmailAddress()
+                        draft.addNewEmailAddress()
                     }
                 } label: {
                     HStack(spacing: 18) {
@@ -121,7 +121,7 @@ struct EditContact: View {
             .autocapitalization(.none)
             Section {
                 let isMapPresented: Binding<Bool> = Binding {
-                    return newData.coordinateRegion != nil || locationManager.coordinateRegion != nil
+                    return draft.coordinateRegion != nil || locationManager.coordinateRegion != nil
                 } set: {
                     if $0 == true {
                         if locationManager.isAuthorized {
@@ -132,42 +132,42 @@ struct EditContact: View {
                         }
                     }
                     else {
-                        newData.latitude = nil
-                        newData.longitude = nil
+                        draft.latitude = nil
+                        draft.longitude = nil
                         locationManager.coordinateRegion = nil
                     }
                 }
                 let strongCoordinateRegion: Binding<MKCoordinateRegion> = Binding {
                     if isEditingContact {
-                        if newData.coordinateRegion == nil {
+                        if draft.coordinateRegion == nil {
                             return locationManager.coordinateRegion ?? MKCoordinateRegion()
                         } else {
-                            return newData.coordinateRegion!
+                            return draft.coordinateRegion!
                         }
                     } else {
                         return locationManager.coordinateRegion ?? MKCoordinateRegion()
                     }
                 } set: {
                     if isEditingContact {
-                        if newData.coordinateRegion == nil {
+                        if draft.coordinateRegion == nil {
                             locationManager.coordinateRegion = $0
-                            newData.latitude = $0.center.latitude
-                            newData.longitude = $0.center.longitude
+                            draft.latitude = $0.center.latitude
+                            draft.longitude = $0.center.longitude
                         } else {
-                            newData.latitude = $0.center.latitude
-                            newData.longitude = $0.center.longitude
+                            draft.latitude = $0.center.latitude
+                            draft.longitude = $0.center.longitude
                         }
                     } else {
                         locationManager.coordinateRegion = $0
-                        newData.latitude = $0.center.latitude
-                        newData.longitude = $0.center.longitude
+                        draft.latitude = $0.center.latitude
+                        draft.longitude = $0.center.longitude
                     }
                 }
                 Toggle("Location", isOn: isMapPresented)
-                if newData.coordinateRegion != nil || locationManager.coordinateRegion != nil {
+                if draft.coordinateRegion != nil || locationManager.coordinateRegion != nil {
                     ZStack {
                         Map(coordinateRegion: strongCoordinateRegion)
-                        newData.image?
+                        draft.image?
                             .resizable()
                             .scaledToFill()
                             .foregroundStyle(.white, .gray)
@@ -182,38 +182,38 @@ struct EditContact: View {
             }
             Section {
                 let isDatePickerPresented: Binding<Bool> = Binding {
-                    newData.birthday != nil
+                    draft.birthday != nil
                 } set: {
                     if $0 == true {
-                        newData.birthday = Calendar.current.startOfDay(for: contact.birthday ?? Date.now)
+                        draft.birthday = Calendar.current.startOfDay(for: contact.birthday ?? Date.now)
                     }
                     else {
-                        newData.birthday = nil
+                        draft.birthday = nil
                     }
                 }
                 let strongBirthday: Binding<Date> = Binding {
-                    newData.birthday ?? Date.now
+                    draft.birthday ?? Date.now
                 } set: {
-                    newData.birthday = Calendar.current.startOfDay(for: $0)
+                    draft.birthday = Calendar.current.startOfDay(for: $0)
                 }
                 Toggle("Birthday", isOn: isDatePickerPresented)
-                if newData.birthday != nil {
+                if draft.birthday != nil {
                     DatePicker("Date", selection: strongBirthday, displayedComponents: [.date])
                         .datePickerStyle(.graphical)
                 }
             }
             Section {
                 let notes: Binding<String> = Binding {
-                    newData.notes ?? ""
+                    draft.notes ?? ""
                 } set: {
                     if $0.isTotallyEmpty {
-                        newData.notes = nil
+                        draft.notes = nil
                     } else {
-                        newData.notes = $0
+                        draft.notes = $0
                     }
                 }
                 ZStack(alignment: .topLeading) {
-                    if newData.notes == nil {
+                    if draft.notes == nil {
                         Text("Notes")
                             .opacity(0.25)
                             .padding(.top, 7)
@@ -233,14 +233,14 @@ struct EditContact: View {
                     UINotificationFeedbackGenerator().notificationOccurred(.success)
                     if isEditingContact {
                         isEditingContact.toggle()
-                        contactStore.update(contact, with: newData)
+                        contactStore.update(contact, with: draft)
                     } else {
                         dismiss()
-                        contactStore.add(newData)
-                        completeionHandler(newData)
+                        contactStore.add(draft)
+                        completeionHandler(draft)
                     }
                 }
-                .disabled(newData.firstName.isTotallyEmpty || contact == newData)
+                .disabled(draft.firstName.isTotallyEmpty || contact == draft)
             }
             ToolbarItem(placement: .cancellationAction) {
                 Button("Cancel") {
@@ -260,20 +260,20 @@ struct EditContact: View {
         }
         .sheet(item: $selectedLabel) { strongLabel in
             if strongLabel.type == .phone {
-                if let index = newData.phoneNumbers.firstIndex(of: strongLabel) {
+                if let index = draft.phoneNumbers.firstIndex(of: strongLabel) {
                     let labelBinding: Binding<LabeledValue> = Binding {
-                        newData.phoneNumbers[index]
+                        draft.phoneNumbers[index]
                     } set: {
-                        newData.phoneNumbers[index] = $0
+                        draft.phoneNumbers[index] = $0
                     }
                     LabelPicker(labeledValue: labelBinding)
                 }
             } else if strongLabel.type == .email {
-                if let index = newData.emailAddresses.firstIndex(of: strongLabel) {
+                if let index = draft.emailAddresses.firstIndex(of: strongLabel) {
                     let labelBinding: Binding<LabeledValue> = Binding {
-                        newData.emailAddresses[index]
+                        draft.emailAddresses[index]
                     } set: {
-                        newData.emailAddresses[index] = $0
+                        draft.emailAddresses[index] = $0
                     }
                     LabelPicker(labeledValue: labelBinding)
                 }
@@ -285,7 +285,7 @@ struct EditContact: View {
         self.contact = contact
         self._isEditingContact = isEditingContact
         self.completeionHandler = completeionHandler
-        self._newData = State(initialValue: self.contact)
+        self._draft = State(initialValue: self.contact)
         self._locationManager = StateObject(wrappedValue: LocationManager(coordinateRegion: contact.coordinateRegion))
     }
     
