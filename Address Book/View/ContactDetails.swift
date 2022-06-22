@@ -27,75 +27,70 @@ struct ContactDetails: View {
                 if contact.phoneNumbers.count > 0 {
                     Section() {
                         ForEach(contact.phoneNumbers) { phone in
-                            HStack {
+                            if contact.isMyCard {
                                 VStack(alignment: .leading) {
                                     Text(phone.label)
                                     Text(phone.value)
                                         .foregroundColor(.secondary)
                                         .textSelection(.enabled)
                                 }
-                                if !contact.isMyCard {
-                                    Spacer()
-                                    Button {
+                                .padding(.vertical, 8)
+                            } else {
+                                DisclosureGroup {
+                                    Button("Call \(phone.value)") {
                                         guard let url = URL(string: "tel:\(phone.value.plainPhoneNumber)") else { return }
                                         UIApplication.shared.open(url)
-                                    } label: {
-                                        Image(systemName: "phone.fill")
-                                            .font(.footnote)
-                                            .foregroundColor(.blue)
-                                            .frame(width: 30, height: 30)
-                                            .background(.regularMaterial)
-                                            .clipShape(Circle())
-                                            .shadow(radius: 1)
                                     }
-                                    .buttonStyle(BorderlessButtonStyle())
-                                    Button {
+                                    Button("Message \(phone.value)") {
                                         guard let url = URL(string: "sms:\(phone.value.plainPhoneNumber)") else { return }
                                         UIApplication.shared.open(url)
-                                    } label: {
-                                        Image(systemName: "message.fill")
-                                            .font(.footnote)
-                                            .foregroundColor(.blue)
-                                            .frame(width: 30, height: 30)
-                                            .background(.regularMaterial)
-                                            .clipShape(Circle())
-                                            .shadow(radius: 1)
                                     }
-                                    .buttonStyle(BorderlessButtonStyle())
+                                    Button("FaceTime \(phone.value)") {}
+                                    Button("WhatsApp \(phone.value)") {
+                                        guard let url = URL(string: "https://api.whatsapp.com/send?phone=\(phone.value.plainPhoneNumber)") else { return }
+                                        UIApplication.shared.open(url)
+                                    }
+                                } label: {
+                                    VStack(alignment: .leading) {
+                                        Text(phone.label)
+                                        Text(phone.value)
+                                            .foregroundColor(.secondary)
+                                            .textSelection(.enabled)
+                                    }
+                                    .padding(8)
                                 }
                             }
-                            .padding(.vertical, 8)
                         }
                     }
                 }
                 if contact.emailAddresses.count > 0 {
                     Section() {
                         ForEach(contact.emailAddresses) { email in
-                            HStack {
+                            if contact.isMyCard {
                                 VStack(alignment: .leading) {
                                     Text(email.label)
                                     Text(email.value)
                                         .foregroundColor(.secondary)
                                         .textSelection(.enabled)
                                 }
-                                if !contact.isMyCard {
-                                    Spacer()
-                                    Button {
+                                .padding(.vertical, 8)
+                            } else {
+                                DisclosureGroup {
+                                    Button("Mail \(email.value)") {
                                         guard let url = URL(string: "mailto:\(email.value)") else { return }
                                         UIApplication.shared.open(url)
-                                    } label: {
-                                        Image(systemName: "envelope.fill")
-                                            .foregroundColor(.blue)
-                                            .font(.footnote)
-                                            .frame(width: 30, height: 30)
-                                            .background(.regularMaterial)
-                                            .clipShape(Circle())
-                                            .shadow(radius: 1)
                                     }
-                                    .buttonStyle(BorderlessButtonStyle())
+                                    Button("FaceTime \(email.value)") {}
+                                } label: {
+                                    VStack(alignment: .leading) {
+                                        Text(email.label)
+                                        Text(email.value)
+                                            .foregroundColor(.secondary)
+                                            .textSelection(.enabled)
+                                    }
+                                    .padding(8)
                                 }
                             }
-                            .padding(.vertical, 8)
                         }
                     }
                 }
