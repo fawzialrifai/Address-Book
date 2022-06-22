@@ -32,10 +32,6 @@ struct LabeledValue: Identifiable, Equatable, Codable {
         }
     }
     
-    static func ==(lhs: LabeledValue, rhs: LabeledValue) -> Bool {
-        lhs.label == rhs.label && lhs.value == rhs.value && lhs.defaultLabels == rhs.defaultLabels && lhs.customLabel == rhs.customLabel
-    }
-    
     enum ValueType: Codable {
         case phone, email
     }

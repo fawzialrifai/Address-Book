@@ -16,9 +16,7 @@ struct EditContact: View {
     @StateObject var locationManager: LocationManager
     var contact: Contact
     @State private var newData: Contact
-    @State private var isPhoneLabelPickerPresented = false
-    @State private var isEmailLabelPickerPresented = false
-    @State private var selectedLabel: Int? = nil
+    @State private var selectedLabel: LabeledValue? = nil
     @Binding var isEditingContact: Bool
     var body: some View {
         Form {
@@ -52,8 +50,7 @@ struct EditContact: View {
                 ForEach(Array(newData.phoneNumbers.enumerated()), id: \.element.id) { item in
                     VStack(alignment: .leading, spacing: 0) {
                         Button(item.element.label) {
-                            selectedLabel = item.offset
-                            isPhoneLabelPickerPresented = true
+                            selectedLabel = item.element
                         }
                         TextField("Phone number", text: $newData.phoneNumbers[item.offset].value)
                     }
@@ -89,8 +86,7 @@ struct EditContact: View {
                 ForEach(Array(newData.emailAddresses.enumerated()), id: \.element.id) { item in
                     VStack(alignment: .leading, spacing: 0) {
                         Button(item.element.label) {
-                            selectedLabel = item.offset
-                            isEmailLabelPickerPresented = true
+                            selectedLabel = item.element
                         }
                         TextField("Email address", text: $newData.emailAddresses[item.offset].value)
                     }
@@ -262,14 +258,25 @@ struct EditContact: View {
         } message: {
             
         }
-        .sheet(isPresented: $isPhoneLabelPickerPresented) {
-            if let selectedLabel = selectedLabel {
-                LabelPicker(labeledValue: $newData.phoneNumbers[selectedLabel])
-            }
-        }
-        .sheet(isPresented: $isEmailLabelPickerPresented) {
-            if let selectedLabel = selectedLabel {
-                LabelPicker(labeledValue: $newData.emailAddresses[selectedLabel])
+        .sheet(item: $selectedLabel) { strongLabel in
+            if strongLabel.type == .phone {
+                if let index = newData.phoneNumbers.firstIndex(of: strongLabel) {
+                    let labelBinding: Binding<LabeledValue> = Binding {
+                        newData.phoneNumbers[index]
+                    } set: {
+                        newData.phoneNumbers[index] = $0
+                    }
+                    LabelPicker(labeledValue: labelBinding)
+                }
+            } else if strongLabel.type == .email {
+                if let index = newData.emailAddresses.firstIndex(of: strongLabel) {
+                    let labelBinding: Binding<LabeledValue> = Binding {
+                        newData.emailAddresses[index]
+                    } set: {
+                        newData.emailAddresses[index] = $0
+                    }
+                    LabelPicker(labeledValue: labelBinding)
+                }
             }
         }
     }
