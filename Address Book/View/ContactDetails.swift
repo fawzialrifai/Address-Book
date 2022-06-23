@@ -18,8 +18,10 @@ struct ContactDetails: View {
     @State private var isRestoreContactAlertPresented = false
     @State private var expandedPhoneNumber: LabeledValue? = nil
     @State private var expandedEmailAddress: LabeledValue? = nil
+    @State var valueToDelete: LabeledValue? = nil
+    @State var isDeletePhoneAlertPresented = false
     @State var region: MKCoordinateRegion?
-    var contact: Contact
+    @Binding var contact: Contact
     @State var isEditingContact = false
     @State private var isCodeGeneratorPresented = false
     var body: some View {
@@ -40,7 +42,13 @@ struct ContactDetails: View {
                             } else {
                                 let isExpanded: Binding<Bool> = Binding {
                                     expandedPhoneNumber == phone
-                                } set: { value in }
+                                } set: {
+                                    if $0 == true {
+                                        expandedPhoneNumber = phone
+                                    } else {
+                                        expandedPhoneNumber = nil
+                                    }
+                                }
                                 DisclosureGroup(isExpanded: isExpanded) {
                                     Button {
                                         guard let url = URL(string: "tel:\(phone.value.plainPhoneNumber)") else { return }
@@ -55,25 +63,29 @@ struct ContactDetails: View {
                                         Label("Message", systemImage: "message")
                                     }
                                     Button {
+                                        guard let url = URL(string: "facetime://\(phone.value.plainPhoneNumber)") else { return }
+                                        UIApplication.shared.open(url)
                                     } label: {
                                         Label("FaceTime", systemImage: "video")
                                     }
                                 } label: {
                                     VStack(alignment: .leading) {
                                         Text(phone.label)
-                                        Button(phone.value) {
-                                            withAnimation {
-                                                if expandedPhoneNumber == phone {
-                                                    expandedPhoneNumber = nil
-                                                } else {
-                                                    expandedPhoneNumber = phone
-                                                }
-                                            }
-                                        }
+                                        Text(phone.value)
                                         .foregroundColor(.secondary)
                                         .textSelection(.enabled)
                                     }
                                     .padding(8)
+                                }
+                                .swipeActions(edge: .trailing) {
+                                    Button  {
+                                        UINotificationFeedbackGenerator().notificationOccurred(.warning)
+                                        valueToDelete = phone
+                                        isDeletePhoneAlertPresented.toggle()
+                                    } label: {
+                                        Label("Delete", systemImage: "trash.fill")
+                                    }
+                                    .tint(.red)
                                 }
                             }
                         }
@@ -93,7 +105,13 @@ struct ContactDetails: View {
                             } else {
                                 let isEmailExpanded: Binding<Bool> = Binding {
                                     expandedEmailAddress == email
-                                } set: { value in }
+                                } set: {
+                                    if $0 == true {
+                                        expandedEmailAddress = email
+                                    } else {
+                                        expandedEmailAddress = nil
+                                    }
+                                }
                                 DisclosureGroup(isExpanded: isEmailExpanded) {
                                     Button {
                                         guard let url = URL(string: "mailto:\(email.value)") else { return }
@@ -102,25 +120,29 @@ struct ContactDetails: View {
                                         Label("Mail", systemImage: "envelope")
                                     }
                                     Button {
+                                        guard let url = URL(string: "facetime://\(email.value)") else { return }
+                                        UIApplication.shared.open(url)
                                     } label: {
                                         Label("FaceTime", systemImage: "video")
                                     }
                                 } label: {
                                     VStack(alignment: .leading) {
                                         Text(email.label)
-                                        Button(email.value) {
-                                            withAnimation {
-                                                if expandedEmailAddress == email {
-                                                    expandedEmailAddress = nil
-                                                } else {
-                                                    expandedEmailAddress = email
-                                                }
-                                            }
-                                        }
+                                        Text(email.value)
                                         .foregroundColor(.secondary)
                                         .textSelection(.enabled)
                                     }
                                     .padding(8)
+                                }
+                                .swipeActions(edge: .trailing) {
+                                    Button  {
+                                        UINotificationFeedbackGenerator().notificationOccurred(.warning)
+                                        valueToDelete = email
+                                        isDeletePhoneAlertPresented.toggle()
+                                    } label: {
+                                        Label("Delete", systemImage: "trash.fill")
+                                    }
+                                    .tint(.red)
                                 }
                             }
                         }
@@ -315,6 +337,32 @@ struct ContactDetails: View {
                     }
                 }
             }
+            .confirmationDialog("Delete?", isPresented: $isDeletePhoneAlertPresented) {
+                Button("Delete", role: .destructive) {
+                    UINotificationFeedbackGenerator().notificationOccurred(.success)
+                    if let valueToDelete = valueToDelete {
+                        if valueToDelete.type == .phone {
+                            if let index = contact.phoneNumbers.firstIndex(of: valueToDelete) {
+                                UINotificationFeedbackGenerator().notificationOccurred(.success)
+                                withAnimation {
+                                    contact.removePhoneNumbers(at: [index])
+                                    contactStore.update(contact, with: contact)
+                                }
+                            }
+                        } else if valueToDelete.type == .email {
+                            if let index = contact.emailAddresses.firstIndex(of: valueToDelete) {
+                                UINotificationFeedbackGenerator().notificationOccurred(.success)
+                                withAnimation {
+                                    contact.removeEmailAddresses(at: [index])
+                                    contactStore.update(contact, with: contact)
+                                }
+                            }
+                        }
+                    }
+                }
+            } message: {
+                Text("Are you sure you want to delete this " + (valueToDelete?.type == .phone ? "phone number?" : "email address?"))
+            }
             if isEditingContact {
                 EditContact(contact: contact, isEditingContact: $isEditingContact, completeionHandler: {_ in})
                     .zIndex(1)
@@ -322,16 +370,16 @@ struct ContactDetails: View {
             }
         }
     }
-    init(contact: Contact) {
-        self.contact = contact
-        _region = State(initialValue: contact.coordinateRegion)
+    init(contact: Binding<Contact>) {
+        self._contact = contact
+        _region = State(initialValue: contact.wrappedValue.coordinateRegion)
     }
 }
 
 struct ContactDetails_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
-            ContactDetails(contact: .example)
+            ContactDetails(contact: .constant(.example))
         }
     }
 }

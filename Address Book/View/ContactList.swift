@@ -317,7 +317,29 @@ struct ContactRow: View {
             if cards.count > 1 {
                 MergeContact(duplicates: cards)
             } else {
-                ContactDetails(contact: cards[0])
+                if cards[0].isDeleted {
+                    if let index = contactStore.deletedContacts.firstIndex(of: cards[0]) {
+                        let contactBinding: Binding<Contact> = Binding {
+                            return contactStore.deletedContacts[index]
+                        } set: {
+                            if let index = contactStore.deletedContacts.firstIndex(of: cards[0]) {
+                                contactStore.deletedContacts[index] = $0
+                            }
+                        }
+                        ContactDetails(contact: contactBinding)
+                    }
+                } else {
+                    if let index = contactStore.contacts.firstIndex(of: cards[0]) {
+                        let contactBinding: Binding<Contact> = Binding {
+                            return contactStore.contacts[index]
+                        } set: {
+                            if let index = contactStore.contacts.firstIndex(of: cards[0]) {
+                                contactStore.contacts[index] = $0
+                            }
+                        }
+                        ContactDetails(contact: contactBinding)
+                    }
+                }
             }
         } label: {
             HStack {
